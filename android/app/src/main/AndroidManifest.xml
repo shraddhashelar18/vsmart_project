@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.example.vsmart_project">
     <application
         android:label="vsmart_project"
         android:name="${applicationName}"

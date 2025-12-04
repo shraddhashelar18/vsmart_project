@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "756365969702",
+    "project_id": "vsmartproject",
+    "storage_bucket": "vsmartproject.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756365969702:android:34ad332d79d71537fc59e7",
+        "android_client_info": {
+          "package_name": "com.example.vsmart_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1iU7e_btVS66r-o17bMw0nTxh6b_mPGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
