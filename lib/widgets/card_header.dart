@@ -1,19 +1,14 @@
-// lib/src/widgets/card_tile.dart
 import 'package:flutter/material.dart';
 
-class CardTile extends StatelessWidget {
+class CardHeader extends StatelessWidget {
   final String title;
-  final String subtitle;
-  final Widget? trailing;
-  const CardTile({required this.title, required this.subtitle, this.trailing});
+  const CardHeader({super.key, required this.title});
+
   @override
-  Widget build(BuildContext ctx) {
-    return Card(
-      child: ListTile(
-        title: Text(title, style: Theme.of(ctx).textTheme.headline6),
-        subtitle: Text(subtitle, style: Theme.of(ctx).textTheme.subtitle1),
-        trailing: trailing,
-      ),
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
     );
   }
 }

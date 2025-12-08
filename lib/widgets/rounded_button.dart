@@ -1,26 +1,16 @@
-// lib/src/widgets/primary_button.dart
 import 'package:flutter/material.dart';
 
-class PrimaryButton extends StatelessWidget {
-  final String label;
+class RoundedButton extends StatelessWidget {
+  final String text;
   final VoidCallback onPressed;
-  final bool disabled;
-  const PrimaryButton({
-    required this.label,
-    required this.onPressed,
-    this.disabled = false,
-  });
+
+  const RoundedButton({super.key, required this.text, required this.onPressed});
+
   @override
-  Widget build(BuildContext ctx) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: disabled ? null : onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Text(label, style: Theme.of(ctx).textTheme.button),
-        ),
-      ),
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text(text),
     );
   }
 }

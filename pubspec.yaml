@@ -1,34 +1,55 @@
-name: vsmart_project
-description: "A new Flutter project."
-publish_to: 'none'
+name: vsmart_app
+description: A professional school management app with student, teacher, parent, and admin dashboards.
+
+publish_to: "none"
+
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.10.1
+  sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+
+  # State management
+  provider: ^6.1.5
+
+  # HTTP / API calls
+  http: ^1.1.0
+
+  # Firebase / FlutterFire
+  firebase_core: ^3.3.0
+  cloud_firestore: ^5.4.4
+  firebase_auth: ^5.3.3
+  firebase_messaging: ^15.1.2
+
+  # Styling & utilities
+  google_fonts: ^6.0.0
+
+  # Date formatting / utilities
+  intl: ^0.18.1
+
+  # Icons
+  flutter_svg: ^2.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
 
-  # Custom fonts
+  assets:
+    - assets/images/
+    - assets/icons/
+
   fonts:
     - family: Poppins
       fonts:
         - asset: assets/fonts/Poppins-Regular.ttf
-        - asset: assets/fonts/Poppins-Medium.ttf
-          weight: 500
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
-
-  # Assets (images, icons, etc.)
-  assets:
-    - assets/images/
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
