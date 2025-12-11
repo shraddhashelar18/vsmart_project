@@ -12,7 +12,10 @@ class AttendanceProvider extends ChangeNotifier {
 
   Future<void> submitAttendance(String classId) async {
     for (var entry in attendance.entries) {
-      await ApiService.sendLowAttendance(entry.key, entry.value.status);
+      await ApiService.sendLowAttendance(
+        studentId: entry.key, // ✅ corrected parameter name
+        message: entry.value.status,
+      );
     }
   }
 }

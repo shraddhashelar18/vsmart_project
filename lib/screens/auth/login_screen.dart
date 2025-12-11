@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/rounded_button.dart';
+import '../../models/user.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

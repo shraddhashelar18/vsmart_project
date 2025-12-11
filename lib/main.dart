@@ -4,7 +4,8 @@ import 'core/theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/students_provider.dart';
 import 'providers/attendance_provider.dart';
-import 'screens/teacher/take_attendance_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'app_router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,6 +13,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -21,9 +23,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
       ],
       child: MaterialApp(
-        title: 'Vsmart App',
+        debugShowCheckedModeBanner: false,
         theme: appTheme,
-        home: const TakeAttendanceScreen(classId: 'class_1'),
+        home: const LoginScreen(), // 👈 default screen is Login
+        onGenerateRoute: AppRouter.generateRoute, // 👈 routing enabled
       ),
     );
   }
