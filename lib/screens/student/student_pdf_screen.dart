@@ -9,13 +9,13 @@ class StudentPDFScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryColor,
         title: const Text("Download PDF"),
       ),
       body: Center(
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.primaryColor,
             padding: const EdgeInsets.all(15),
           ),
           icon: const Icon(Icons.picture_as_pdf),

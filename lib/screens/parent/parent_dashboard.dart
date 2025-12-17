@@ -30,8 +30,7 @@ class _ParentDashboardState extends State<ParentDashboard> {
       return;
     }
 
-    final data =
-        await FirestoreService().getUserData(parent["childId"]); // student data
+    final data = await FirestoreService().getUserData(parent["childId"]);
 
     setState(() {
       childData = data;
@@ -41,8 +40,6 @@ class _ParentDashboardState extends State<ParentDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final parent = Provider.of<UserProvider>(context).userData;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FF),
       appBar: AppBar(
@@ -67,32 +64,45 @@ class _ParentDashboardState extends State<ParentDashboard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // ----------------------------------------
                       SectionTitle(title: "Child Information"),
                       InfoCard(
                         title: childData!["name"] ?? "Unknown",
-                        subtitle: "Class: ${childData!["class"]}",
+                        subtitle: "Class: ${childData!["class"] ?? '--'}",
                         icon: Icons.person,
                         color: Colors.blueAccent,
                       ),
+
                       const SizedBox(height: 16),
+
+                      // ----------------------------------------
                       SectionTitle(title: "Attendance"),
                       InfoCard(
-                        title: "${childData!["attendancePercent"] ?? '0'}%",
+                        title:
+                            "${childData!["attendancePercent"]?.toString() ?? '0'}%",
                         subtitle: "Overall Attendance",
                         icon: Icons.calendar_month,
                         color: Colors.green,
                       ),
+
                       const SizedBox(height: 16),
+
+                      // ----------------------------------------
                       SectionTitle(title: "Marks"),
+
                       InfoCard(
-                        title: "CT1: ${childData!["marks"]?["ct1"] ?? '--'}   "
+                        title:
+                            "CT1: ${childData!["marks"]?["ct1"] ?? '--'}     "
                             "CT2: ${childData!["marks"]?["ct2"] ?? '--'}",
                         subtitle:
                             "Semester: ${childData!["marks"]?["semester"] ?? '--'}",
                         icon: Icons.bar_chart,
                         color: Colors.orange,
                       ),
+
                       const SizedBox(height: 16),
+
+                      // ----------------------------------------
                       SectionTitle(title: "Teacher Suggestions"),
                       InfoCard(
                         title:
@@ -101,6 +111,7 @@ class _ParentDashboardState extends State<ParentDashboard> {
                         icon: Icons.message,
                         color: Colors.purple,
                       ),
+
                       const SizedBox(height: 30),
                     ],
                   ),

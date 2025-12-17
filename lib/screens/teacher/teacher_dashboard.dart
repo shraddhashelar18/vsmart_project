@@ -9,37 +9,31 @@ class TeacherDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryColor,
         title: const Text("Teacher Dashboard"),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             const SectionTitle(title: "Quick Actions"),
-
             InfoCard(
               title: "Take Attendance",
               icon: Icons.how_to_reg,
               onTap: () => Navigator.pushNamed(context, '/takeAttendance'),
             ),
-
             InfoCard(
               title: "Enter Marks",
               icon: Icons.edit_document,
               onTap: () => Navigator.pushNamed(context, '/enterMarks'),
             ),
-
             InfoCard(
               title: "Update Attendance Threshold",
               icon: Icons.settings,
-              onTap: () =>
-                  Navigator.pushNamed(context, '/updateThreshold'),
+              onTap: () => Navigator.pushNamed(context, '/updateThreshold'),
             ),
           ],
         ),

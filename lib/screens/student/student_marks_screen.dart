@@ -9,7 +9,7 @@ class StudentMarksScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryColor,
         title: const Text("Marks & Analytics"),
       ),
       body: Padding(

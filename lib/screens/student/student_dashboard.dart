@@ -4,15 +4,15 @@ import '../../widgets/section_title.dart';
 import '../../widgets/gradient_button.dart';
 import '../../theme/app_colors.dart';
 
-class StudentDashboardScreen extends StatelessWidget {
-  const StudentDashboardScreen({super.key});
+class StudentDashboard extends StatelessWidget {
+  const StudentDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryColor,
         title: const Text("Student Dashboard"),
       ),
       body: SingleChildScrollView(

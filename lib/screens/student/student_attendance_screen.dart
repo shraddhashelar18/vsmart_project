@@ -9,7 +9,7 @@ class StudentAttendanceScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryColor,
         title: const Text("Attendance"),
       ),
       body: Padding(

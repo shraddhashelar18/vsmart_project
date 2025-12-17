@@ -3,6 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Future<Map<String, dynamic>?> getUserData(String uid) async {
+    try {
+      final userDoc = await _firestore.collection("users").doc(uid).get();
+      return userDoc.data();
+    } catch (e) {
+      print("Error loading user data: $e");
+      return null;
+    }
+  }
+
   Future<Map<String, dynamic>?> getStudentDashboard(String uid) async {
     try {
       final doc = await _firestore.collection("students").doc(uid).get();
