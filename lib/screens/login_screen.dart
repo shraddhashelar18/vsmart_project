@@ -12,7 +12,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final emailC = TextEditingController();
   final passC = TextEditingController();
-
   bool loading = false;
 
   @override
@@ -20,7 +19,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(gradient: AppColors.gradient),
+        decoration: const BoxDecoration(
+          gradient: AppColors.gradient,
+        ),
         child: Center(
           child: SingleChildScrollView(
             child: Card(
@@ -34,12 +35,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Text(
                       "Login",
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+
                     const SizedBox(height: 20),
 
-                    // Email
                     TextField(
                       controller: emailC,
                       decoration: const InputDecoration(
@@ -47,9 +50,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(),
                       ),
                     ),
+
                     const SizedBox(height: 15),
 
-                    // Password
                     TextField(
                       controller: passC,
                       obscureText: true,
@@ -58,30 +61,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(),
                       ),
                     ),
+
                     const SizedBox(height: 20),
 
-                    // Login Button
                     loading
                         ? const CircularProgressIndicator()
                         : ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.indigo,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
                             onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => DashboardRouter(
-                                    email: emailC.text.trim(),
-                                  ),
-                                ),
+                                    builder: (_) => const DashboardRouter()),
                               );
                             },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.indigo,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 14),
+                            ),
                             child: const Text(
                               "Login",
                               style:

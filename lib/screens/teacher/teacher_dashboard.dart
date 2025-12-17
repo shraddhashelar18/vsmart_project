@@ -11,7 +11,7 @@ class TeacherDashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppColors.primary,
         title: const Text("Teacher Dashboard"),
       ),
       body: SingleChildScrollView(
@@ -20,19 +20,28 @@ class TeacherDashboard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SectionTitle(title: "Quick Actions"),
+
             InfoCard(
               title: "Take Attendance",
+              subtitle: "Mark students for today's class",
               icon: Icons.how_to_reg,
+              color: Colors.blue,
               onTap: () => Navigator.pushNamed(context, '/takeAttendance'),
             ),
+
             InfoCard(
               title: "Enter Marks",
+              subtitle: "Update internal exam marks",
               icon: Icons.edit_document,
+              color: Colors.orange,
               onTap: () => Navigator.pushNamed(context, '/enterMarks'),
             ),
+
             InfoCard(
               title: "Update Attendance Threshold",
+              subtitle: "Modify attendance alert limit",
               icon: Icons.settings,
+              color: Colors.redAccent,
               onTap: () => Navigator.pushNamed(context, '/updateThreshold'),
             ),
           ],

@@ -12,7 +12,7 @@ class StudentDashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppColors.primary,
         title: const Text("Student Dashboard"),
       ),
       body: SingleChildScrollView(
@@ -21,38 +21,37 @@ class StudentDashboard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SectionTitle(title: "Overview"),
-            const InfoCard(
-              title: "Attendance",
-              value: "82%",
+
+            InfoCard(
+              title: "82%",
+              subtitle: "Attendance",
               icon: Icons.check_circle,
+              color: Colors.green,
             ),
-            const InfoCard(
-              title: "Semester Marks",
-              value: "View Marks",
+
+            InfoCard(
+              title: "View Marks",
+              subtitle: "Semester Marks",
               icon: Icons.school,
+              color: Colors.indigo,
             ),
+
             const SizedBox(height: 20),
             const SectionTitle(title: "Actions"),
+
             GradientButton(
               text: "View Attendance",
-              icon: Icons.list_alt,
-              onTap: () {
-                Navigator.pushNamed(context, "/student-attendance");
-              },
+              onTap: () => Navigator.pushNamed(context, "/student-attendance"),
             ),
+
             GradientButton(
               text: "View Marks",
-              icon: Icons.bar_chart,
-              onTap: () {
-                Navigator.pushNamed(context, "/student-marks");
-              },
+              onTap: () => Navigator.pushNamed(context, "/student-marks"),
             ),
+
             GradientButton(
               text: "Download PDF Marksheet",
-              icon: Icons.picture_as_pdf,
-              onTap: () {
-                Navigator.pushNamed(context, "/student-pdf");
-              },
+              onTap: () => Navigator.pushNamed(context, "/student-pdf"),
             ),
           ],
         ),
