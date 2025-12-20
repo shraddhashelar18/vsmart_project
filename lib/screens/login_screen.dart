@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dashboard_router.dart';
 import '../theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -65,26 +68,36 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 20),
 
                     loading
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const DashboardRouter()),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.indigo,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 14),
-                            ),
-                            child: const Text(
-                              "Login",
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                          ),
+    ? const CircularProgressIndicator()
+    : ElevatedButton(
+        onPressed: () {
+          Provider.of<UserProvider>(context, listen: false).setUser(
+  newUid: "dummyUID",
+  newRole: "Student",
+  newUserData: {
+    "name": "Test User",
+    "email": emailC.text.trim(),
+  },
+);
+
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => const DashboardRouter()),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.indigo,
+          padding:
+              const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+        ),
+        child: const Text(
+          "Login",
+          style: TextStyle(fontSize: 18, color: Colors.white),
+        ),
+      ),
+
                   ],
                 ),
               ),
