@@ -13,28 +13,26 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // 🔁 TEMP: Navigation logic will be replaced later
-    Future.delayed(const Duration(seconds: 3), () {
-      // Navigator.pushReplacement(context,
-      //   MaterialPageRoute(builder: (context) => LoginScreen()));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(seconds: 10), () {
+        Navigator.pushReplacementNamed(context, '/register');
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // ✅ FINAL
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
-            // ✅ FINAL: App Logo Circle
             Container(
               height: 70,
               width: 70,
-              decoration: BoxDecoration(
-                color: const Color(0xFF009846),
+              decoration: const BoxDecoration(
+                color: Color(0xFF009846),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -43,10 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 size: 35,
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // ✅ FINAL: App Name
             const Text(
               "Vsmart",
               style: TextStyle(
@@ -55,10 +50,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Color(0xFF009846),
               ),
             ),
-
             const SizedBox(height: 8),
-
-            // ✅ FINAL: Tagline
             const Text(
               "A Smart Academic Management Platform",
               style: TextStyle(

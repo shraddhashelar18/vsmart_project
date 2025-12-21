@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 
-class RegisterParentScreen extends StatefulWidget {
-  const RegisterParentScreen({Key? key}) : super(key: key);
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<RegisterParentScreen> createState() => _RegisterParentScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _RegisterParentScreenState extends State<RegisterParentScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   // ✅ FINAL attributes
-  String fullName = "";
   String email = "";
   String password = "";
-  String enrollmentNo = "";
-  String mobileNo = "";
 
   bool isPasswordVisible = false;
 
@@ -25,36 +22,41 @@ class _RegisterParentScreenState extends State<RegisterParentScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const SizedBox(height: 70),
+            const SizedBox(height: 90),
 
             _appHeader(),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 40),
 
-            _input("Full Name", Icons.person, (v) => fullName = v),
-            _input("Email Address", Icons.email, (v) => email = v),
+            _input("Enter your email", Icons.email, (v) => email = v),
             _passwordInput(),
-            _input("Mobile Number", Icons.phone, (v) => mobileNo = v),
-            _input("Enrollment No", Icons.confirmation_number,
-                (v) => enrollmentNo = v),
 
             const SizedBox(height: 20),
 
-            _registerButton(),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF009846),
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text("Login will be connected to backend"),
+    ),
+  );
+},
 
-            const SizedBox(height: 10),
-
-            const Text(
-              "Your account will be activated after admin approval",
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              child: const Text("Login"),
             ),
 
+            const SizedBox(height: 12),
+
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () {},
               child: const Text(
-                "Back to Login",
+                "Forgot Password?",
                 style: TextStyle(color: Color(0xFF009846)),
               ),
             ),
@@ -101,7 +103,7 @@ class _RegisterParentScreenState extends State<RegisterParentScreen> {
       child: TextField(
         obscureText: !isPasswordVisible,
         onChanged: (v) => password = v,
-        decoration: _decoration("Password", Icons.lock).copyWith(
+        decoration: _decoration("Enter your password", Icons.lock).copyWith(
           suffixIcon: IconButton(
             icon: Icon(
                 isPasswordVisible ? Icons.visibility : Icons.visibility_off),
@@ -126,21 +128,6 @@ class _RegisterParentScreenState extends State<RegisterParentScreen> {
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
       ),
-    );
-  }
-
-  Widget _registerButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF009846),
-        minimumSize: const Size(double.infinity, 48),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      onPressed: () {
-        // 🔁 TEMP: API call to insert parent with status = pending
-      },
-      child: const Text("Register"),
     );
   }
 }
