@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../dashboard/admin_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -8,9 +9,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _loginFormKey = GlobalKey<FormState>(); // ✅ FORM KEY
+  final _loginFormKey = GlobalKey<FormState>();
 
-  // ✅ FINAL attributes
+  // 🔐 AUTH ATTRIBUTES (MATCH users TABLE)
   String email = "";
   String password = "";
 
@@ -22,17 +23,15 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: Form( // ✅ FORM START
+        child: Form(
           key: _loginFormKey,
           child: Column(
             children: [
               const SizedBox(height: 90),
-
               _appHeader(),
-
               const SizedBox(height: 40),
 
-              // ✅ EMAIL FIELD
+              // EMAIL
               TextFormField(
                 onChanged: (v) => email = v,
                 decoration: _decoration("Enter your email", Icons.email),
@@ -46,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 12),
 
-              // ✅ PASSWORD FIELD
+              // PASSWORD
               TextFormField(
                 obscureText: !isPasswordVisible,
                 onChanged: (v) => password = v,
@@ -75,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 20),
 
-              // ✅ LOGIN BUTTON (BLOCKS IF INVALID)
+              // LOGIN BUTTON
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF009846),
@@ -86,19 +85,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 onPressed: () {
                   if (_loginFormKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content:
-                            Text("Login will be connected to backend"),
-                      ),
-                    );
+                    _mockLogin();
                   }
                 },
                 child: const Text(
-  "Login",
-  style: TextStyle(color: Colors.white),
-),
-
+                  "Login",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
 
               const SizedBox(height: 12),
@@ -112,9 +105,46 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-        ), // ✅ FORM END
+        ),
       ),
     );
+  }
+
+  // ---------- MOCK LOGIN LOGIC (SIMULATES BACKEND) ----------
+
+  void _mockLogin() {
+    // 🔴 FAKE BACKEND RESPONSE (users table)
+    final fakeUser = {
+      "user_id": 1,
+      "role": "admin", // try: student / teacher / parent
+      "status": "approved", // try: pending
+    };
+
+    if (fakeUser["status"] != "approved") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Waiting for admin approval"),
+        ),
+      );
+      return;
+    }
+
+    if (fakeUser["role"] == "admin") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AdminDashboard(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Dashboard for this role will be available soon",
+          ),
+        ),
+      );
+    }
   }
 
   // ---------- UI HELPERS ----------

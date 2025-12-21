@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/login/login_screen.dart';
 import 'screens/register/register_common_screen.dart';
+import 'screens/dashboard/admin_dashboard.dart'; // ✅ ADD THIS
 
 void main() {
   runApp(const VsmartApp());
@@ -18,12 +19,14 @@ class VsmartApp extends StatelessWidget {
       title: 'Vsmart',
       debugShowCheckedModeBanner: false,
 
-      // first screen
+      // ✅ FIRST SCREEN
       home: const SplashScreen(),
 
+      // ✅ ROUTES
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterCommonScreen(),
+        '/admin': (context) => const AdminDashboard(), // ✅ ADMIN DASHBOARD
       },
     );
   }
