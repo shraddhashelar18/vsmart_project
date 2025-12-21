@@ -33,9 +33,24 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
   String parentOwnMobile = "";
 
   final List<String> classList = [
-    "IF1KA","IF2KA","IF3KA","IF4KA","IF5KA","IF6KA",
-    "CO1KA","CO2KA","CO3KA","CO4KA","CO5KA","CO6KA",
-    "EJ1KA","EJ2KA","EJ3KA","EJ4KA","EJ5KA","EJ6KA",
+    "IF1KA",
+    "IF2KA",
+    "IF3KA",
+    "IF4KA",
+    "IF5KA",
+    "IF6KA",
+    "CO1KA",
+    "CO2KA",
+    "CO3KA",
+    "CO4KA",
+    "CO5KA",
+    "CO6KA",
+    "EJ1KA",
+    "EJ2KA",
+    "EJ3KA",
+    "EJ4KA",
+    "EJ5KA",
+    "EJ6KA",
   ];
 
   @override
@@ -92,7 +107,6 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                   icon: Icons.badge,
                   onChanged: (v) => rollNo = v,
                 ),
-
                 DropdownButtonFormField<String>(
                   decoration: _decoration("Class", Icons.class_),
                   validator: (value) =>
@@ -103,12 +117,11 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                       .toList(),
                   onChanged: (value) => studentClass = value!,
                 ),
-
+                const SizedBox(height: 12),
                 phoneField(
                   "Mobile Number",
                   (v) => studentMobile = v,
                 ),
-
                 phoneField(
                   "Parent Mobile Number",
                   (v) => parentMobile = v,
@@ -122,7 +135,6 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                   icon: Icons.badge,
                   onChanged: (v) => employeeId = v,
                 ),
-
                 phoneField(
                   "Mobile Number",
                   (v) => teacherMobile = v,
@@ -136,7 +148,6 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                   icon: Icons.confirmation_number,
                   onChanged: (v) => enrollmentNo = v,
                 ),
-
                 phoneField(
                   "Mobile Number",
                   (v) => parentOwnMobile = v,
@@ -166,10 +177,9 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                   }
                 },
                 child: const Text(
-  "Register",
-  style: TextStyle(color: Colors.white),
-),
-
+                  "Register",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
 
               const SizedBox(height: 12),
@@ -202,8 +212,7 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
           FilteringTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(10),
         ],
-        decoration:
-            _decoration(label, Icons.phone).copyWith(counterText: ""),
+        decoration: _decoration(label, Icons.phone).copyWith(counterText: ""),
         onChanged: onChanged,
         validator: (value) {
           if (value == null || value.length != 10) {
@@ -243,9 +252,7 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
         decoration: _decoration("Password", Icons.lock).copyWith(
           suffixIcon: IconButton(
             icon: Icon(
-              isPasswordVisible
-                  ? Icons.visibility
-                  : Icons.visibility_off,
+              isPasswordVisible ? Icons.visibility : Icons.visibility_off,
             ),
             onPressed: () {
               setState(() {
