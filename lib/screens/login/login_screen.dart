@@ -8,6 +8,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _loginFormKey = GlobalKey<FormState>(); // ✅ FORM KEY
+
   // ✅ FINAL attributes
   String email = "";
   String password = "";
@@ -20,51 +22,102 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const SizedBox(height: 90),
+        child: Form( // ✅ FORM START
+          key: _loginFormKey,
+          child: Column(
+            children: [
+              const SizedBox(height: 90),
 
-            _appHeader(),
+              _appHeader(),
 
-            const SizedBox(height: 40),
+              const SizedBox(height: 40),
 
-            _input("Enter your email", Icons.email, (v) => email = v),
-            _passwordInput(),
-
-            const SizedBox(height: 20),
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF009846),
-                minimumSize: const Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+              // ✅ EMAIL FIELD
+              TextFormField(
+                onChanged: (v) => email = v,
+                decoration: _decoration("Enter your email", Icons.email),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Email is required";
+                  }
+                  return null;
+                },
               ),
-              onPressed: () {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text("Login will be connected to backend"),
-    ),
-  );
-},
 
-              child: const Text("Login"),
-            ),
+              const SizedBox(height: 12),
 
-            const SizedBox(height: 12),
-
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                "Forgot Password?",
-                style: TextStyle(color: Color(0xFF009846)),
+              // ✅ PASSWORD FIELD
+              TextFormField(
+                obscureText: !isPasswordVisible,
+                onChanged: (v) => password = v,
+                decoration:
+                    _decoration("Enter your password", Icons.lock).copyWith(
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        isPasswordVisible = !isPasswordVisible;
+                      });
+                    },
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Password is required";
+                  }
+                  return null;
+                },
               ),
-            ),
-          ],
-        ),
+
+              const SizedBox(height: 20),
+
+              // ✅ LOGIN BUTTON (BLOCKS IF INVALID)
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF009846),
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  if (_loginFormKey.currentState!.validate()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text("Login will be connected to backend"),
+                      ),
+                    );
+                  }
+                },
+                child: const Text(
+  "Login",
+  style: TextStyle(color: Colors.white),
+),
+
+              ),
+
+              const SizedBox(height: 12),
+
+              TextButton(
+                onPressed: () {},
+                child: const Text(
+                  "Forgot Password?",
+                  style: TextStyle(color: Color(0xFF009846)),
+                ),
+              ),
+            ],
+          ),
+        ), // ✅ FORM END
       ),
     );
   }
+
+  // ---------- UI HELPERS ----------
 
   Widget _appHeader() {
     return Column(
@@ -75,46 +128,19 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Icon(Icons.school, color: Colors.white, size: 28),
         ),
         SizedBox(height: 10),
-        Text("Vsmart",
-            style: TextStyle(
-                color: Color(0xFF009846),
-                fontSize: 22,
-                fontWeight: FontWeight.w600)),
-        SizedBox(height: 4),
-        Text("A Smart Academic Management Platform",
-            style: TextStyle(fontSize: 13, color: Colors.grey)),
-      ],
-    );
-  }
-
-  Widget _input(String hint, IconData icon, Function(String) onChanged) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        onChanged: onChanged,
-        decoration: _decoration(hint, icon),
-      ),
-    );
-  }
-
-  Widget _passwordInput() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        obscureText: !isPasswordVisible,
-        onChanged: (v) => password = v,
-        decoration: _decoration("Enter your password", Icons.lock).copyWith(
-          suffixIcon: IconButton(
-            icon: Icon(
-                isPasswordVisible ? Icons.visibility : Icons.visibility_off),
-            onPressed: () {
-              setState(() {
-                isPasswordVisible = !isPasswordVisible;
-              });
-            },
-          ),
+        Text(
+          "Vsmart",
+          style: TextStyle(
+              color: Color(0xFF009846),
+              fontSize: 22,
+              fontWeight: FontWeight.w600),
         ),
-      ),
+        SizedBox(height: 4),
+        Text(
+          "A Smart Academic Management Platform",
+          style: TextStyle(fontSize: 13, color: Colors.grey),
+        ),
+      ],
     );
   }
 

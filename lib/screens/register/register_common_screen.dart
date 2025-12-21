@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class RegisterCommonScreen extends StatefulWidget {
   const RegisterCommonScreen({Key? key}) : super(key: key);
@@ -8,28 +9,34 @@ class RegisterCommonScreen extends StatefulWidget {
 }
 
 class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
-  String selectedRole = "";
+  final _formKey = GlobalKey<FormState>();
 
-  // Common
+  // ---------- COMMON ----------
   String fullName = "";
   String email = "";
   String password = "";
+  String selectedRole = "";
+  bool isPasswordVisible = false;
 
-  // Student
+  // ---------- STUDENT ----------
   String rollNo = "";
   String studentClass = "";
   String studentMobile = "";
   String parentMobile = "";
 
-  // Teacher
+  // ---------- TEACHER ----------
   String employeeId = "";
   String teacherMobile = "";
 
-  // Parent
+  // ---------- PARENT ----------
   String enrollmentNo = "";
   String parentOwnMobile = "";
 
-  bool isPasswordVisible = false;
+  final List<String> classList = [
+    "IF1KA","IF2KA","IF3KA","IF4KA","IF5KA","IF6KA",
+    "CO1KA","CO2KA","CO3KA","CO4KA","CO5KA","CO6KA",
+    "EJ1KA","EJ2KA","EJ3KA","EJ4KA","EJ5KA","EJ6KA",
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -37,92 +44,230 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const SizedBox(height: 60),
-            _header(),
-            const SizedBox(height: 30),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              const SizedBox(height: 60),
+              _header(),
+              const SizedBox(height: 30),
 
-            _input("Full Name", Icons.person, (v) => fullName = v),
-            _input("Email Address", Icons.email, (v) => email = v),
-            _passwordInput(),
+              // ---------- COMMON FIELDS ----------
+              _requiredField(
+                hint: "Full Name",
+                icon: Icons.person,
+                onChanged: (v) => fullName = v,
+              ),
 
-            DropdownButtonFormField<String>(
-              decoration: _decoration("Select Role", Icons.group),
-              items: const [
-                DropdownMenuItem(value: "student", child: Text("Student")),
-                DropdownMenuItem(value: "teacher", child: Text("Teacher")),
-                DropdownMenuItem(value: "parent", child: Text("Parent")),
+              _requiredField(
+                hint: "Email Address",
+                icon: Icons.email,
+                onChanged: (v) => email = v,
+              ),
+
+              _passwordField(),
+
+              DropdownButtonFormField<String>(
+                decoration: _decoration("Select Role", Icons.group),
+                validator: (value) =>
+                    value == null ? "Please select role" : null,
+                items: const [
+                  DropdownMenuItem(value: "student", child: Text("Student")),
+                  DropdownMenuItem(value: "teacher", child: Text("Teacher")),
+                  DropdownMenuItem(value: "parent", child: Text("Parent")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedRole = value!;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              // ================= STUDENT =================
+              if (selectedRole == "student") ...[
+                _requiredField(
+                  hint: "Roll No",
+                  icon: Icons.badge,
+                  onChanged: (v) => rollNo = v,
+                ),
+
+                DropdownButtonFormField<String>(
+                  decoration: _decoration("Class", Icons.class_),
+                  validator: (value) =>
+                      value == null ? "Please select class" : null,
+                  items: classList
+                      .map((cls) =>
+                          DropdownMenuItem(value: cls, child: Text(cls)))
+                      .toList(),
+                  onChanged: (value) => studentClass = value!,
+                ),
+
+                phoneField(
+                  "Mobile Number",
+                  (v) => studentMobile = v,
+                ),
+
+                phoneField(
+                  "Parent Mobile Number",
+                  (v) => parentMobile = v,
+                ),
               ],
-              onChanged: (value) {
-                setState(() {
-                  selectedRole = value!;
-                });
-              },
-            ),
 
-            const SizedBox(height: 10),
+              // ================= TEACHER =================
+              if (selectedRole == "teacher") ...[
+                _requiredField(
+                  hint: "Employee ID",
+                  icon: Icons.badge,
+                  onChanged: (v) => employeeId = v,
+                ),
 
-            // ---------- ROLE BASED FIELDS ----------
-            if (selectedRole == "student") ...[
-              _input("Roll No", Icons.badge, (v) => rollNo = v),
-              _input("Class", Icons.class_, (v) => studentClass = v),
-              _input("Mobile Number", Icons.phone, (v) => studentMobile = v),
-              _input("Parent Mobile Number", Icons.phone, (v) => parentMobile = v),
-            ],
+                phoneField(
+                  "Mobile Number",
+                  (v) => teacherMobile = v,
+                ),
+              ],
 
-            if (selectedRole == "teacher") ...[
-              _input("Employee ID", Icons.badge, (v) => employeeId = v),
-              _input("Mobile Number", Icons.phone, (v) => teacherMobile = v),
-            ],
+              // ================= PARENT =================
+              if (selectedRole == "parent") ...[
+                _requiredField(
+                  hint: "Enrollment No",
+                  icon: Icons.confirmation_number,
+                  onChanged: (v) => enrollmentNo = v,
+                ),
 
-            if (selectedRole == "parent") ...[
-              _input("Enrollment No", Icons.confirmation_number,
-                  (v) => enrollmentNo = v),
-              _input("Mobile Number", Icons.phone,
-                  (v) => parentOwnMobile = v),
-            ],
+                phoneField(
+                  "Mobile Number",
+                  (v) => parentOwnMobile = v,
+                ),
+              ],
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF009846),
-                minimumSize: const Size(double.infinity, 48),
+              // ---------- REGISTER BUTTON ----------
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF009846),
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Registration request sent to admin for approval",
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: const Text(
+  "Register",
+  style: TextStyle(color: Colors.white),
+),
+
               ),
-              onPressed: _onRegisterPressed,
-              child: const Text("Register"),
-            ),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-              child: const Text(
-                "Back to Login",
-                style: TextStyle(color: Color(0xFF009846)),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+                child: const Text(
+                  "Back to Login",
+                  style: TextStyle(color: Color(0xFF009846)),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // ---------- ACTION ----------
-  void _onRegisterPressed() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Registration request sent to admin for approval",
-        ),
+  // ---------- HELPERS ----------
+
+  Widget phoneField(String label, Function(String) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        keyboardType: TextInputType.phone,
+        maxLength: 10,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(10),
+        ],
+        decoration:
+            _decoration(label, Icons.phone).copyWith(counterText: ""),
+        onChanged: onChanged,
+        validator: (value) {
+          if (value == null || value.length != 10) {
+            return "Enter valid 10-digit number";
+          }
+          return null;
+        },
       ),
     );
   }
 
-  // ---------- UI HELPERS ----------
+  Widget _requiredField({
+    required String hint,
+    required IconData icon,
+    required Function(String) onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        decoration: _decoration(hint, icon),
+        onChanged: onChanged,
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return "$hint is required";
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget _passwordField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        obscureText: !isPasswordVisible,
+        decoration: _decoration("Password", Icons.lock).copyWith(
+          suffixIcon: IconButton(
+            icon: Icon(
+              isPasswordVisible
+                  ? Icons.visibility
+                  : Icons.visibility_off,
+            ),
+            onPressed: () {
+              setState(() {
+                isPasswordVisible = !isPasswordVisible;
+              });
+            },
+          ),
+        ),
+        onChanged: (v) => password = v,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return "Password is required";
+          }
+          if (value.length < 6) {
+            return "Password must be at least 6 characters";
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
   Widget _header() {
     return Column(
       children: const [
@@ -135,9 +280,10 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
         Text(
           "Vsmart",
           style: TextStyle(
-              color: Color(0xFF009846),
-              fontSize: 22,
-              fontWeight: FontWeight.w600),
+            color: Color(0xFF009846),
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         SizedBox(height: 4),
         Text(
@@ -145,38 +291,6 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
           style: TextStyle(fontSize: 13, color: Colors.grey),
         ),
       ],
-    );
-  }
-
-  Widget _input(String hint, IconData icon, Function(String) onChanged) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        onChanged: onChanged,
-        decoration: _decoration(hint, icon),
-      ),
-    );
-  }
-
-  Widget _passwordInput() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        obscureText: !isPasswordVisible,
-        onChanged: (v) => password = v,
-        decoration: _decoration("Password", Icons.lock).copyWith(
-          suffixIcon: IconButton(
-            icon: Icon(
-              isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-            ),
-            onPressed: () {
-              setState(() {
-                isPasswordVisible = !isPasswordVisible;
-              });
-            },
-          ),
-        ),
-      ),
     );
   }
 
