@@ -1,18 +1,41 @@
 import '../models/user_auth_model.dart';
 
 List<UserAuth> mockUsers = [
+  // ✅ ADMIN
+  UserAuth(
+    user_id: 99,
+    email: "admin@test.com",
+    role: "admin",
+    status: "approved",
+  ),
+
+  // ✅ TEACHER – MULTIPLE DEPARTMENTS
+  UserAuth(
+    user_id: 2,
+    email: "teacher@test.com",
+    role: "teacher",
+    status: "approved",
+    departments: ["IT", "CO"],
+  ),
+
+  // ✅ TEACHER – SINGLE DEPARTMENT
+  UserAuth(
+    user_id: 4,
+    email: "teacher_it@test.com",
+    role: "teacher",
+    status: "approved",
+    departments: ["IT"],
+  ),
+
+  // ✅ STUDENT (pending)
   UserAuth(
     user_id: 1,
     email: "student@test.com",
     role: "student",
     status: "pending",
   ),
-  UserAuth(
-    user_id: 2,
-    email: "teacher@test.com",
-    role: "teacher",
-    status: "pending",
-  ),
+
+  // ✅ PARENT
   UserAuth(
     user_id: 3,
     email: "parent@test.com",

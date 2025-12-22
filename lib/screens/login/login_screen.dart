@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+
+// mock + models
+import '../../mock/mock_users.dart';
+import '../../mock/mock_teacher_departments.dart';
+import '../../models/user_auth_model.dart';
+
+// dashboards
 import '../dashboard/admin_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -11,10 +18,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _loginFormKey = GlobalKey<FormState>();
 
-  // 🔐 AUTH ATTRIBUTES (MATCH users TABLE)
   String email = "";
   String password = "";
-
   bool isPasswordVisible = false;
 
   @override
@@ -28,19 +33,17 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               const SizedBox(height: 90),
+
               _appHeader(),
+
               const SizedBox(height: 40),
 
               // EMAIL
               TextFormField(
-                onChanged: (v) => email = v,
                 decoration: _decoration("Enter your email", Icons.email),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return "Email is required";
-                  }
-                  return null;
-                },
+                onChanged: (v) => email = v.trim(),
+                validator: (v) =>
+                    v == null || v.isEmpty ? "Email is required" : null,
               ),
 
               const SizedBox(height: 12),
@@ -48,15 +51,12 @@ class _LoginScreenState extends State<LoginScreen> {
               // PASSWORD
               TextFormField(
                 obscureText: !isPasswordVisible,
-                onChanged: (v) => password = v,
                 decoration:
                     _decoration("Enter your password", Icons.lock).copyWith(
                   suffixIcon: IconButton(
-                    icon: Icon(
-                      isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
+                    icon: Icon(isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off),
                     onPressed: () {
                       setState(() {
                         isPasswordVisible = !isPasswordVisible;
@@ -64,12 +64,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Password is required";
-                  }
-                  return null;
-                },
+                onChanged: (v) => password = v,
+                validator: (v) =>
+                    v == null || v.isEmpty ? "Password is required" : null,
               ),
 
               const SizedBox(height: 20),
@@ -110,44 +107,93 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ---------- MOCK LOGIN LOGIC (SIMULATES BACKEND) ----------
+  // ---------------- LOGIN LOGIC ----------------
 
   void _mockLogin() {
-    // 🔴 FAKE BACKEND RESPONSE (users table)
-    final fakeUser = {
-      "user_id": 1,
-      "role": "admin", // try: student / teacher / parent
-      "status": "approved", // try: pending
-    };
+    // 🔍 find user by email (users table simulation)
+    final UserAuth user = mockUsers.firstWhere(
+  (u) => u.email == email,
+  orElse: () => UserAuth(
+    user_id: -1,
+    email: "",
+    role: "",
+    status: "",
+  ),
+);
 
-    if (fakeUser["status"] != "approved") {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Waiting for admin approval"),
-        ),
-      );
+
+    if (user.user_id == -1) {
+      _showMessage("User not found");
       return;
     }
 
-    if (fakeUser["role"] == "admin") {
+    // ⛔ approval check
+    if (user.status != "approved") {
+      _showMessage("Waiting for admin approval");
+      return;
+    }
+
+    // ✅ role-based routing
+    if (user.role == "admin") {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const AdminDashboard(),
-        ),
+        MaterialPageRoute(builder: (_) => const AdminDashboard()),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Dashboard for this role will be available soon",
-          ),
-        ),
+    }
+
+    else if (user.role == "teacher") {
+      // 🔑 simulate teacher_departments table
+      final List<String> departments =
+          mockTeacherDepartments[user.user_id] ?? [];
+
+      if (departments.isEmpty) {
+        _showMessage("No department assigned");
+        return;
+      }
+
+      if (departments.length == 1) {
+        final activeDepartment = departments.first;
+        _showMessage(
+          "Logged in as Teacher ($activeDepartment department)",
+        );
+
+        // 🔜 Later:
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (_) => TeacherDashboard(
+        //       department: activeDepartment,
+        //     ),
+        //   ),
+        // );
+      } else {
+        _showMessage("Please select a department");
+        // 🔜 Later:
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (_) => DepartmentSelectionScreen(
+        //       departments: departments,
+        //     ),
+        //   ),
+        // );
+      }
+    }
+
+    else {
+      _showMessage(
+        "Dashboard for this role will be available soon",
       );
     }
   }
 
-  // ---------- UI HELPERS ----------
+  // ---------------- HELPERS ----------------
+
+  void _showMessage(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
 
   Widget _appHeader() {
     return Column(
@@ -161,9 +207,10 @@ class _LoginScreenState extends State<LoginScreen> {
         Text(
           "Vsmart",
           style: TextStyle(
-              color: Color(0xFF009846),
-              fontSize: 22,
-              fontWeight: FontWeight.w600),
+            color: Color(0xFF009846),
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         SizedBox(height: 4),
         Text(
