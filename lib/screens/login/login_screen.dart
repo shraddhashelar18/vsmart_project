@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 // mock + models
 import '../../mock/mock_users.dart';
-import '../../mock/mock_teacher_departments.dart';
 import '../../models/user_auth_model.dart';
 
-// dashboards
+// dashboards (placeholders for now)
 import '../dashboard/admin_dashboard.dart';
+import '../dashboard/teacher_dashboard.dart';
+import '../dashboard/department_selection_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -33,9 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               const SizedBox(height: 90),
-
               _appHeader(),
-
               const SizedBox(height: 40),
 
               // EMAIL
@@ -54,9 +53,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration:
                     _decoration("Enter your password", Icons.lock).copyWith(
                   suffixIcon: IconButton(
-                    icon: Icon(isPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off),
+                    icon: Icon(
+                      isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
                     onPressed: () {
                       setState(() {
                         isPasswordVisible = !isPasswordVisible;
@@ -71,7 +72,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 20),
 
-              // LOGIN BUTTON
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF009846),
@@ -90,16 +90,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(color: Colors.white),
                 ),
               ),
-
-              const SizedBox(height: 12),
-
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  "Forgot Password?",
-                  style: TextStyle(color: Color(0xFF009846)),
-                ),
-              ),
             ],
           ),
         ),
@@ -110,81 +100,72 @@ class _LoginScreenState extends State<LoginScreen> {
   // ---------------- LOGIN LOGIC ----------------
 
   void _mockLogin() {
-    // 🔍 find user by email (users table simulation)
     final UserAuth user = mockUsers.firstWhere(
-  (u) => u.email == email,
-  orElse: () => UserAuth(
-    user_id: -1,
-    email: "",
-    role: "",
-    status: "",
-  ),
-);
-
+      (u) => u.email == email,
+      orElse: () => UserAuth(
+        user_id: -1,
+        email: "",
+        role: "",
+        status: "",
+      ),
+    );
 
     if (user.user_id == -1) {
       _showMessage("User not found");
       return;
     }
 
-    // ⛔ approval check
     if (user.status != "approved") {
       _showMessage("Waiting for admin approval");
       return;
     }
 
-    // ✅ role-based routing
+    // ADMIN
     if (user.role == "admin") {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const AdminDashboard()),
       );
+      return;
     }
 
-    else if (user.role == "teacher") {
-      // 🔑 simulate teacher_departments table
-      final List<String> departments =
-          mockTeacherDepartments[user.user_id] ?? [];
-
-      if (departments.isEmpty) {
+    // TEACHER
+    if (user.role == "teacher") {
+      if (user.departments.isEmpty) {
         _showMessage("No department assigned");
         return;
       }
 
-      if (departments.length == 1) {
-        final activeDepartment = departments.first;
-        _showMessage(
-          "Logged in as Teacher ($activeDepartment department)",
+      // SINGLE DEPARTMENT
+      if (user.departments.length == 1) {
+        String activeDepartment = user.departments.first;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TeacherDashboard(
+              activeDepartment: activeDepartment,
+              teacherId: user.user_id, // 🔑 REQUIRED
+            ),
+          ),
         );
-
-        // 🔜 Later:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (_) => TeacherDashboard(
-        //       department: activeDepartment,
-        //     ),
-        //   ),
-        // );
-      } else {
-        _showMessage("Please select a department");
-        // 🔜 Later:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (_) => DepartmentSelectionScreen(
-        //       departments: departments,
-        //     ),
-        //   ),
-        // );
       }
+      // MULTIPLE DEPARTMENTS
+      else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DepartmentSelectionScreen(
+              departments: user.departments,
+              teacherId: user.user_id,
+            ),
+          ),
+        );
+      }
+      return;
     }
 
-    else {
-      _showMessage(
-        "Dashboard for this role will be available soon",
-      );
-    }
+    // OTHER ROLES
+    _showMessage("Dashboard coming soon for ${user.role}");
   }
 
   // ---------------- HELPERS ----------------
