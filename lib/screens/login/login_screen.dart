@@ -128,6 +128,24 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
+    // HOD
+if (user.role == "hod") {
+  if (user.departments.isEmpty) {
+    _showMessage("No department assigned to HOD");
+    return;
+  }
+
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => HodDashboard(
+        department: user.departments.first, // 🔐 exactly one
+      ),
+    ),
+  );
+  return;
+}
+
 
     // TEACHER
     if (user.role == "teacher") {

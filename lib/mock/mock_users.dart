@@ -33,4 +33,28 @@ List<UserAuth> mockUsers = [
     role: "student",
     status: "pending",
   ),
+  UserAuth(
+  user_id: 10,
+  email: "hod_it@test.com",
+  role: "hod",
+  status: "approved",
+  departments: ["IT"],
+),
+
+UserAuth(
+  user_id: 11,
+  email: "hod_co@test.com",
+  role: "hod",
+  status: "approved",
+  departments: ["CO"],
+),
+
+UserAuth(
+  user_id: 12,
+  email: "hod_ej@test.com",
+  role: "hod",
+  status: "approved",
+  departments: ["EJ"],
+),
+
 ];
