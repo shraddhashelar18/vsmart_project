@@ -145,6 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
             builder: (_) => TeacherDashboard(
               activeDepartment: activeDepartment,
               teacherId: user.user_id, // 🔑 REQUIRED
+              departments: user.departments,
             ),
           ),
         );

@@ -57,9 +57,11 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (_) => TeacherDashboard(
-                            activeDepartment: selectedDepartment!,
-                            teacherId: widget.teacherId, // ✅ PASS HERE
-                          ),
+  activeDepartment: selectedDepartment!,
+  teacherId: widget.teacherId,
+  departments: widget.departments, // ✅ ADD THIS
+),
+
                         ),
                       );
                     },

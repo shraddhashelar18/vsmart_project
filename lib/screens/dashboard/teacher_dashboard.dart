@@ -6,12 +6,16 @@ import 'department_selection_screen.dart';
 class TeacherDashboard extends StatefulWidget {
   final String activeDepartment;
   final int teacherId;
+    final List<String> departments; // ✅ ADD THIS
+
 
   const TeacherDashboard({
-    Key? key,
-    required this.activeDepartment,
-    required this.teacherId,
-  }) : super(key: key);
+  Key? key,
+  required this.activeDepartment,
+  required this.teacherId,
+  required this.departments, // ✅ ADD THIS
+}) : super(key: key);
+
 
   @override
   State<TeacherDashboard> createState() => _TeacherDashboardState();
@@ -66,6 +70,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
 
   Widget _header(String today) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
         color: Color(0xFF009846),
@@ -113,42 +118,42 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   // ================= SWITCH DEPARTMENT =================
 
   Widget _switchDepartmentButton() {
-    // 🔴 MOCK: later backend will tell department count
-    bool hasMultipleDepartments = true;
+  // ✅ show only if teacher has more than 1 department
+  if (widget.departments.length <= 1) {
+    return const SizedBox();
+  }
 
-    if (!hasMultipleDepartments) return const SizedBox();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: TextButton.icon(
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => DepartmentSelectionScreen(
-                  departments: const ["IT", "CO"], // 🔁 mock
-                  teacherId: widget.teacherId,
-                ),
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+    child: Align(
+      alignment: Alignment.centerRight,
+      child: TextButton.icon(
+        onPressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DepartmentSelectionScreen(
+                departments: widget.departments,
+                teacherId: widget.teacherId,
               ),
-            );
-          },
-          icon: const Icon(
-            Icons.swap_horiz,
-            color: Color(0xFF009846),
-          ),
-          label: const Text(
-            "Switch Department",
-            style: TextStyle(
-              color: Color(0xFF009846),
-              fontWeight: FontWeight.w600,
             ),
+          );
+        },
+        icon: const Icon(
+          Icons.swap_horiz,
+          color: Color(0xFF009846),
+        ),
+        label: const Text(
+          "Switch Department",
+          style: TextStyle(
+            color: Color(0xFF009846),
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // ================= CLASS SELECT =================
 
