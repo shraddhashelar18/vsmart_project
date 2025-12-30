@@ -31,7 +31,7 @@ List<UserAuth> mockUsers = [
     user_id: 1,
     email: "student@test.com",
     role: "student",
-    status: "pending",
+    status: "approved",
   ),
   UserAuth(
   user_id: 10,

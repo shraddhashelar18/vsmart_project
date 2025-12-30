@@ -1,121 +1,413 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../providers/user_provider.dart';
-import '../../widgets/info_card.dart';
-import '../../widgets/section_title.dart';
-import '../../services/firestore_service.dart';
 
-class ParentDashboard extends StatefulWidget {
-  const ParentDashboard({super.key});
+class ParentDashboard extends StatelessWidget {
+  const ParentDashboard({Key? key}) : super(key: key);
 
-  @override
-  State<ParentDashboard> createState() => _ParentDashboardState();
-}
-
-class _ParentDashboardState extends State<ParentDashboard> {
-  Map<String, dynamic>? childData;
-  bool loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    loadChildData();
-  }
-
-  Future<void> loadChildData() async {
-    final parent = Provider.of<UserProvider>(context, listen: false).userData;
-
-    if (parent == null || parent["childId"] == null) {
-      setState(() => loading = false);
-      return;
-    }
-
-    final data = await FirestoreService().getUserData(parent["childId"]);
-
-    setState(() {
-      childData = data;
-      loading = false;
-    });
-  }
+  static const Color green = Color(0xFF009846);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FF),
-      appBar: AppBar(
-        title: const Text(
-          "Parent Dashboard",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-      ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : childData == null
-              ? const Center(
-                  child: Text(
-                    "No child data found!",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ----------------------------------------
-                      SectionTitle(title: "Child Information"),
-                      InfoCard(
-                        title: childData!["name"] ?? "Unknown",
-                        subtitle: "Class: ${childData!["class"] ?? '--'}",
-                        icon: Icons.person,
-                        color: Colors.blueAccent,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // ----------------------------------------
-                      SectionTitle(title: "Attendance"),
-                      InfoCard(
-                        title:
-                            "${childData!["attendancePercent"]?.toString() ?? '0'}%",
-                        subtitle: "Overall Attendance",
-                        icon: Icons.calendar_month,
-                        color: Colors.green,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // ----------------------------------------
-                      SectionTitle(title: "Marks"),
-
-                      InfoCard(
-                        title:
-                            "CT1: ${childData!["marks"]?["ct1"] ?? '--'}     "
-                            "CT2: ${childData!["marks"]?["ct2"] ?? '--'}",
-                        subtitle:
-                            "Semester: ${childData!["marks"]?["semester"] ?? '--'}",
-                        icon: Icons.bar_chart,
-                        color: Colors.orange,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // ----------------------------------------
-                      SectionTitle(title: "Teacher Suggestions"),
-                      InfoCard(
-                        title:
-                            childData!["suggestion"] ?? "No suggestions yet.",
-                        subtitle: "From Teachers",
-                        icon: Icons.message,
-                        color: Colors.purple,
-                      ),
-
-                      const SizedBox(height: 30),
-                    ],
+      backgroundColor: Colors.grey.shade100,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(90),
+        child: AppBar(
+          backgroundColor: const Color(0xFF009846),
+          elevation: 0,
+          flexibleSpace: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: const [
+                Text(
+                  "Parent Dashboard",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                SizedBox(height: 4),
+                Text(
+                  "Welcome back, Priya",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications, color: Colors.white),
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
+
+     body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 12),
+            const Text(
+              "Your Children",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            // rest unchanged
+
+            const SizedBox(height: 12),
+
+            _childDetailCard(
+              initials: "SK",
+              name: "Shrusti Kadam",
+              className: "IF6KA",
+              attendance: 0.94,
+              grade: "A",
+              weakSubjects: ["Java", "Python"],
+            ),
+
+            const SizedBox(height: 16),
+
+            _childDetailCard(
+              initials: "SS",
+              name: "Shraddha Shelar",
+              className: "IF6KA",
+              attendance: 0.88,
+              grade: "B",
+              weakSubjects: ["C", "C++"],
+            ),
+
+            const SizedBox(height: 24),
+
+            // ========= OVERALL PERFORMANCE =========
+            const Text(
+              "Overall Performance",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+
+            _overallCard(
+              initials: "SK",
+              name: "Shrusti Kadam",
+              attendance: "94%",
+              score: "92%",
+              grade: "A",
+            ),
+            const SizedBox(height: 12),
+            _overallCard(
+              initials: "SS",
+              name: "Shraddha Shelar",
+              attendance: "88%",
+              score: "85%",
+              grade: "B",
+            ),
+
+            const SizedBox(height: 24),
+
+            // ========= NOTIFICATIONS =========
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Text(
+                  "Notifications",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "View All",
+                  style: TextStyle(color: green),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            _notification(
+              icon: Icons.warning_amber,
+              title: "Low attendance warning",
+              subtitle: "Shrusti's attendance dropped below 90%",
+            ),
+            _notification(
+              icon: Icons.event,
+              title: "Parent-Teacher Meeting",
+              subtitle: "Scheduled for Dec 20, 2025 at 3:00 PM",
+            ),
+            _notification(
+              icon: Icons.school,
+              title: "Exam Schedule Released",
+              subtitle: "Final exams start from Jan 10, 2026",
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ================= HEADER =================
+  Widget _welcomeHeader() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: green,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Welcome back, Priya", style: TextStyle(color: Colors.white70)),
+          SizedBox(height: 6),
+          Text(
+            "Parent Dashboard",
+            style: TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= CHILD DETAIL CARD =================
+  Widget _childDetailCard({
+    required String initials,
+    required String name,
+    required String className,
+    required double attendance,
+    required String grade,
+    required List<String> weakSubjects,
+  }) {
+    final bool good = attendance >= 0.9;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: green,
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(className,
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 12)),
+                  ],
+                ),
+              ),
+              CircleAvatar(
+                radius: 14,
+                backgroundColor: green.withOpacity(0.1),
+                child: Text(
+                  grade,
+                  style: const TextStyle(
+                      color: green, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.calendar_today, size: 16, color: green),
+                  SizedBox(width: 6),
+                  Text("Attendance"),
+                ],
+              ),
+              Text(
+                "${(attendance * 100).toInt()}%",
+                style: TextStyle(
+                  color: good ? green : Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          LinearProgressIndicator(
+            value: attendance,
+            minHeight: 6,
+            backgroundColor: Colors.grey.shade200,
+            color: good ? green : Colors.orange,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.orange.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.trending_down, size: 18, color: Colors.orange),
+                    SizedBox(width: 6),
+                    Text("Needs Improvement",
+                        style: TextStyle(
+                            color: Colors.orange, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: weakSubjects
+                      .map((s) => Chip(
+                            label: Text(s),
+                            backgroundColor: Colors.orange.withOpacity(0.15),
+                          ))
+                      .toList(),
+                )
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const [
+              _BottomIcon(icon: Icons.menu_book, label: "Subjects"),
+              _BottomIcon(icon: Icons.grade, label: "Grades"),
+              _BottomIcon(icon: Icons.person, label: "Profile"),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= OVERALL CARD =================
+  Widget _overallCard({
+    required String initials,
+    required String name,
+    required String attendance,
+    required String score,
+    required String grade,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: green.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(initials,
+                    style: const TextStyle(
+                        color: green, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(width: 12),
+              Text(name,
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _stat(attendance, "Attendance"),
+              _stat(score, "Avg Score"),
+              _stat(grade, "Grade"),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _stat(String value, String label) {
+    return Column(
+      children: [
+        Text(value,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text(label,
+            style: const TextStyle(color: Colors.white70, fontSize: 12)),
+      ],
+    );
+  }
+
+  // ================= NOTIFICATION =================
+  Widget _notification({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: green.withOpacity(0.1),
+            child: Icon(icon, color: green),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(subtitle,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomIcon extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _BottomIcon({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: ParentDashboard.green),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      ],
     );
   }
 }

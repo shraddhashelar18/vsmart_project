@@ -8,6 +8,9 @@ import '../../models/user_auth_model.dart';
 import '../dashboard/admin_dashboard.dart';
 import '../dashboard/teacher_dashboard.dart';
 import '../dashboard/department_selection_screen.dart';
+import '../dashboard/hod_dashboard.dart';
+import '../dashboard/student_dashboard.dart';
+import '../dashboard/parent_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -147,6 +150,7 @@ if (user.role == "hod") {
 }
 
 
+
     // TEACHER
     if (user.role == "teacher") {
       if (user.departments.isEmpty) {
@@ -183,6 +187,22 @@ if (user.role == "hod") {
       return;
     }
 
+    //student
+
+if (user.role == "student") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const StudentDashboard()),
+      );
+      return;
+    }
+    if (user.role == "parent") {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const ParentDashboard()),
+    );
+    return;
+    }
     // OTHER ROLES
     _showMessage("Dashboard coming soon for ${user.role}");
   }
