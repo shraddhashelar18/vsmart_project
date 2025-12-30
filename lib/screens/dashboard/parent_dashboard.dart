@@ -47,8 +47,7 @@ class ParentDashboard extends StatelessWidget {
           ],
         ),
       ),
-
-     body: SingleChildScrollView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,7 +246,7 @@ class ParentDashboard extends StatelessWidget {
             value: attendance,
             minHeight: 6,
             backgroundColor: Colors.grey.shade200,
-            color: good ? green : Colors.orange,
+            color: good ? green : Colors.redAccent,
             borderRadius: BorderRadius.circular(6),
           ),
           const SizedBox(height: 14),
@@ -255,7 +254,7 @@ class ParentDashboard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.12),
+              color: Color.fromARGB(255, 111, 189, 101),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -263,11 +262,13 @@ class ParentDashboard extends StatelessWidget {
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.trending_down, size: 18, color: Colors.orange),
+                    Icon(Icons.trending_down,
+                        size: 18, color: Color.fromARGB(255, 111, 189, 101)),
                     SizedBox(width: 6),
                     Text("Needs Improvement",
                         style: TextStyle(
-                            color: Colors.orange, fontWeight: FontWeight.bold)),
+                            color: Color.fromARGB(255, 111, 189, 101),
+                            fontWeight: FontWeight.bold)),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -276,7 +277,7 @@ class ParentDashboard extends StatelessWidget {
                   children: weakSubjects
                       .map((s) => Chip(
                             label: Text(s),
-                            backgroundColor: Colors.orange.withOpacity(0.15),
+                            backgroundColor: Color.fromARGB(255, 111, 189, 101),
                           ))
                       .toList(),
                 )
