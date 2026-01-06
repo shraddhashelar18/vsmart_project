@@ -76,7 +76,7 @@ class ParentDashboard extends StatelessWidget {
               initials: "SS",
               name: "Shraddha Shelar",
               className: "IF6KA",
-              attendance: 0.88,
+              attendance: 0.38,
               grade: "B",
               weakSubjects: ["C", "C++"],
             ),
@@ -101,7 +101,7 @@ class ParentDashboard extends StatelessWidget {
             _overallCard(
               initials: "SS",
               name: "Shraddha Shelar",
-              attendance: "88%",
+              attendance: "38%",
               score: "85%",
               grade: "B",
             ),
@@ -235,7 +235,7 @@ class ParentDashboard extends StatelessWidget {
               Text(
                 "${(attendance * 100).toInt()}%",
                 style: TextStyle(
-                  color: good ? green : Colors.orange,
+                  color: good ? green : const Color.fromARGB(255, 255, 7, 7),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -250,41 +250,54 @@ class ParentDashboard extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
           ),
           const SizedBox(height: 14),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Color.fromARGB(255, 111, 189, 101),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.trending_down,
-                        size: 18, color: Color.fromARGB(255, 111, 189, 101)),
-                    SizedBox(width: 6),
-                    Text("Needs Improvement",
-                        style: TextStyle(
-                            color: Color.fromARGB(255, 111, 189, 101),
-                            fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: weakSubjects
-                      .map((s) => Chip(
-                            label: Text(s),
-                            backgroundColor: Color.fromARGB(255, 111, 189, 101),
-                          ))
-                      .toList(),
-                )
-              ],
+Container(
+  width: double.infinity,
+  padding: const EdgeInsets.all(12),
+  decoration: BoxDecoration(
+    color: Color(0xFFE8F5E9), // light green background
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Row(
+        children: [
+          Icon(
+            Icons.trending_down,
+            size: 18,
+            color: Color(0xFF2E7D32), // dark green
+          ),
+          SizedBox(width: 6),
+          Text(
+            "Needs Improvement",
+            style: TextStyle(
+              color: Color(0xFF2E7D32),
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 14),
+        ],
+      ),
+      const SizedBox(height: 8),
+      Wrap(
+        spacing: 8,
+        children: weakSubjects
+            .map(
+              (s) => Chip(
+                label: Text(
+                  s,
+                  style: const TextStyle(
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+                backgroundColor: Color(0xFFC8E6C9),
+              ),
+            )
+            .toList(),
+      )
+    ],
+  ),
+),
+const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: const [

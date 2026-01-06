@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'manage_teachers.dart';
+import 'manage_students.dart';
+import 'manage_parents.dart';
+import 'manage_classes.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({Key? key}) : super(key: key);
@@ -133,10 +137,15 @@ class AdminDashboard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 15),
-                  _actionButton("Manage Teachers", const Color(0xFF009846)),
-                  _actionButton("Manage Students", const Color(0xFF009846)),
-                  _actionButton("Manage Parents", const Color(0xFF009846)),
-                  _actionButton("Manage Classes", const Color(0xFF009846)),
+                 _actionButton(
+                      context, "Manage Teachers", const Color(0xFF009846)),
+                  _actionButton(
+                      context, "Manage Students", const Color(0xFF009846)),
+                  _actionButton(
+                      context, "Manage Parents", const Color(0xFF009846)),
+                  _actionButton(
+                      context, "Manage Classes", const Color(0xFF009846)),
+
                 ],
               ),
             ),
@@ -184,7 +193,11 @@ class AdminDashboard extends StatelessWidget {
   }
 
   // 🔹 ACTION BUTTON
-  Widget _actionButton(String text, Color color) {
+  Widget _actionButton(
+    BuildContext context,
+    String text,
+    Color color,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SizedBox(
@@ -197,7 +210,29 @@ class AdminDashboard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          onPressed: () {},
+          onPressed: () {
+            if (text == "Manage Teachers") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ManageTeachers()),
+              );
+            } else if (text == "Manage Students") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ManageStudents()),
+              );
+            } else if (text == "Manage Parents") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ManageParents()),
+              );
+            } else if (text == "Manage Classes") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ManageClasses()),
+              );
+            }
+          },
           child: Text(
             text,
             style: const TextStyle(color: Colors.white),
@@ -206,4 +241,5 @@ class AdminDashboard extends StatelessWidget {
       ),
     );
   }
+
 }
