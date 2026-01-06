@@ -5,7 +5,7 @@ import '../../mock/mock_users.dart';
 import '../../models/user_auth_model.dart';
 
 // dashboards (placeholders for now)
-import '../dashboard/admin_dashboard.dart';
+import '../admin/admin_dashboard.dart';
 import '../dashboard/teacher_dashboard.dart';
 import '../dashboard/department_selection_screen.dart';
 import '../dashboard/hod_dashboard.dart';
@@ -127,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (user.role == "admin") {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const AdminDashboard()),
+        MaterialPageRoute(builder: (_) => AdminDashboard()),
       );
       return;
     }
