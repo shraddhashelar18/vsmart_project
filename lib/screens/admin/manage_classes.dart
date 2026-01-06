@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'admin_bottom_nav.dart';
+import 'add_class.dart';
 
 class ManageClasses extends StatelessWidget {
   const ManageClasses({Key? key}) : super(key: key);
@@ -16,7 +17,10 @@ class ManageClasses extends StatelessWidget {
         backgroundColor: const Color(0xFF009846),
         child: const Icon(Icons.add),
         onPressed: () {
-          // Add Class later
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddClass()),
+          );
         },
       ),
       body: ListView(
