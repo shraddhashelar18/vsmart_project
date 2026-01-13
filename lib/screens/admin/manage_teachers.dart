@@ -14,19 +14,23 @@ class ManageTeachers extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF009846),
         elevation: 0,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Manage Teachers",
-              style: TextStyle(fontWeight: FontWeight.bold),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text("Manage Teachers"),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(20),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 8, left: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "View and manage teacher information",
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
             ),
-            SizedBox(height: 2),
-            Text(
-              "View and manage teacher information",
-              style: TextStyle(fontSize: 12),
-            ),
-          ],
+          ),
         ),
       ),
 
@@ -40,7 +44,7 @@ class ManageTeachers extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddTeacher()),
+            MaterialPageRoute(builder: (_) => const AddTeacher()),
           );
         },
       ),
@@ -104,7 +108,7 @@ class ManageTeachers extends StatelessWidget {
   }
 }
 
-// 🔹 TEACHER CARD (MATCHES UI)
+// 🔹 TEACHER CARD
 class TeacherCard extends StatelessWidget {
   final String name;
   final String subject;
@@ -141,10 +145,22 @@ class TeacherCard extends StatelessWidget {
               subtitle: Text(subject),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.edit, color: Colors.blue),
-                  SizedBox(width: 12),
-                  Icon(Icons.delete, color: Colors.red),
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AddTeacher()),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _confirmDelete(context, name);
+                    },
+                  ),
                 ],
               ),
             ),
@@ -169,4 +185,30 @@ class TeacherCard extends StatelessWidget {
       ),
     );
   }
+}
+
+// 🔴 DELETE CONFIRMATION DIALOG
+void _confirmDelete(BuildContext context, String name) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text("Confirm Delete"),
+      content: Text("Delete $name?"),
+      actions: [
+        TextButton(
+          child: const Text("Cancel"),
+          onPressed: () => Navigator.pop(context),
+        ),
+        TextButton(
+          child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          onPressed: () {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("$name deleted")),
+            );
+          },
+        ),
+      ],
+    ),
+  );
 }

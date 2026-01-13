@@ -16,19 +16,19 @@ class AddTeacher extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Add Teacher",
-              style: TextStyle(fontWeight: FontWeight.bold),
+        title: const Text("Add Teacher"),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(20),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8, left: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Fill in teacher details",
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
             ),
-            SizedBox(height: 2),
-            Text(
-              "Fill in teacher details",
-              style: TextStyle(fontSize: 12),
-            ),
-          ],
+          ),
         ),
       ),
 

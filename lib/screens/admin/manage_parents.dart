@@ -18,24 +18,20 @@ class ManageParents extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Manage Parents",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 2),
-            Text(
-              "Vsmart Academic Platform",
-              style: TextStyle(fontSize: 12),
+        title: const Text("Manage Parents"),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(20),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 8, left: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "View and manage parent information",
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
             ),
-          ],
+          ),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: Icon(Icons.filter_list),
-          )
-        ],
       ),
 
       bottomNavigationBar: const AdminBottomNav(currentIndex: 0),
@@ -46,7 +42,7 @@ class ManageParents extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddParent()),
+            MaterialPageRoute(builder: (_) => const AddParent()),
           );
         },
       ),
@@ -96,7 +92,7 @@ class ManageParents extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: const [
-                  _ParentCard(
+                  ParentCard(
                     name: "Sarah Johnson",
                     parentId: "P12345",
                     email: "sarah.johnson@email.com",
@@ -105,7 +101,7 @@ class ManageParents extends StatelessWidget {
                     studentId: "S001",
                     studentClass: "IF6K-A",
                   ),
-                  _ParentCard(
+                  ParentCard(
                     name: "Michael Smith",
                     parentId: "P12346",
                     email: "michael.smith@email.com",
@@ -136,10 +132,8 @@ class ManageParents extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
+            Text(title,
+                style: const TextStyle(color: Colors.white70, fontSize: 12)),
             const SizedBox(height: 4),
             Text(
               value,
@@ -158,7 +152,7 @@ class ManageParents extends StatelessWidget {
 
 // ---------- PARENT CARD ----------
 
-class _ParentCard extends StatelessWidget {
+class ParentCard extends StatelessWidget {
   final String name;
   final String parentId;
   final String email;
@@ -167,7 +161,7 @@ class _ParentCard extends StatelessWidget {
   final String studentId;
   final String studentClass;
 
-  const _ParentCard({
+  const ParentCard({
     required this.name,
     required this.parentId,
     required this.email,
@@ -195,47 +189,59 @@ class _ParentCard extends StatelessWidget {
                   child: Icon(Icons.person, color: Color(0xFF009846)),
                 ),
                 const SizedBox(width: 12),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                      Text(name,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
                       Text("Parent ID: $parentId",
                           style: const TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
-                const Icon(Icons.more_vert),
+
+                // 🔹 ACTION BUTTONS
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AddParent()),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _confirmDelete(context, name),
+                    ),
+                  ],
+                ),
               ],
             ),
 
             const SizedBox(height: 10),
 
-            Row(
-              children: [
-                const Icon(Icons.email, size: 16, color: Colors.grey),
-                const SizedBox(width: 6),
-                Text(email),
-              ],
-            ),
+            Row(children: [
+              const Icon(Icons.email, size: 16, color: Colors.grey),
+              const SizedBox(width: 6),
+              Text(email),
+            ]),
+
             const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(Icons.phone, size: 16, color: Colors.grey),
-                const SizedBox(width: 6),
-                Text(phone),
-              ],
-            ),
+
+            Row(children: [
+              const Icon(Icons.phone, size: 16, color: Colors.grey),
+              const SizedBox(width: 6),
+              Text(phone),
+            ]),
 
             const SizedBox(height: 12),
 
-            // 🔹 LINKED STUDENT
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -250,12 +256,10 @@ class _ParentCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Linked Students (1)",
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
+                        const Text("Linked Students (1)",
+                            style: TextStyle(fontWeight: FontWeight.w600)),
                         const SizedBox(height: 4),
-                        Text("$studentName"),
+                        Text(studentName),
                         Text("ID: $studentId"),
                       ],
                     ),
@@ -280,4 +284,29 @@ class _ParentCard extends StatelessWidget {
       ),
     );
   }
+}
+
+// ---------- CONFIRM DELETE ----------
+
+void _confirmDelete(BuildContext context, String name) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text("Confirm Delete"),
+      content: Text("Delete parent $name?"),
+      actions: [
+        TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.pop(context)),
+        TextButton(
+          child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          onPressed: () {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text("$name deleted")));
+          },
+        ),
+      ],
+    ),
+  );
 }

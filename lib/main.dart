@@ -6,6 +6,7 @@ import 'screens/login/login_screen.dart';
 import 'screens/register/register_common_screen.dart';
 import 'screens/admin/admin_dashboard.dart'; // ✅ ADD THIS
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() {
   runApp(const VsmartApp());
 }
@@ -18,6 +19,7 @@ class VsmartApp extends StatelessWidget {
     return MaterialApp(
       title: 'Vsmart',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
 
       // ✅ FIRST SCREEN
       home: const SplashScreen(),
@@ -26,7 +28,7 @@ class VsmartApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterCommonScreen(),
-        '/admin': (context) =>  AdminDashboard(), // ✅ ADMIN DASHBOARD
+        '/admin': (context) => AdminDashboard(), // ✅ ADMIN DASHBOARD
       },
     );
   }

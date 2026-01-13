@@ -9,16 +9,23 @@ class AddStudent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: green,
+        backgroundColor: const Color(0xFF009846),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text("Add Student"),
-        leading: const BackButton(),
         bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(30),
+          preferredSize: Size.fromHeight(20),
           child: Padding(
-            padding: EdgeInsets.only(bottom: 12),
-            child: Text(
-              "Fill in student details",
-              style: TextStyle(color: Colors.white70),
+            padding: const EdgeInsets.only(bottom: 8, left: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Fill in student details",
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
             ),
           ),
         ),

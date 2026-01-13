@@ -17,6 +17,19 @@ class AddParent extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text("Add Parent"),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(20),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 8, left: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Fill parent and linked student details",
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ),
+          ),
+        ),
       ),
 
       body: Padding(
