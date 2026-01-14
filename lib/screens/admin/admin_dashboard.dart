@@ -3,6 +3,7 @@ import 'manage_teachers.dart';
 import 'manage_students.dart';
 import 'manage_parents.dart';
 import 'manage_classes.dart';
+import 'admin_bottom_nav.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({Key? key}) : super(key: key);
@@ -19,30 +20,9 @@ class AdminDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
+      bottomNavigationBar: const AdminBottomNav(currentIndex: 0),
 
-      // 🔹 BOTTOM NAVIGATION
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: const Color(0xFF009846),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: "Dashboard",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
-            label: "Reports",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.logout),
-            label: "Logout",
-          ),
-        ],
-      ),
+      
 
       body: SingleChildScrollView(
         child: Column(

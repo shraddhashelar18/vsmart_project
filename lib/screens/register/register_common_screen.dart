@@ -78,6 +78,7 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                 hint: "Email Address",
                 icon: Icons.email,
                 onChanged: (v) => email = v,
+                
               ),
 
               _passwordField(),
@@ -238,6 +239,20 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
           if (value == null || value.trim().isEmpty) {
             return "$hint is required";
           }
+
+          // Full Name validation: no numbers
+          if (hint == "Full Name" && RegExp(r'[0-9]').hasMatch(value)) {
+            return "Name cannot contain numbers";
+          }
+
+          // Email validation: proper format
+          if (hint == "Email Address") {
+            final emailReg = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+            if (!emailReg.hasMatch(value)) {
+              return "Enter valid email";
+            }
+          }
+
           return null;
         },
       ),

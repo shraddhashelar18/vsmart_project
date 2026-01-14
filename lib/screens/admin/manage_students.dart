@@ -40,7 +40,7 @@ class ManageStudents extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AddStudent()),
+            MaterialPageRoute(builder: (_) =>  AddStudent()),
           );
         },
       ),
@@ -210,7 +210,7 @@ class _StudentCard extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const AddStudent()),
+                      MaterialPageRoute(builder: (_) =>  AddStudent()),
                     );
                   },
                 ),

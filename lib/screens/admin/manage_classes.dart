@@ -37,7 +37,7 @@ class ManageClasses extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AddClass()),
+            MaterialPageRoute(builder: (_) =>  AddClass()),
           );
         },
       ),
@@ -77,7 +77,7 @@ class ClassCard extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AddClass()),
+                  MaterialPageRoute(builder: (_) =>  AddClass()),
                 );
               },
             ),

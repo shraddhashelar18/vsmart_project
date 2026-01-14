@@ -42,7 +42,7 @@ class ManageParents extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AddParent()),
+            MaterialPageRoute(builder: (_) => AddParent()),
           );
         },
       ),
@@ -211,7 +211,7 @@ class ParentCard extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const AddParent()),
+                          MaterialPageRoute(builder: (_) => AddParent()),
                         );
                       },
                     ),

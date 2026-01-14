@@ -44,7 +44,7 @@ class ManageTeachers extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AddTeacher()),
+            MaterialPageRoute(builder: (_) =>  AddTeacher()),
           );
         },
       ),
@@ -151,7 +151,7 @@ class TeacherCard extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const AddTeacher()),
+                        MaterialPageRoute(builder: (_) => AddTeacher()),
                       );
                     },
                   ),
