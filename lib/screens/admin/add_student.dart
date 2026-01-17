@@ -16,7 +16,10 @@ class AddStudent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
+
       appBar: AppBar(
+        
         backgroundColor: const Color(0xFF009846),
         elevation: 0,
         leading: IconButton(
@@ -38,7 +41,7 @@ class AddStudent extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
@@ -117,7 +120,8 @@ class AddStudent extends StatelessWidget {
                   ],
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 20),
+
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: green,

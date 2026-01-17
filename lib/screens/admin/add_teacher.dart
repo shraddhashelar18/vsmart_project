@@ -11,6 +11,8 @@ class AddTeacher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
+
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF009846),
@@ -34,7 +36,7 @@ class AddTeacher extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
@@ -138,7 +140,8 @@ class AddTeacher extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
                 child: const Text("Cancel"),
               ),
-              const Spacer(),
+              const SizedBox(height: 20),
+
               const Center(
                 child: Text(
                   "Vsmart Academic Platform © 2024",

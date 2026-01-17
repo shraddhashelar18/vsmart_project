@@ -40,7 +40,7 @@ class ManageStudents extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) =>  AddStudent()),
+            MaterialPageRoute(builder: (_) => AddStudent()),
           );
         },
       ),
@@ -48,7 +48,6 @@ class ManageStudents extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 🟩 STATS ROW (same as parents)
             Row(
               children: [
                 _statsBox("Total Students", "4"),
@@ -58,10 +57,7 @@ class ManageStudents extends StatelessWidget {
                 _statsBox("Without", "1"),
               ],
             ),
-
             const SizedBox(height: 16),
-
-            // 🔍 SEARCH BAR
             TextField(
               decoration: InputDecoration(
                 hintText: "Search by name, email, phone or ID...",
@@ -74,9 +70,7 @@ class ManageStudents extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
-
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -84,9 +78,7 @@ class ManageStudents extends StatelessWidget {
                 style: TextStyle(color: Colors.grey),
               ),
             ),
-
             const SizedBox(height: 12),
-
             Expanded(
               child: ListView(
                 children: const [
@@ -123,7 +115,6 @@ class ManageStudents extends StatelessWidget {
     );
   }
 
-  // 🟩 STATS BOX WIDGET (same style as parents)
   Widget _statsBox(String title, String value) {
     return Expanded(
       child: Container(
@@ -150,7 +141,6 @@ class ManageStudents extends StatelessWidget {
   }
 }
 
-// 🟩 STUDENT CARD MATCHING PARENT STYLE
 class _StudentCard extends StatelessWidget {
   final String name;
   final String email;
@@ -171,53 +161,66 @@ class _StudentCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(14),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CircleAvatar(
-              backgroundColor: Color(0xFFEAF7F1),
-              child: Icon(Icons.person, color: Color(0xFF009846)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                  Row(
-                    children: [
-                      const Icon(Icons.email, size: 16, color: Colors.grey),
-                      const SizedBox(width: 6),
-                      Text(email),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.phone, size: 16, color: Colors.grey),
-                      const SizedBox(width: 6),
-                      Text(phone),
-                    ],
-                  ),
-                ],
-              ),
-            ),
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) =>  AddStudent()),
-                    );
-                  },
+                const CircleAvatar(
+                  backgroundColor: Color(0xFFEAF7F1),
+                  child: Icon(Icons.person, color: Color(0xFF009846)),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _confirmDelete(context, name),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => AddStudent()),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _confirmDelete(context, name),
+                    ),
+                  ],
+                )
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.email, size: 16, color: Colors.grey),
+                const SizedBox(width: 6),
+                Text(email),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.phone, size: 16, color: Colors.grey),
+                const SizedBox(width: 6),
+                Text(phone),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.badge, size: 16, color: Colors.grey),
+                const SizedBox(width: 6),
+                Text(className),
               ],
             ),
           ],
@@ -227,7 +230,8 @@ class _StudentCard extends StatelessWidget {
   }
 }
 
-// 🗑 DELETE CONFIRMATION
+
+
 void _confirmDelete(BuildContext context, String name) {
   showDialog(
     context: context,
