@@ -53,6 +53,7 @@ class HodSettings extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+        selectionColor: Color(0xFF009846),
       ),
     );
   }
@@ -100,7 +101,7 @@ class HodSettings extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
+          backgroundColor: const Color.fromARGB(255, 214, 24, 11),
           foregroundColor: Colors.white,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
