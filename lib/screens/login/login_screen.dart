@@ -8,7 +8,7 @@ import '../../models/user_auth_model.dart';
 import '../admin/admin_dashboard.dart';
 import '../dashboard/teacher_dashboard.dart';
 import '../dashboard/department_selection_screen.dart';
-import '../dashboard/hod_dashboard.dart';
+import '../hod/hod_dashboard.dart';
 import '../dashboard/student_dashboard.dart';
 import '../dashboard/parent_dashboard.dart';
 

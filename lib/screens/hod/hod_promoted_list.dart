@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'hod_bottom_nav.dart';
 
 class HodPromoted extends StatelessWidget {
-  const HodPromoted({Key? key}) : super(key: key);
+  final String department;
+
+  const HodPromoted({Key? key, required this.department}) : super(key: key);
 
   static const green = Color(0xFF009846);
 
@@ -12,7 +14,11 @@ class HodPromoted extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: green,
         elevation: 0,
-        title: const Text("Promoted Students"),
+        title: Text("Promoted Students ($department)"),
+      ),
+      bottomNavigationBar: HodBottomNav(
+        currentIndex: 1,
+        department: department,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

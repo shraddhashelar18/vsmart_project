@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'hod_bottom_nav.dart';
-import 'hod_promoted_list.dart';
-import 'hod_detained_list.dart';
 import 'hod_students.dart';
 import 'hod_teachers.dart';
+import 'hod_promoted_list.dart';
+import 'hod_detained_list.dart';
+import 'hod_settings.dart';
 
 class HodDashboard extends StatelessWidget {
-  const HodDashboard({Key? key}) : super(key: key);
+  final String department;
+
+  const HodDashboard({Key? key, required this.department}) : super(key: key);
 
   static const green = Color(0xFF009846);
 
@@ -16,15 +19,15 @@ class HodDashboard extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: green,
         elevation: 0,
-        title: const Text("HOD Dashboard"),
+        title: Text("HOD Dashboard ($department)"),
       ),
-      bottomNavigationBar: const HodBottomNav(currentIndex: 0),
+      bottomNavigationBar:
+          HodBottomNav(currentIndex: 0, department: department),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // STAT CARDS
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
@@ -46,20 +49,44 @@ class HodDashboard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _button(context, "View Students", () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const HodStudents()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HodStudents(department: department),
+                ),
+              );
             }),
             _button(context, "View Teachers", () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const HodTeachers()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HodTeachers(department: department),
+                ),
+              );
             }),
             _button(context, "View Promoted List", () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const HodPromoted()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HodPromoted(department: department),
+                ),
+              );
             }),
             _button(context, "View Detained List", () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const HodDetained()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HodDetained(department: department),
+                ),
+              );
+            }),
+            _button(context, "Settings", () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HodSettings(department: department),
+                ),
+              );
             }),
           ],
         ),

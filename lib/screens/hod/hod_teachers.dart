@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'hod_bottom_nav.dart';
 
 class HodTeachers extends StatelessWidget {
-  const HodTeachers({Key? key}) : super(key: key);
+  final String department;
+  const HodTeachers({Key? key, required this.department}) : super(key: key);
 
   static const green = Color(0xFF009846);
 
@@ -14,7 +15,10 @@ class HodTeachers extends StatelessWidget {
         elevation: 0,
         title: const Text("Teachers"),
       ),
-      bottomNavigationBar: const HodBottomNav(currentIndex: 2),
+      bottomNavigationBar: HodBottomNav(
+        currentIndex: 2,
+        department: department,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
