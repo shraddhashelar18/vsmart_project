@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'hod_bottom_nav.dart';
 import 'hod_students.dart';
 import 'hod_teachers.dart';
-import 'hod_promoted_list.dart';
-import 'hod_detained_list.dart';
+import 'hod_promoted_classes.dart';
+import 'hod_detained_classes.dart';
 import 'hod_settings.dart';
 
 class HodDashboard extends StatelessWidget {
@@ -68,7 +68,7 @@ class HodDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => HodPromoted(department: department),
+                  builder: (_) => HodPromotedClasses(department: department),
                 ),
               );
             }),
@@ -76,18 +76,11 @@ class HodDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => HodDetained(department: department),
+                  builder: (_) => HodDetainedClasses(department: department),
                 ),
               );
             }),
-            _button(context, "Settings", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => HodSettings(department: department),
-                ),
-              );
-            }),
+            
           ],
         ),
       ),
