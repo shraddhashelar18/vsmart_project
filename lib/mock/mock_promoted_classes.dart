@@ -23,7 +23,7 @@ class HodPromotedClasses extends StatelessWidget {
         title: Text("Promoted Classes ($department)"),
       ),
       bottomNavigationBar: HodBottomNav(
-        currentIndex: 0,
+        currentIndex: 1,
         department: department,
       ),
       body: ListView.builder(

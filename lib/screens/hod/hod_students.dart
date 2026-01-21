@@ -17,7 +17,7 @@ class HodStudents extends StatelessWidget {
         title: const Text("Students"),
       ),
       bottomNavigationBar:
-          HodBottomNav(currentIndex: 1, department: department),
+          HodBottomNav(currentIndex: 0, department: department),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

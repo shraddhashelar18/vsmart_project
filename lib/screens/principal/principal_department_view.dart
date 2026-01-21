@@ -3,6 +3,8 @@ import '../hod/hod_students.dart';
 import '../hod/hod_teachers.dart';
 import '../hod/hod_promoted_classes.dart';
 import '../hod/hod_detained_classes.dart';
+import 'principal_bottom_nav.dart';
+
 
 class PrincipalDepartmentView extends StatelessWidget {
   final String department;
@@ -18,6 +20,7 @@ class PrincipalDepartmentView extends StatelessWidget {
         backgroundColor: green,
         title: Text("$department Department"),
       ),
+      bottomNavigationBar: const PrincipalBottomNav(currentIndex: 0),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

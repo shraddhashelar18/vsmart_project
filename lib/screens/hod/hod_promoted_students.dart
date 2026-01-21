@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../mock/mock_promotion.dart'; // <-- Uses centralized mock data
+import 'hod_bottom_nav.dart';
 
 class HodPromotedStudents extends StatelessWidget {
   final String department;
@@ -12,16 +14,9 @@ class HodPromotedStudents extends StatelessWidget {
 
   static const green = Color(0xFF009846);
 
-  // Mock student list
-  final Map<String, List<String>> promotedStudents = const {
-    "IF6K-A": ["Emma Johnson", "Liam Smith"],
-    "IF6K-B": ["Olivia Brown"],
-    "IF5K-A": ["Noah Davis", "Sophia Patel"],
-  };
-
   @override
   Widget build(BuildContext context) {
-    List<String> students = promotedStudents[className] ?? [];
+    final List<Map<String, String>> students = mockPromotions[className] ?? [];
 
     return Scaffold(
       appBar: AppBar(
@@ -29,19 +24,40 @@ class HodPromotedStudents extends StatelessWidget {
         elevation: 0,
         title: Text("$className - Promoted"),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: students.length,
-        itemBuilder: (_, i) {
-          return Card(
-            child: ListTile(
-              title: Text(students[i],
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
-              subtitle: const Text("Promoted to next semester"),
-            ),
-          );
-        },
+
+      // 🔽 Bottom Nav (Students tab highlighted)
+      bottomNavigationBar: HodBottomNav(
+        currentIndex: 0,
+        department: department,
       ),
+
+      body: students.isEmpty
+          ? const Center(
+              child: Text(
+                "No promoted students found",
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: students.length,
+              itemBuilder: (_, i) {
+                final student = students[i];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    title: Text(
+                      student["name"] ?? "",
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      "${student["from"]} → ${student["to"]}",
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }

@@ -11,7 +11,7 @@ import '../dashboard/department_selection_screen.dart';
 import '../hod/hod_dashboard.dart';
 import '../dashboard/student_dashboard.dart';
 import '../dashboard/parent_dashboard.dart';
-
+import '../principal/principal_dashboard.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -131,6 +131,26 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
+    // PRINCIPAL
+    // PRINCIPAL
+if (user.role == "principal") {
+  if (user.departments.isEmpty) {
+    _showMessage("Principal has no departments assigned");
+    return;
+  }
+
+  Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PrincipalDashboard(
+            departments: user.departments,
+          ),
+        ),
+      );
+
+  return;
+}
+
     // HOD
 if (user.role == "hod") {
   if (user.departments.isEmpty) {

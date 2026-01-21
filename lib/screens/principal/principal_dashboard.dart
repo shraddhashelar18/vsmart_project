@@ -3,11 +3,17 @@ import 'principal_bottom_nav.dart';
 import 'principal_department_view.dart';
 
 class PrincipalDashboard extends StatelessWidget {
-  const PrincipalDashboard({Key? key}) : super(key: key);
+  final List<String> departments;
+
+  const PrincipalDashboard({
+    Key? key,
+    required this.departments,
+  }) : super(key: key);
 
   static const green = Color(0xFF009846);
 
-  final List<String> departments = const ["IT", "CO", "EJ"];
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +36,7 @@ class PrincipalDashboard extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 itemCount: departments.length,
-                itemBuilder: (context, i) {
+                itemBuilder: (_, i) {
                   String dept = departments[i];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
