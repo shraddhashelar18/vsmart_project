@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'principal_dashboard.dart';
-import 'principal_settings.dart'; // <-- new
+import 'principal_settings.dart';
 
 class PrincipalBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -25,10 +25,8 @@ class PrincipalBottomNav extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    PrincipalDashboard(departments: const ["IT", "CO", "EJ"]),
+                builder: (_) => const PrincipalDashboard(departments: [],),
               ),
-
             );
             break;
 
