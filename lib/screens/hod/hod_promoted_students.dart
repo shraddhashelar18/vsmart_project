@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../mock/mock_promotion.dart'; // <-- Uses centralized mock data
-import 'hod_bottom_nav.dart';
 
 class HodPromotedStudents extends StatelessWidget {
   final String department;
@@ -24,13 +23,6 @@ class HodPromotedStudents extends StatelessWidget {
         elevation: 0,
         title: Text("$className - Promoted"),
       ),
-
-      // 🔽 Bottom Nav (Students tab highlighted)
-      bottomNavigationBar: HodBottomNav(
-        currentIndex: 0,
-        department: department,
-      ),
-
       body: students.isEmpty
           ? const Center(
               child: Text(
