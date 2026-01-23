@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'hod_bottom_nav.dart';
 import '../../mock/mock_promotion.dart';
-import 'hod_promoted_students.dart';
+import '../screens/hod/hod_promoted_students.dart';
+import '../screens/hod/hod_bottom_nav.dart';
+
 
 class HodPromotedClasses extends StatelessWidget {
   final String department;
