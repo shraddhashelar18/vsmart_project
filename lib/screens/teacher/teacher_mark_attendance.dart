@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../mock/mock_teacher_data.dart';
 
 class TeacherMarkAttendance extends StatefulWidget {
   final String className;
+  final String subject; // ⬅ Added Subject
 
-  const TeacherMarkAttendance({Key? key, required this.className})
-      : super(key: key);
+  const TeacherMarkAttendance({
+    Key? key,
+    required this.className,
+    required this.subject,
+  }) : super(key: key);
 
   @override
   State<TeacherMarkAttendance> createState() => _TeacherMarkAttendanceState();
@@ -13,26 +19,41 @@ class TeacherMarkAttendance extends StatefulWidget {
 class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
   static const green = Color(0xFF009846);
 
-  // TODO BACKEND: fetch attendance students list
-  final List<Map<String, dynamic>> students = [
-    {"name": "Aarav Sharma", "roll": "001", "status": null},
-    {"name": "Ananya Patel", "roll": "002", "status": null},
-    {"name": "Arjun Kumar", "roll": "003", "status": null},
-    {"name": "Diya Singh", "roll": "004", "status": null},
-    {"name": "Ishaan Verma", "roll": "005", "status": null},
-  ];
+  DateTime selectedDate = DateTime.now();
 
+  List<Map<String, dynamic>> students = [];
   int present = 0;
-  int absent = 0;
   int late = 0;
+  int absent = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    students = mockStudents[widget.className] ?? [];
+  }
 
   void setStatus(int index, String status) {
     setState(() {
       students[index]["status"] = status;
       present = students.where((s) => s["status"] == "P").length;
-      absent = students.where((s) => s["status"] == "A").length;
       late = students.where((s) => s["status"] == "L").length;
+      absent = students.where((s) => s["status"] == "A").length;
     });
+  }
+
+  Future<void> pickDate() async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2023),
+      lastDate: DateTime(2030),
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
   }
 
   @override
@@ -41,141 +62,185 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: green,
-        elevation: 0,
-        title: const Text("Mark Attendance"),
+        title: const Text("Take Attendance"),
       ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _label("Class"),
+            _inputBox(widget.className),
 
-      body: Column(
-        children: [
-          const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-          // CLASS + DATE
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            _label("Subject"),
+            _inputBox(widget.subject.isEmpty ? "-" : widget.subject),
+ // ⬅ Added
+
+            const SizedBox(height: 10),
+
+            _label("Date"),
+            GestureDetector(
+              onTap: pickDate,
+              child: _inputBox(
+                DateFormat("dd-MM-yyyy").format(selectedDate),
+                trailing: Icons.calendar_today,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Row(
               children: [
-                Text("Class: ${widget.className}",
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Text("Date: "),
-                    Text(DateTime.now().toString().split(" ").first,
-                        style: const TextStyle(fontWeight: FontWeight.w500)),
-                  ],
-                ),
-                const SizedBox(height: 12),
+                _counterBox("Present", present, Colors.green),
+                _counterBox("Late", late, Colors.orange),
+                _counterBox("Absent", absent, Colors.red),
               ],
             ),
-          ),
 
-          // COUNTERS
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                _countBox("Present", present, Colors.green),
-                const SizedBox(width: 8),
-                _countBox("Absent", absent, Colors.red),
-                const SizedBox(width: 8),
-                _countBox("Late", late, Colors.orange),
-              ],
+            const SizedBox(height: 18),
+
+            Text(
+              "Students (${students.length})",
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
             ),
-          ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
-          // STUDENTS LIST
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: students.length,
-              itemBuilder: (_, i) {
-                final s = students[i];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(s["name"]),
-                    subtitle: Text("Roll No: ${s["roll"]}"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _statusChip("P", s["status"] == "P", Colors.green, () => setStatus(i, "P")),
-                        const SizedBox(width: 6),
-                        _statusChip("A", s["status"] == "A", Colors.red, () => setStatus(i, "A")),
-                        const SizedBox(width: 6),
-                        _statusChip("L", s["status"] == "L", Colors.orange, () => setStatus(i, "L")),
+            Expanded(
+              child: ListView.builder(
+                itemCount: students.length,
+                itemBuilder: (_, i) {
+                  final s = students[i];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        )
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // SUBMIT BUTTON
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: green,
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s['name'],
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 14)),
+                        Text("Roll No: ${s['roll']}",
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey.shade600)),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            _statusChip("Present", "P", s["status"] == "P",
+                                Colors.green, () => setStatus(i, "P")),
+                            _statusChip("Late", "L", s["status"] == "L",
+                                Colors.orange, () => setStatus(i, "L")),
+                            _statusChip("Absent", "A", s["status"] == "A",
+                                Colors.red, () => setStatus(i, "A")),
+                          ],
+                        )
+                      ],
+                    ),
+                  );
+                },
               ),
-              onPressed: () {
-                // TODO BACKEND: Send attendance list
-                print("Attendance submitted => $students");
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Attendance submitted")),
-                );
-              },
-              child: const Text("Submit Attendance"),
             ),
-          )
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: green,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  print("Submitted => $students | Subject: ${widget.subject}");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Attendance Submitted!")),
+                  );
+                },
+                child: const Text("Submit Attendance",
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helpers below remain same...
+
+  Widget _label(String text) => Text(text,
+      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500));
+
+  Widget _inputBox(String text, {IconData? trailing}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(text, style: const TextStyle(fontSize: 14)),
+          if (trailing != null) Icon(trailing, size: 18),
         ],
       ),
     );
   }
 
-  Widget _statusChip(String label, bool selected, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
+  Widget _counterBox(String title, int count, Color color) {
+    return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.17) : Colors.grey.shade200,
+          color: color.withOpacity(0.12),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: selected ? color : Colors.grey.shade300),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? color : Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
+        child: Column(
+          children: [
+            Text(count.toString(),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 18, color: color)),
+            const SizedBox(height: 4),
+            Text(title,
+                style: TextStyle(fontSize: 12, color: color.withOpacity(0.9))),
+          ],
         ),
       ),
     );
   }
 
-  Widget _countBox(String label, int count, Color color) {
-    return Expanded(
+  Widget _statusChip(String label, String key, bool selected, Color color,
+      VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
+          color: selected ? color.withOpacity(0.16) : Colors.grey.shade200,
+          border: Border.all(color: selected ? color : Colors.transparent),
         ),
-        child: Column(
-          children: [
-            Text("$count", style: TextStyle(color: color, fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
-          ],
-        ),
+        child: Text(label,
+            style: TextStyle(
+                color: selected ? color : Colors.black,
+                fontWeight: FontWeight.w500,
+                fontSize: 12)),
       ),
     );
   }

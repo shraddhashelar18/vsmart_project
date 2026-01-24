@@ -13,18 +13,18 @@ final Map<String, dynamic> mockStudentReports = {
     "name": "Aarav Sharma",
     "roll": "001",
     "marks": [
-      {"exam": "Unit Test", "score": 21, "max": 25},
-      {"exam": "Mid Term", "score": 42, "max": 50},
-      {"exam": "Final Exam", "score": 90, "max": 100},
+      {"exam": "CT 1", "score": 21, "max":30},
+      {"exam": "CT 2", "score": 22, "max": 30},
+      
     ]
   },
   "2": {
     "name": "Ananya Patel",
     "roll": "002",
     "marks": [
-      {"exam": "Unit Test", "score": 20, "max": 25},
-      {"exam": "Mid Term", "score": 44, "max": 50},
-      {"exam": "Final Exam", "score": 88, "max": 100},
+      {"exam": "Unit Test", "score": 20, "max": 30},
+      {"exam": "Mid Term", "score": 24, "max": 30},
+    
     ]
   },
 };

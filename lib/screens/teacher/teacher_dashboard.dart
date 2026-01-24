@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-import 'teacher_mark_attendance.dart';
-import 'teacher_enter_marks.dart';
-import 'teacher_view_reports.dart';
-import 'teacher_attendance_settings.dart';
-import 'teacher_send_notifications.dart';
+import '../../mock/mock_teacher_classes.dart';
+import '../../mock/mock_teacher_subjects.dart';
 
-class TeacherDashboard extends StatelessWidget {
+import '../teacher/department_selection_screen.dart';
+import '../teacher/teacher_mark_attendance.dart';
+import '../teacher/teacher_enter_marks.dart';
+import '../teacher/teacher_view_students.dart';
+import '../teacher/teacher_attendance_settings.dart';
+import '../teacher/teacher_send_notifications.dart';
+
+class TeacherDashboard extends StatefulWidget {
   final String activeDepartment;
   final int teacherId;
   final List<String> departments;
+  
 
   const TeacherDashboard({
     Key? key,
@@ -18,127 +24,302 @@ class TeacherDashboard extends StatelessWidget {
     required this.departments,
   }) : super(key: key);
 
+  @override
+  State<TeacherDashboard> createState() => _TeacherDashboardState();
+}
+
+class _TeacherDashboardState extends State<TeacherDashboard> {
   static const green = Color(0xFF009846);
+
+  String teacherName = "Mr. Sunil Dodake";
+  String selectedClass = "";
+  String selectedSubject = "";
+
+  List<String> allocatedClasses = [];
+  List<String> subjectList = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    allocatedClasses = mockTeacherClasses[widget.teacherId] ?? [];
+
+    if (allocatedClasses.isNotEmpty) {
+      selectedClass = allocatedClasses.first;
+      loadSubjects();
+    }
+  }
+
+  void loadSubjects() {
+    subjectList = (mockTeacherSubjects[widget.teacherId]?[selectedClass]) ?? [];
+
+    if (subjectList.isEmpty) {
+      selectedSubject = "-";
+    } else if (subjectList.length == 1) {
+      selectedSubject = subjectList.first;
+    } else if (selectedSubject.isEmpty) {
+      selectedSubject = subjectList.first; // default select first
+    }
+
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
+    final String today =
+        DateFormat("EEEE, MMMM d, yyyy").format(DateTime.now());
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: green,
-        elevation: 0,
-        title: const Text("Teacher Dashboard"),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(20),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              "$activeDepartment Department",
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
-            ),
-          ),
-        ),
+      backgroundColor: Colors.grey.shade100,
+      body: SingleChildScrollView(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _header(today),
+          _switchDepartmentButton(),
+          const SizedBox(height: 10),
+          _classSelector(),
+          if (subjectList.isNotEmpty) _subjectSelector(),
+          const SizedBox(height: 20),
+          _quickActions(),
+        ]),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.05,
-          children: [
-            _dashBtn(
-              icon: Icons.check_circle,
-              title: "Take Attendance",
-              onTap: () {
-                
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => TeacherMarkAttendance(className: className),
-                  ),
-                );
-              },
-            ),
-            _dashBtn(
-              icon: Icons.score,
-              title: "Enter Marks",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => TeacherEnterMarks(teacherId: teacherId),
-                  ),
-                );
-              },
-            ),
-            _dashBtn(
-              icon: Icons.assignment,
-              title: "View Reports",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => TeacherViewReports()),
-                );
-              },
-            ),
-            _dashBtn(
-              icon: Icons.settings,
-              title: "Attendance Settings",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const TeacherAttendanceSettings()),
-                );
-              },
-            ),
-            _dashBtn(
-              icon: Icons.notifications_active,
-              title: "Send Notifications",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const TeacherSendNotifications()),
-                );
-              },
-            ),
-          ],
+    );
+  }
+
+  Widget _header(String today) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: green,
+        borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(22), bottomRight: Radius.circular(22)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const SizedBox(height: 18),
+        const Text("Vsmart",
+            style: TextStyle(color: Colors.white, fontSize: 20)),
+        const Text("Academic Management",
+            style: TextStyle(color: Colors.white70)),
+        const SizedBox(height: 18),
+        Text("Good Afternoon, $teacherName",
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        Text(today, style: const TextStyle(color: Colors.white70)),
+      ]),
+    );
+  }
+
+  Widget _switchDepartmentButton() {
+    if (widget.departments.length <= 1) return const SizedBox();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: TextButton.icon(
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => DepartmentSelectionScreen(
+                  departments: widget.departments,
+                  teacherId: widget.teacherId,
+                ),
+              ),
+            );
+          },
+          icon: const Icon(Icons.swap_horiz, color: green),
+          label: const Text("Switch Department",
+              style: TextStyle(color: green, fontWeight: FontWeight.w600)),
         ),
       ),
     );
   }
 
-  Widget _dashBtn({
+  Widget _classSelector() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("Select Class",
+            style: TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        DropdownButtonFormField(
+          value: selectedClass.isEmpty ? null : selectedClass,
+          items: allocatedClasses
+              .map((cls) => DropdownMenuItem(value: cls, child: Text(cls)))
+              .toList(),
+          decoration: _dropdownDeco(),
+          onChanged: (v) {
+            selectedClass = v!;
+            loadSubjects();
+          },
+        ),
+      ]),
+    );
+  }
+
+  Widget _subjectSelector() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("Select Subject",
+            style: TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        DropdownButtonFormField(
+          value: selectedSubject.isEmpty ? null : selectedSubject,
+          items: subjectList
+              .map((sub) => DropdownMenuItem(value: sub, child: Text(sub)))
+              .toList(),
+          decoration: _dropdownDeco(),
+          onChanged: (v) => setState(() => selectedSubject = v!),
+        ),
+      ]),
+    );
+  }
+
+  InputDecoration _dropdownDeco() {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+    );
+  }
+
+  Widget _quickActions() {
+    bool disabled = selectedClass.isEmpty ||
+        (subjectList.isNotEmpty && selectedSubject.isEmpty);
+
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          _actionCard(
+            icon: Icons.check_circle_outline,
+            title: "Mark Attendance",
+            subtitle: "Take attendance",
+            onTap: disabled
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TeacherMarkAttendance(
+                          className: selectedClass,
+                          subject: selectedSubject,
+                        ),
+                      ),
+                    );
+                  },
+          ),
+          _actionCard(
+            icon: Icons.edit_note,
+            title: "Enter Marks",
+            subtitle: "Add student marks",
+            onTap: disabled
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EnterMarksScreen(
+                          className: selectedClass,
+                          subject: selectedSubject,
+                          teacherId: widget.teacherId,
+                        ),
+                      ),
+                    );
+                  },
+          ),
+          _actionCard(
+            icon: Icons.bar_chart,
+            title: "View Reports",
+            subtitle: "Performance Reports",
+            onTap: disabled
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            TeacherViewStudents(className: selectedClass),
+                      ),
+                    );
+                  },
+          ),
+
+          // 📩 NEW — SEND NOTIFICATIONS
+          _actionCard(
+            icon: Icons.notifications_active,
+            title: "Send Notifications",
+            subtitle: "Message class or students",
+            onTap: disabled
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TeacherSendNotifications(
+                          className: selectedClass, subject: '',
+                         
+                        ),
+                      ),
+                    );
+                  },
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _actionCard({
     required IconData icon,
     required String title,
-    required VoidCallback onTap,
+    required String subtitle,
+    required VoidCallback? onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
-            BoxShadow(
-                color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: green, size: 30),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+    return Opacity(
+      opacity: onTap == null ? 0.45 : 1,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3)),
+              ]),
+          child: Row(children: [
+            Container(
+              height: 44,
+              width: 44,
+              decoration:
+                  const BoxDecoration(color: green, shape: BoxShape.circle),
+              child: Icon(icon, color: Colors.white),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(subtitle,
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.grey.shade600)),
+                  ]),
             )
-          ],
+          ]),
         ),
       ),
     );
