@@ -7,8 +7,21 @@ final Map<String, List<Map<String, dynamic>>> mockStudents = {
   ]
 };
 
-// REPORT DATA (subject wise + CT-1/CT-2 publish)
-final Map<String, Map<String, dynamic>> mockStudentReports = {
-  // structure gets filled when teacher publishes
-  // "1": { "name": "...", "roll": "...", "marks": { "CT-1": { score, max }, "CT-2": {...} } }
-};
+/*
+STRUCTURE (IMPORTANT)
+
+mockStudentReports = {
+  studentId: {
+    "name": String,
+    "roll": String,
+    "marks": {
+      subject: {
+        "CT-1": { "score": int, "max": int },
+        "CT-2": { "score": int, "max": int }
+      }
+    }
+  }
+}
+*/
+
+final Map<String, Map<String, dynamic>> mockStudentReports = {};

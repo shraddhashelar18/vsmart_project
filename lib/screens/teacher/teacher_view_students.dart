@@ -48,6 +48,20 @@ class TeacherViewStudents extends StatelessWidget {
                   ),
                   child: InkWell(
                     onTap: () {
+                      final report = mockStudentReports[s['id']];
+
+                      // No report at all
+                      if (report == null ||
+                          report["marks"] == null ||
+                          (report["marks"] as Map).isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text("No report found for this student")),
+                        );
+                        return;
+                      }
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
