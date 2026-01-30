@@ -12,6 +12,7 @@ import '../hod/hod_dashboard.dart';
 import '../dashboard/student_dashboard.dart';
 import '../dashboard/parent_dashboard.dart';
 import '../principal/principal_dashboard.dart';
+import '../teacher/teacher_home.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -172,40 +173,29 @@ if (user.role == "hod") {
 
 
     // TEACHER
+    // TEACHER
     if (user.role == "teacher") {
       if (user.departments.isEmpty) {
         _showMessage("No department assigned");
         return;
       }
 
-      // SINGLE DEPARTMENT
-      if (user.departments.length == 1) {
-        String activeDepartment = user.departments.first;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TeacherDashboard(
-              activeDepartment: activeDepartment,
-              teacherId: user.user_id, // 🔑 REQUIRED
-              departments: user.departments,
-            ),
+      String activeDepartment = user.departments.first;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => TeacherHome(
+            teacherId: user.user_id,
+            department: activeDepartment,
+            departments: user.departments,
           ),
-        );
-      }
-      // MULTIPLE DEPARTMENTS
-      else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => DepartmentSelectionScreen(
-              departments: user.departments,
-              teacherId: user.user_id,
-            ),
-          ),
-        );
-      }
+        ),
+      );
+
       return;
     }
+
 
     //student
 

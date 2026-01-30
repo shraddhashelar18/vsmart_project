@@ -1,4 +1,4 @@
-// STUDENTS ALLOCATED TO TEACHER BY CLASS
+// STUDENTS LIST
 final Map<String, List<Map<String, dynamic>>> mockStudents = {
   "IF6K-A": [
     {"id": "1", "roll": "001", "name": "Aarav Sharma"},
@@ -7,24 +7,8 @@ final Map<String, List<Map<String, dynamic>>> mockStudents = {
   ]
 };
 
-// DETAILED REPORTS (KEY = STUDENT ID)
-final Map<String, dynamic> mockStudentReports = {
-  "1": {
-    "name": "Aarav Sharma",
-    "roll": "001",
-    "marks": [
-      {"exam": "CT 1", "score": 21, "max":30},
-      {"exam": "CT 2", "score": 22, "max": 30},
-      
-    ]
-  },
-  "2": {
-    "name": "Ananya Patel",
-    "roll": "002",
-    "marks": [
-      {"exam": "Unit Test", "score": 20, "max": 30},
-      {"exam": "Mid Term", "score": 24, "max": 30},
-    
-    ]
-  },
+// REPORT DATA (subject wise + CT-1/CT-2 publish)
+final Map<String, Map<String, dynamic>> mockStudentReports = {
+  // structure gets filled when teacher publishes
+  // "1": { "name": "...", "roll": "...", "marks": { "CT-1": { score, max }, "CT-2": {...} } }
 };

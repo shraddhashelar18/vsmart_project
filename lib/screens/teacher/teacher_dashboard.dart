@@ -15,7 +15,6 @@ class TeacherDashboard extends StatefulWidget {
   final String activeDepartment;
   final int teacherId;
   final List<String> departments;
-  
 
   const TeacherDashboard({
     Key? key,
@@ -51,16 +50,19 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   }
 
   void loadSubjects() {
-    subjectList = (mockTeacherSubjects[widget.teacherId]?[selectedClass]) ?? [];
+    // Load subjects for selected class
+    subjectList = mockTeacherSubjects[widget.teacherId]?[selectedClass] ?? [];
 
     if (subjectList.isEmpty) {
-      selectedSubject = "-";
+      selectedSubject = "";
     } else if (subjectList.length == 1) {
       selectedSubject = subjectList.first;
-    } else if (selectedSubject.isEmpty) {
-      selectedSubject = subjectList.first; // default select first
+    } else {
+      // Default choose first if not selected
+      if (!subjectList.contains(selectedSubject)) {
+        selectedSubject = subjectList.first;
+      }
     }
-
 
     setState(() {});
   }
@@ -73,15 +75,19 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: SingleChildScrollView(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _header(today),
-          _switchDepartmentButton(),
-          const SizedBox(height: 10),
-          _classSelector(),
-          if (subjectList.isNotEmpty) _subjectSelector(),
-          const SizedBox(height: 20),
-          _quickActions(),
-        ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _header(today),
+            _switchDepartmentButton(),
+            const SizedBox(height: 10),
+            _classSelector(),
+            const SizedBox(height: 10),
+            _subjectSelector(), // Always show subject block if class selected
+            const SizedBox(height: 20),
+            _quickActions(),
+          ],
+        ),
       ),
     );
   }
@@ -93,23 +99,28 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
       decoration: const BoxDecoration(
         color: green,
         borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(22), bottomRight: Radius.circular(22)),
+          bottomLeft: Radius.circular(22),
+          bottomRight: Radius.circular(22),
+        ),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(height: 18),
-        const Text("Vsmart",
-            style: TextStyle(color: Colors.white, fontSize: 20)),
-        const Text("Academic Management",
-            style: TextStyle(color: Colors.white70)),
-        const SizedBox(height: 18),
-        Text("Good Afternoon, $teacherName",
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 18),
+          const Text("Vsmart",
+              style: TextStyle(color: Colors.white, fontSize: 20)),
+          const Text("Academic Management",
+              style: TextStyle(color: Colors.white70)),
+          const SizedBox(height: 18),
+          Text(
+            "Good Afternoon, $teacherName",
             style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
-        Text(today, style: const TextStyle(color: Colors.white70)),
-      ]),
+                color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+          Text(today, style: const TextStyle(color: Colors.white70)),
+        ],
+      ),
     );
   }
 
@@ -133,8 +144,10 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
             );
           },
           icon: const Icon(Icons.swap_horiz, color: green),
-          label: const Text("Switch Department",
-              style: TextStyle(color: green, fontWeight: FontWeight.w600)),
+          label: const Text(
+            "Switch Department",
+            style: TextStyle(color: green, fontWeight: FontWeight.w600),
+          ),
         ),
       ),
     );
@@ -143,41 +156,49 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   Widget _classSelector() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text("Select Class",
-            style: TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
-        DropdownButtonFormField(
-          value: selectedClass.isEmpty ? null : selectedClass,
-          items: allocatedClasses
-              .map((cls) => DropdownMenuItem(value: cls, child: Text(cls)))
-              .toList(),
-          decoration: _dropdownDeco(),
-          onChanged: (v) {
-            selectedClass = v!;
-            loadSubjects();
-          },
-        ),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("Select Class",
+              style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          DropdownButtonFormField(
+            value: selectedClass.isEmpty ? null : selectedClass,
+            items: allocatedClasses
+                .map((cls) => DropdownMenuItem(value: cls, child: Text(cls)))
+                .toList(),
+            decoration: _dropdownDeco(),
+            onChanged: (v) {
+              selectedClass = v!;
+              loadSubjects();
+            },
+          ),
+        ],
+      ),
     );
   }
 
   Widget _subjectSelector() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text("Select Subject",
-            style: TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
-        DropdownButtonFormField(
-          value: selectedSubject.isEmpty ? null : selectedSubject,
-          items: subjectList
-              .map((sub) => DropdownMenuItem(value: sub, child: Text(sub)))
-              .toList(),
-          decoration: _dropdownDeco(),
-          onChanged: (v) => setState(() => selectedSubject = v!),
-        ),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("Select Subject",
+              style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          DropdownButtonFormField(
+            value: selectedSubject.isEmpty ? null : selectedSubject,
+            items: subjectList
+                .map((sub) => DropdownMenuItem(value: sub, child: Text(sub)))
+                .toList(),
+            decoration: _dropdownDeco(),
+            onChanged: (v) {
+              setState(() => selectedSubject = v!);
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -191,8 +212,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   }
 
   Widget _quickActions() {
-    bool disabled = selectedClass.isEmpty ||
-        (subjectList.isNotEmpty && selectedSubject.isEmpty);
+    bool disabled = selectedClass.isEmpty || selectedSubject.isEmpty;
 
     return Padding(
       padding: const EdgeInsets.all(20),
@@ -251,8 +271,6 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                     );
                   },
           ),
-
-          // 📩 NEW — SEND NOTIFICATIONS
           _actionCard(
             icon: Icons.notifications_active,
             title: "Send Notifications",
@@ -264,8 +282,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                       context,
                       MaterialPageRoute(
                         builder: (_) => TeacherSendNotifications(
-                          className: selectedClass, subject: '',
-                         
+                          className: selectedClass,
+                          subject: selectedSubject,
                         ),
                       ),
                     );
@@ -275,7 +293,6 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
       ),
     );
   }
-
 
   Widget _actionCard({
     required IconData icon,
