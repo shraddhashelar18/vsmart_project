@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'admin_bottom_nav.dart';
+import 'result_control_screen.dart'; // NEW SCREEN
 
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({Key? key}) : super(key: key);
@@ -19,26 +20,48 @@ class ReportsScreen extends StatelessWidget {
         child: Column(
           children: [
             _reportCard(
+              context: context,
               icon: Icons.fact_check,
               title: "Attendance Report",
               subtitle: "View student attendance details",
             ),
             _reportCard(
+              context: context,
               icon: Icons.bar_chart,
               title: "Performance Report",
               subtitle: "Student academic performance",
             ),
+
+            // 🔥 NEW: RESULT CONTROL
             _reportCard(
+              context: context,
+              icon: Icons.assignment_turned_in,
+              title: "Result Control",
+              subtitle: "Declare results & control marksheet upload",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ResultControlScreen(),
+                  ),
+                );
+              },
+            ),
+
+            _reportCard(
+              context: context,
               icon: Icons.school,
               title: "Teacher Report",
               subtitle: "Teacher activity & allocation",
             ),
             _reportCard(
+              context: context,
               icon: Icons.people,
               title: "Parent Engagement",
               subtitle: "Parent interactions & reports",
             ),
             _reportCard(
+              context: context,
               icon: Icons.download,
               title: "Download Reports",
               subtitle: "Export reports as PDF",
@@ -50,9 +73,11 @@ class ReportsScreen extends StatelessWidget {
   }
 
   Widget _reportCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
+    VoidCallback? onTap,
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 14),
@@ -89,9 +114,7 @@ class ReportsScreen extends StatelessWidget {
           Icons.arrow_forward_ios,
           size: 16,
         ),
-        onTap: () {
-          // navigation later
-        },
+        onTap: onTap,
       ),
     );
   }

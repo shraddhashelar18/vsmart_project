@@ -4,15 +4,14 @@ import 'package:flutter/material.dart';
 import '../../mock/mock_users.dart';
 import '../../models/user_auth_model.dart';
 
-// dashboards (placeholders for now)
+// dashboards / homes
 import '../admin/admin_dashboard.dart';
-import '../teacher/teacher_dashboard.dart';
-import '../teacher/department_selection_screen.dart';
-import '../hod/hod_dashboard.dart';
-import '../dashboard/student_dashboard.dart';
-import '../dashboard/parent_dashboard.dart';
-import '../principal/principal_dashboard.dart';
 import '../teacher/teacher_home.dart';
+import '../hod/hod_dashboard.dart';
+import '../principal/principal_dashboard.dart';
+import '../student/student_home.dart';
+import '../dashboard/parent_dashboard.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -40,18 +39,13 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 90),
               _appHeader(),
               const SizedBox(height: 40),
-
-              // EMAIL
               TextFormField(
                 decoration: _decoration("Enter your email", Icons.email),
                 onChanged: (v) => email = v.trim(),
                 validator: (v) =>
                     v == null || v.isEmpty ? "Email is required" : null,
               ),
-
               const SizedBox(height: 12),
-
-              // PASSWORD
               TextFormField(
                 obscureText: !isPasswordVisible,
                 decoration:
@@ -73,9 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 validator: (v) =>
                     v == null || v.isEmpty ? "Password is required" : null,
               ),
-
               const SizedBox(height: 20),
-
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF009846),
@@ -101,8 +93,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ---------------- LOGIN LOGIC ----------------
-
   void _mockLogin() {
     final UserAuth user = mockUsers.firstWhere(
       (u) => u.email == email,
@@ -124,23 +114,16 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // ADMIN
     if (user.role == "admin") {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => AdminDashboard()),
+        MaterialPageRoute(builder: (_) => const AdminDashboard()),
       );
       return;
     }
-    // PRINCIPAL
-    // PRINCIPAL
-if (user.role == "principal") {
-  if (user.departments.isEmpty) {
-    _showMessage("Principal has no departments assigned");
-    return;
-  }
 
-  Navigator.pushReplacement(
+    if (user.role == "principal") {
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => PrincipalDashboard(
@@ -148,81 +131,57 @@ if (user.role == "principal") {
           ),
         ),
       );
+      return;
+    }
 
-  return;
-}
+    if (user.role == "hod") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HodDashboard(
+            department: user.departments.first,
+          ),
+        ),
+      );
+      return;
+    }
 
-    // HOD
-if (user.role == "hod") {
-  if (user.departments.isEmpty) {
-    _showMessage("No department assigned to HOD");
-    return;
-  }
-
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => HodDashboard(
-        department: user.departments.first, // 🔐 exactly one
-      ),
-    ),
-  );
-  return;
-}
-
-
-
-    // TEACHER
-    // TEACHER
     if (user.role == "teacher") {
-      if (user.departments.isEmpty) {
-        _showMessage("No department assigned");
-        return;
-      }
-
-      String activeDepartment = user.departments.first;
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => TeacherHome(
             teacherId: user.user_id,
-            department: activeDepartment,
+            department: user.departments.first,
             departments: user.departments,
           ),
         ),
       );
-
       return;
     }
 
-
-    //student
-
-if (user.role == "student") {
+    // ✅ STUDENT FIX
+    if (user.role == "student") {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const StudentDashboard()),
+        MaterialPageRoute(builder: (_) => const StudentHome()),
       );
       return;
     }
+
     if (user.role == "parent") {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const ParentDashboard()),
-    );
-    return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const ParentDashboard()),
+      );
+      return;
     }
-    // OTHER ROLES
+
     _showMessage("Dashboard coming soon for ${user.role}");
   }
 
-  // ---------------- HELPERS ----------------
-
   void _showMessage(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   Widget _appHeader() {
@@ -231,21 +190,15 @@ if (user.role == "student") {
         CircleAvatar(
           radius: 32,
           backgroundColor: Color(0xFF009846),
-          child: Icon(Icons.school, color: Colors.white, size: 28),
+          child: Icon(Icons.school, color: Colors.white),
         ),
         SizedBox(height: 10),
         Text(
           "Vsmart",
           style: TextStyle(
-            color: Color(0xFF009846),
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: 4),
-        Text(
-          "A Smart Academic Management Platform",
-          style: TextStyle(fontSize: 13, color: Colors.grey),
+              color: Color(0xFF009846),
+              fontSize: 22,
+              fontWeight: FontWeight.w600),
         ),
       ],
     );

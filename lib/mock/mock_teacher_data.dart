@@ -8,7 +8,7 @@ final Map<String, List<Map<String, dynamic>>> mockStudents = {
 };
 
 /*
-STRUCTURE (IMPORTANT)
+STRUCTURE (MARKS)
 
 mockStudentReports = {
   studentId: {
@@ -23,5 +23,20 @@ mockStudentReports = {
   }
 }
 */
-
 final Map<String, Map<String, dynamic>> mockStudentReports = {};
+
+/*
+STRUCTURE (ATTENDANCE)
+
+mockAttendance = {
+  className: {
+    subject: {
+      "yyyy-MM-dd": {
+        studentId: "P" | "A" | "L"
+      }
+    }
+  }
+}
+*/
+final Map<String, Map<String, Map<String, Map<String, String>>>>
+    mockAttendance = {};

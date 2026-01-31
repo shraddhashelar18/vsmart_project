@@ -76,7 +76,7 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
 
             _label("Subject"),
             _inputBox(widget.subject.isEmpty ? "-" : widget.subject),
- // ⬅ Added
+            // ⬅ Added
 
             const SizedBox(height: 10),
 
@@ -164,7 +164,18 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
                       borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () {
-                  print("Submitted => $students | Subject: ${widget.subject}");
+                  final dateKey = DateFormat("yyyy-MM-dd").format(selectedDate);
+
+                  mockAttendance[widget.className] ??= {};
+                  mockAttendance[widget.className]![widget.subject] ??= {};
+                  mockAttendance[widget.className]![widget.subject]![dateKey] =
+                      {};
+
+                  for (var s in students) {
+                    mockAttendance[widget.className]![widget.subject]![
+                        dateKey]![s["id"]] = s["status"] ?? "A";
+                  }
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Attendance Submitted!")),
                   );
