@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
-import 'student_dashboard.dart';
+
+// dashboard
+import '../student/dasboard/student_dashboard.dart';
+
+// results
 import 'results/student_results_screen.dart';
+
+// notifications
+import 'notifications/notifications_screen.dart';
+
+// settings
+import 'settings/settings_screen.dart';
 
 class StudentHome extends StatefulWidget {
   const StudentHome({super.key});
@@ -10,21 +20,29 @@ class StudentHome extends StatefulWidget {
 }
 
 class _StudentHomeState extends State<StudentHome> {
-  int index = 0;
+  int currentIndex = 0;
 
-  final screens = const [
+  final List<Widget> screens =  [
     StudentDashboard(),
     StudentResultsScreen(),
+    NotificationsScreen(),
+    SettingsScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: screens[index],
+      body: screens[currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: index,
-        onTap: (i) => setState(() => index = i),
+        currentIndex: currentIndex,
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+        },
         selectedItemColor: const Color(0xFF009846),
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
@@ -33,6 +51,14 @@ class _StudentHomeState extends State<StudentHome> {
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment),
             label: "Results",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: "Alerts",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Settings",
           ),
         ],
       ),

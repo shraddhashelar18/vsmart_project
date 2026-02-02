@@ -1,87 +1,85 @@
 import 'package:flutter/material.dart';
-import '../../../../mock/mock_teacher_data.dart';
 
 class ExamCard extends StatelessWidget {
-  final String title; // "Class Test 1 (CT1)"
-  final String examKey; // "CT-1" or "CT-2"
-  final String subject;
-  final String studentId;
+  final String title;
+  final String grade;
+  final String total;
+  final String percent;
+  final String date;
 
   const ExamCard({
     super.key,
     required this.title,
-    required this.examKey,
-    required this.subject,
-    required this.studentId,
+    required this.grade,
+    required this.total,
+    required this.percent,
+    required this.date,
   });
+
+  static const green = Color(0xFF009846);
 
   @override
   Widget build(BuildContext context) {
-    final studentReport = mockStudentReports[studentId];
-    final subjectMarks = studentReport?["marks"]?[subject];
-    final examData = subjectMarks?[examKey];
-
-    final bool isDeclared = examData != null;
-
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
-      decoration: _cardDecoration(),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // -------- Title --------
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // -------- Status text --------
-          Text(
-            isDeclared
-                ? "Marks declared by subject teacher"
-                : "Marks not declared yet",
-            style: TextStyle(
-              color: isDeclared ? Colors.green : Colors.grey,
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // -------- Status chip --------
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Status"),
-              Chip(
-                label: Text(isDeclared ? "Declared" : "Pending"),
-                backgroundColor:
-                    isDeclared ? const Color(0xFFE6F4EA) : Colors.grey.shade200,
-                labelStyle: TextStyle(
-                  color: isDeclared ? const Color(0xFF009846) : Colors.grey,
-                ),
-              ),
+              Text(title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16)),
+              Chip(label: Text(grade)),
             ],
+          ),
+          const SizedBox(height: 6),
+          Text(date, style: const TextStyle(color: Colors.grey)),
+          const Divider(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Total Marks"),
+              Text(total, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Percentage"),
+              Text(percent,
+                  style: const TextStyle(
+                      color: green, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: green.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.download, color: green),
+                SizedBox(width: 6),
+                Text("Download PDF", style: TextStyle(color: green)),
+              ],
+            ),
           ),
         ],
       ),
-    );
-  }
-
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.05),
-          blurRadius: 6,
-        ),
-      ],
     );
   }
 }
