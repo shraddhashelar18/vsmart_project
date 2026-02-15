@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
+
 import 'add_teacher.dart';
+import 'teacher_detail_screen.dart';
+import '../../mock/mock_teacher_data.dart';
+import '../../mock/mock_teacher_departments.dart';
+import '../../mock/mock_teacher_classes.dart';
+import '../../mock/mock_teacher_subjects.dart';
+
+
 
 
 class ManageTeachers extends StatelessWidget {
@@ -7,44 +15,25 @@ class ManageTeachers extends StatelessWidget {
 
   const ManageTeachers({Key? key, required this.department}) : super(key: key);
   List<Widget> _getTeachers() {
-    if (department == "IT") {
-      return [
-        TeacherCard(
-          name: "Prof Sunil Dodake",
-          subject: "PIC",
-          email: "sunil@teacher.com",
-          department: department,
-          phone: "+91 5678903451",
-        ),
-        TeacherCard(
-          name: "Mrs Samidha Chavan",
-          subject: "Computer Science",
-          department: department,
-          email: "samidha@teacher.com",
-          phone: "+91 5678903454",
-        ),
-      ];
-    } else if (department == "CO") {
-      return [
-        TeacherCard(
-          name: "Mrs Sushma Pawar",
-          subject: "DAN",
-          email: "sushma@teacher.com",
-          department: department,
-          phone: "+91 5678903452",
-        ),
-      ];
-    } else {
-      return [
-        TeacherCard(
-          name: "Mrs Gauri Bobade",
-          department: department,
-          subject: "English Literature",
-          email: "gauri@teacher.com",
-          phone: "+91 5678903453",
-        ),
-      ];
-    }
+    List<Widget> list = [];
+
+    mockTeacherDepartments.forEach((teacherId, depts) {
+      if (depts.contains(department)) {
+        final teacher = mockTeachers[teacherId]!;
+
+        list.add(
+          TeacherCard(
+            teacherId: teacherId,
+            name: teacher["name"]!,
+            email: teacher["email"]!,
+            phone: teacher["phone"]!,
+            department: department,
+          ),
+        );
+      }
+    });
+
+    return list;
   }
 
 
@@ -131,7 +120,8 @@ class ManageTeachers extends StatelessWidget {
 // 🔹 TEACHER CARD
 class TeacherCard extends StatelessWidget {
   final String name;
-  final String subject;
+  final int teacherId;
+
   final String email;
   final String phone;
   final String department;
@@ -139,7 +129,7 @@ class TeacherCard extends StatelessWidget {
   const TeacherCard({
     Key? key,
     required this.name,
-    required this.subject,
+    required this.teacherId,
     required this.email,
      required this.department,
     required this.phone,
@@ -155,38 +145,54 @@ class TeacherCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFFE0F2E9),
-                child: Icon(Icons.person, color: Color(0xFF009846)),
-              ),
-              title: Text(
-                name,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(subject),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.blue),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => AddTeacher(department: department)),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      _confirmDelete(context, name);
-                    },
-                  ),
-                ],
-              ),
+           ListTile(
+  contentPadding: EdgeInsets.zero,
+  leading: const CircleAvatar(
+    backgroundColor: Color(0xFFE0F2E9),
+    child: Icon(Icons.person, color: Color(0xFF009846)),
+  ),
+  title: Text(
+    name,
+    style: const TextStyle(fontWeight: FontWeight.bold),
+  ),
+
+  // 👇 ADD THIS
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TeacherDetailScreen(
+          teacherId: teacherId,   // pass id
+          name: name,
+        ),
+      ),
+    );
+  },
+
+  trailing: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      IconButton(
+        icon: const Icon(Icons.edit, color: Colors.blue),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => AddTeacher(department: department),
             ),
+          );
+        },
+      ),
+      IconButton(
+        icon: const Icon(Icons.delete, color: Colors.red),
+        onPressed: () {
+          _confirmDelete(context, name);
+        },
+      ),
+    ],
+  ),
+),
+
             const SizedBox(height: 6),
             Row(
               children: [
