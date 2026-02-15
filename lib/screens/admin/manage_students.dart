@@ -1,11 +1,51 @@
 import 'package:flutter/material.dart';
-import 'admin_bottom_nav.dart';
+
 import 'add_student.dart';
 
 class ManageStudents extends StatelessWidget {
-  const ManageStudents({Key? key}) : super(key: key);
+  final String department;
+
+  const ManageStudents({Key? key, required this.department}) : super(key: key);
+
 
   static const green = Color(0xFF009846);
+  List<Widget> _getStudents() {
+    if (department == "IT") {
+      return const [
+        _StudentCard(
+          name: "Emma Johnson",
+          email: "emma@student.com",
+          phone: "+91 5678903451",
+          className: "IF6K-A",
+        ),
+        _StudentCard(
+          name: "Liam Smith",
+          email: "liam@student.com",
+          phone: "+91 5678903452",
+          className: "IF6K-A",
+        ),
+      ];
+    } else if (department == "CO") {
+      return const [
+        _StudentCard(
+          name: "Olivia Brown",
+          email: "olivia@student.com",
+          phone: "+91 5678903453",
+          className: "CO5K-B",
+        ),
+      ];
+    } else {
+      return const [
+        _StudentCard(
+          name: "Noah Davis",
+          email: "noah@student.com",
+          phone: "+91 5678903454",
+          className: "EJ4K-A",
+        ),
+      ];
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +73,7 @@ class ManageStudents extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: const AdminBottomNav(currentIndex: 0),
+      
       floatingActionButton: FloatingActionButton(
         backgroundColor: green,
         child: const Icon(Icons.add),
@@ -81,32 +121,7 @@ class ManageStudents extends StatelessWidget {
             const SizedBox(height: 12),
             Expanded(
               child: ListView(
-                children: const [
-                  _StudentCard(
-                    name: "Emma Johnson",
-                    email: "emma@student.com",
-                    phone: "+91 5678903451",
-                    className: "IF6K-A",
-                  ),
-                  _StudentCard(
-                    name: "Liam Smith",
-                    email: "liam@student.com",
-                    phone: "+91 5678903452",
-                    className: "IF6K-A",
-                  ),
-                  _StudentCard(
-                    name: "Olivia Brown",
-                    email: "olivia@student.com",
-                    phone: "+91 5678903453",
-                    className: "IF6K-B",
-                  ),
-                  _StudentCard(
-                    name: "Noah Davis",
-                    email: "noah@student.com",
-                    phone: "+91 5678903454",
-                    className: "CO5K-A",
-                  ),
-                ],
+                children: _getStudents(),
               ),
             ),
           ],

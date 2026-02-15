@@ -10,7 +10,7 @@ import '../teacher/teacher_home.dart';
 import '../hod/hod_dashboard.dart';
 import '../principal/principal_dashboard.dart';
 import '../student/student_home.dart';
-import '../dashboard/parent_dashboard.dart';
+import '../parent/parent_dasboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:vsmart_app/screens/admin/performance_report.dart';
 import 'admin_bottom_nav.dart';
-import 'result_control_screen.dart'; // NEW SCREEN
+import 'result_control.dart';
+import 'attendance_report.dart'; // ADD THIS
 
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({Key? key}) : super(key: key);
@@ -19,20 +21,41 @@ class ReportsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            // 🔹 ATTENDANCE REPORT
             _reportCard(
               context: context,
               icon: Icons.fact_check,
               title: "Attendance Report",
               subtitle: "View student attendance details",
+              onTap: () {
+                // ADD THIS
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AttendanceReport(),
+                  ),
+                );
+              },
             ),
+
+            // PERFORMANCE REPORT
             _reportCard(
               context: context,
               icon: Icons.bar_chart,
               title: "Performance Report",
               subtitle: "Student academic performance",
+              onTap: () {
+                // ADD THIS
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PerformanceReport(),
+                  ),
+                );
+              },
             ),
 
-            // 🔥 NEW: RESULT CONTROL
+            // RESULT CONTROL
             _reportCard(
               context: context,
               icon: Icons.assignment_turned_in,
@@ -114,7 +137,7 @@ class ReportsScreen extends StatelessWidget {
           Icons.arrow_forward_ios,
           size: 16,
         ),
-        onTap: onTap,
+        onTap: onTap, // THIS ALREADY EXISTS
       ),
     );
   }

@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 import 'admin_bottom_nav.dart';
 import 'add_parent.dart';
 
-class ManageParents extends StatelessWidget {
+class ManageParents extends StatefulWidget {
   const ManageParents({Key? key}) : super(key: key);
+
+  @override
+  State<ManageParents> createState() => _ManageParentsState();
+}
+
+class _ManageParentsState extends State<ManageParents> {
+  String selectedDept = "All";
+
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +70,8 @@ class ManageParents extends StatelessWidget {
             ),
 
             const SizedBox(height: 16),
+            
+
 
             // 🔹 SEARCH BAR
             TextField(
@@ -75,7 +86,25 @@ class ManageParents extends StatelessWidget {
                 ),
               ),
             ),
-
+Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                DropdownButton<String>(
+                  value: selectedDept,
+                  items: ["All", "IT", "CO", "EJ"]
+                      .map((dept) => DropdownMenuItem(
+                            value: dept,
+                            child: Text(dept),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedDept = value!;
+                    });
+                  },
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
 
             const Align(

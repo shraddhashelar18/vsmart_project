@@ -23,6 +23,8 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
   String studentClass = "";
   String studentMobile = "";
   String parentMobile = "";
+  String studentEnrollmentNo = "";
+
 
   // ---------- TEACHER ----------
   String employeeId = "";
@@ -102,7 +104,12 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
               const SizedBox(height: 10),
 
               // ================= STUDENT =================
-              if (selectedRole == "student") ...[
+             if (selectedRole == "student") ...[
+                _requiredField(
+                  hint: "Enrollment No",
+                  icon: Icons.confirmation_number,
+                  onChanged: (v) => studentEnrollmentNo = v,
+                ),
                 _requiredField(
                   hint: "Roll No",
                   icon: Icons.badge,
@@ -119,15 +126,11 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                   onChanged: (value) => studentClass = value!,
                 ),
                 const SizedBox(height: 12),
-                phoneField(
-                  "Mobile Number",
-                  (v) => studentMobile = v,
-                ),
-                phoneField(
-                  "Parent Mobile Number",
-                  (v) => parentMobile = v,
-                ),
+
+                phoneField("Mobile Number", (v) => studentMobile = v),
+                phoneField("Parent Mobile Number", (v) => parentMobile = v),
               ],
+
 
               // ================= TEACHER =================
               if (selectedRole == "teacher") ...[

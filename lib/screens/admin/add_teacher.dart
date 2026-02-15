@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AddTeacher extends StatelessWidget {
-  AddTeacher({Key? key}) : super(key: key);
+  final String department;
+
+  AddTeacher({Key? key, required this.department}) : super(key: key);
+
 
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+
   String? _selectedClass;
 
   @override
@@ -69,6 +74,35 @@ class AddTeacher extends StatelessWidget {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
+              _label("Temporary Password"),
+              _textField(
+                hint: "Enter password",
+                icon: Icons.lock,
+                controller: _passwordCtrl,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return "Password required";
+                  if (v.length < 6) return "Min 6 characters";
+                  return null;
+                },
+              ),
+const SizedBox(height: 16),
+              _label("Department"),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.apartment),
+                    const SizedBox(width: 8),
+                    Text(department),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 16),
               _label("Assign Class"),
               _dropdownField(

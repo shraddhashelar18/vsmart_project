@@ -1,9 +1,52 @@
 import 'package:flutter/material.dart';
 import 'add_teacher.dart';
-import 'admin_bottom_nav.dart';
+
 
 class ManageTeachers extends StatelessWidget {
-  const ManageTeachers({Key? key}) : super(key: key);
+  final String department;
+
+  const ManageTeachers({Key? key, required this.department}) : super(key: key);
+  List<Widget> _getTeachers() {
+    if (department == "IT") {
+      return [
+        TeacherCard(
+          name: "Prof Sunil Dodake",
+          subject: "PIC",
+          email: "sunil@teacher.com",
+          department: department,
+          phone: "+91 5678903451",
+        ),
+        TeacherCard(
+          name: "Mrs Samidha Chavan",
+          subject: "Computer Science",
+          department: department,
+          email: "samidha@teacher.com",
+          phone: "+91 5678903454",
+        ),
+      ];
+    } else if (department == "CO") {
+      return [
+        TeacherCard(
+          name: "Mrs Sushma Pawar",
+          subject: "DAN",
+          email: "sushma@teacher.com",
+          department: department,
+          phone: "+91 5678903452",
+        ),
+      ];
+    } else {
+      return [
+        TeacherCard(
+          name: "Mrs Gauri Bobade",
+          department: department,
+          subject: "English Literature",
+          email: "gauri@teacher.com",
+          phone: "+91 5678903453",
+        ),
+      ];
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +77,7 @@ class ManageTeachers extends StatelessWidget {
         ),
       ),
 
-      // 🔹 BOTTOM NAV
-      bottomNavigationBar: const AdminBottomNav(currentIndex: 0),
+      
 
       // 🔹 ADD BUTTON
       floatingActionButton: FloatingActionButton(
@@ -44,7 +86,10 @@ class ManageTeachers extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) =>  AddTeacher()),
+            MaterialPageRoute(
+              builder: (_) => AddTeacher(department: department),
+            ),
+
           );
         },
       ),
@@ -73,32 +118,7 @@ class ManageTeachers extends StatelessWidget {
             // 🔹 TEACHER LIST
             Expanded(
               child: ListView(
-                children: const [
-                  TeacherCard(
-                    name: "Prof Sunil Dodake",
-                    subject: "PIC",
-                    email: "sunil@teacher.com",
-                    phone: "+91 5678903451",
-                  ),
-                  TeacherCard(
-                    name: "Mrs Sushma Pawar",
-                    subject: "DAN",
-                    email: "sushma@teacher.com",
-                    phone: "+91 5678903452",
-                  ),
-                  TeacherCard(
-                    name: "Mrs Gauri Bobade",
-                    subject: "English Literature",
-                    email: "gauri@teacher.com",
-                    phone: "+91 5678903453",
-                  ),
-                  TeacherCard(
-                    name: "Mrs Samidha Chavan",
-                    subject: "Computer Science",
-                    email: "samidha@teacher.com",
-                    phone: "+91 5678903454",
-                  ),
-                ],
+                children: _getTeachers(),
               ),
             ),
           ],
@@ -114,14 +134,17 @@ class TeacherCard extends StatelessWidget {
   final String subject;
   final String email;
   final String phone;
+  final String department;
 
   const TeacherCard({
     Key? key,
     required this.name,
     required this.subject,
     required this.email,
+     required this.department,
     required this.phone,
   }) : super(key: key);
+  
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +174,7 @@ class TeacherCard extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => AddTeacher()),
+                        MaterialPageRoute(builder: (_) => AddTeacher(department: department)),
                       );
                     },
                   ),
