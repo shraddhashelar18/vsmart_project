@@ -2,6 +2,6 @@
 
 Map<int, List<String>> mockTeacherDepartments = {
   // user_id : departments
-  2: ["IT", "CO"], // teacher@test.com teaches IT & CO
-  4: ["IT"],
+  2: ["IF", "CO"], // teacher@test.com teaches IT & CO
+  4: ["IF"],
 };

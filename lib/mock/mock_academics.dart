@@ -1,6 +1,8 @@
 // 🔥 Mock department → years → semesters → classes
+String activeSemType = "EVEN"; // EVEN or ODD
+
 final mockAcademics = {
-  "IT": {
+  "IF": {
     "FY": {
       "SEM 1": ["IF1K-A", "IF1K-B", "IF1K-C"],
       "SEM 2": ["IF2K-A", "IF2K-B", "IF2K-C"],
@@ -28,7 +30,8 @@ final mockAcademics = {
       "SEM 6": ["CO6K-A", "CO6K-B", "CO6K-C"],
     },
   },
-  "EJ": { "FY": {
+  "EJ": {
+    "FY": {
       "SEM 1": ["EJ1K-A", "EJ1K-B", "EJ1K-C"],
       "SEM 2": ["EJ2K-A", "EJ2K-B", "EJ2K-C"],
     },
@@ -39,5 +42,6 @@ final mockAcademics = {
     "TY": {
       "SEM 5": ["EJ5K-A", "EJ5K-B", "EJ5K-C"],
       "SEM 6": ["EJ6K-A", "EJ6K-B", "EJ6K-C"],
-    }, } // same structure
+    },
+  } // same structure
 };

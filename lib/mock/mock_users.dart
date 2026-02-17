@@ -12,14 +12,14 @@ List<UserAuth> mockUsers = [
     email: "teacher@test.com",
     role: "teacher",
     status: "approved",
-    departments: ["IT", "CO"], // multiple dept
+    departments: ["IF", "CO"], // multiple dept
   ),
   UserAuth(
     user_id: 4,
     email: "teacher_it@test.com",
     role: "teacher",
     status: "approved",
-    departments: ["IT"], // single dept
+    departments: ["IF"], // single dept
   ),
   UserAuth(
     user_id: 3,
@@ -34,35 +34,31 @@ List<UserAuth> mockUsers = [
     status: "approved",
   ),
   UserAuth(
-  user_id: 10,
-  email: "hod_it@test.com",
-  role: "hod",
-  status: "approved",
-  departments: ["IT"],
-),
-
-UserAuth(
-  user_id: 11,
-  email: "hod_co@test.com",
-  role: "hod",
-  status: "approved",
-  departments: ["CO"],
-),
-
-UserAuth(
-  user_id: 12,
-  email: "hod_ej@test.com",
-  role: "hod",
-  status: "approved",
-  departments: ["EJ"],
-),
-UserAuth(
+    user_id: 10,
+    email: "hod_it@test.com",
+    role: "hod",
+    status: "approved",
+    departments: ["IF"],
+  ),
+  UserAuth(
+    user_id: 11,
+    email: "hod_co@test.com",
+    role: "hod",
+    status: "approved",
+    departments: ["CO"],
+  ),
+  UserAuth(
+    user_id: 12,
+    email: "hod_ej@test.com",
+    role: "hod",
+    status: "approved",
+    departments: ["EJ"],
+  ),
+  UserAuth(
     user_id: 30,
     email: "principal@test.com",
     role: "principal",
     status: "approved",
-    departments: ["IT", "CO", "EJ"], // 🔥 important
+    departments: ["IF", "CO", "EJ"], // 🔥 important
   ),
 ];
-
-

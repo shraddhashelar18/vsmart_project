@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_teacher_data.dart';
+import '../../mock/mock_student_data.dart';
 import 'student_report_details.dart';
 
 class TeacherViewStudents extends StatelessWidget {
@@ -11,7 +11,14 @@ class TeacherViewStudents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final students = mockStudents[className] ?? [];
+    /// 🔥 FIXED STUDENT FETCH
+    final students = mockStudents.entries
+        .where((e) => e.value["class"] == className)
+        .map((e) => {
+              "enrollment": e.key,
+              ...e.value,
+            })
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -48,9 +55,11 @@ class TeacherViewStudents extends StatelessWidget {
                   ),
                   child: InkWell(
                     onTap: () {
-                      final report = mockStudentReports[s['id']];
+                      /// 🔥 ID FIXED → ENROLLMENT
+                      final studentId = s['enrollment'];
 
-                      // No report at all
+                      final report = mockStudentReports[studentId];
+
                       if (report == null ||
                           report["marks"] == null ||
                           (report["marks"] as Map).isEmpty) {
@@ -66,7 +75,7 @@ class TeacherViewStudents extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) =>
-                              StudentReportDetails(studentId: s['id']),
+                              StudentReportDetails(studentId: studentId),
                         ),
                       );
                     },

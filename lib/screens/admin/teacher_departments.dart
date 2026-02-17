@@ -12,13 +12,13 @@ class TeacherDepartments extends StatelessWidget {
         title: const Text("Select Department"),
         backgroundColor: const Color(0xFF009846),
       ),
-    // 🔹 BOTTOM NAV
+      // 🔹 BOTTOM NAV
       bottomNavigationBar: const AdminBottomNav(currentIndex: 0),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _deptCard(context, "IT"),
+            _deptCard(context, "IF"),
             _deptCard(context, "CO"),
             _deptCard(context, "EJ"),
           ],

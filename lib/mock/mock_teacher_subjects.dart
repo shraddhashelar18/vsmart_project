@@ -1,16 +1,17 @@
 final Map<int, Map<String, List<String>>> mockTeacherSubjects = {
   2: {
-    "IF6K-A": ["Java", "Networking"],
-    "IF6K-B": ["Java"],
+    "IF6KA": ["Networking"],
+    "IF6KB": ["Java"],
+    "CO4KA": ["DBMS"],
   },
   4: {
-    "IF6K-A": ["DBMS"],
-    "IF6K-B": ["C"],
-    "IF6K-C": ["DBMS"],
+    "IF6KA": ["DBMS"],
+    "IF6KB": ["C"],
+    "IF6KC": ["DBMS"],
   },
   5: {
-    "IF6K-A": ["C"],
-    "IF6K-B": ["Maths"],
-    "IF6K-C": ["Maths"],
+    "IF6KA": ["C"],
+    "IF6KB": ["Maths"],
+    "IF6KC": ["Maths"],
   },
 };

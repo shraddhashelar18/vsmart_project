@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_teacher_data.dart';
+import '../../mock/mock_student_data.dart';
 
 class StudentReportDetails extends StatelessWidget {
   final String studentId;

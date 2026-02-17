@@ -1,221 +1,294 @@
 import 'package:flutter/material.dart';
+import '../../mock/mock_teacher_data.dart';
+import '../../mock/mock_teacher_departments.dart';
+import '../../mock/mock_teacher_classes.dart';
+import '../../mock/mock_teacher_subjects.dart';
+import '../../mock/mock_academics.dart';
 
-class AddTeacher extends StatelessWidget {
+class AddTeacher extends StatefulWidget {
   final String department;
+  final int? teacherId;
 
-  AddTeacher({Key? key, required this.department}) : super(key: key);
+  const AddTeacher({
+    Key? key,
+    required this.department,
+    this.teacherId,
+  }) : super(key: key);
 
+  @override
+  State<AddTeacher> createState() => _AddTeacherState();
+}
 
-  final _formKey = GlobalKey<FormState>();
+class _AddTeacherState extends State<AddTeacher> {
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
 
-  String? _selectedClass;
+  List<String> selectedDepartments = [];
+  List<String> selectedClasses = [];
+
+  bool get isEdit => widget.teacherId != null;
+
+  // 🔹 ALL CLASSES WITH A B C
+  final List<String> allClasses = [
+    "IF1KA",
+    "IF1KB",
+    "IF1KC",
+    "IF2KA",
+    "IF2KB",
+    "IF2KC",
+    "IF3KA",
+    "IF3KB",
+    "IF3KC",
+    "IF4KA",
+    "IF4KB",
+    "IF4KC",
+    "IF5KA",
+    "IF5KB",
+    "IF5KC",
+    "IF6KA",
+    "IF6KB",
+    "IF6KC",
+    "CO1KA",
+    "CO1KB",
+    "CO1KC",
+    "CO2KA",
+    "CO2KB",
+    "CO2KC",
+    "CO3KA",
+    "CO3KB",
+    "CO3KC",
+    "CO4KA",
+    "CO4KB",
+    "CO4KC",
+    "CO5KA",
+    "CO5KB",
+    "CO5KC",
+    "CO6KA",
+    "CO6KB",
+    "CO6KC",
+    "EJ1KA",
+    "EJ1KB",
+    "EJ1KC",
+    "EJ2KA",
+    "EJ2KB",
+    "EJ2KC",
+    "EJ3KA",
+    "EJ3KB",
+    "EJ3KC",
+    "EJ4KA",
+    "EJ4KB",
+    "EJ4KC",
+    "EJ5KA",
+    "EJ5KB",
+    "EJ5KC",
+    "EJ6KA",
+    "EJ6KB",
+    "EJ6KC",
+  ];
+
+  final Map<String, List<String>> semesterSubjects = {
+    "IF1K": ["Maths1", "Physics"],
+    "IF2K": ["C", "Maths2"],
+    "IF3K": ["DBMS"],
+    "IF4K": ["Java"],
+    "IF5K": ["OS"],
+    "IF6K": ["Networking"],
+    "CO4K": ["SOM"],
+  };
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (isEdit) {
+      final t = mockTeachers[widget.teacherId]!;
+      _nameCtrl.text = t["name"]!;
+      _emailCtrl.text = t["email"]!;
+
+      selectedDepartments =
+          List.from(mockTeacherDepartments[widget.teacherId] ?? []);
+      selectedClasses = List.from(mockTeacherClasses[widget.teacherId] ?? []);
+    } else {
+      selectedDepartments = [widget.department];
+    }
+  }
+
+  List<String> _classesForDept(String dept) {
+    return allClasses.where((c) {
+      if (!c.startsWith(dept)) return false;
+
+      final sem = int.parse(c[2]);
+
+      if (activeSemType == "EVEN") {
+        return sem % 2 == 0;
+      } else {
+        return sem % 2 != 0;
+      }
+    }).toList();
+  }
+
+  String _baseClass(String cls) {
+    return cls.substring(0, cls.length - 1);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
+    final int teacherKey = widget.teacherId ?? -1;
+    mockTeacherSubjects[teacherKey] ??= {};
 
-      backgroundColor: Colors.white,
+    final visibleClasses =
+        isEdit ? allClasses : _classesForDept(widget.department);
+
+    return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF009846),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text("Add Teacher"),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(20),
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 8, left: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Fill in teacher details",
-                style: TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-            ),
-          ),
-        ),
+        title: Text(isEdit ? "Edit Teacher" : "Add Teacher"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _label("Teacher Name"),
-              _textField(
-                hint: "Enter full name",
-                icon: Icons.person,
-                controller: _nameCtrl,
-                validator: (v) {
-                  if (v == null || v.isEmpty) return "Name is required";
-                  if (RegExp(r'[0-9]').hasMatch(v)) {
-                    return "Name cannot contain numbers";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              _label("Email Address"),
-              _textField(
-                hint: "teacher@example.com",
-                icon: Icons.email,
-                controller: _emailCtrl,
-                validator: (v) {
-                  if (v == null || v.isEmpty) return "Email is required";
-                  final reg = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                  if (!reg.hasMatch(v)) return "Enter valid email";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              _label("Temporary Password"),
-              _textField(
-                hint: "Enter password",
-                icon: Icons.lock,
-                controller: _passwordCtrl,
-                validator: (v) {
-                  if (v == null || v.isEmpty) return "Password required";
-                  if (v.length < 6) return "Min 6 characters";
-                  return null;
-                },
-              ),
-const SizedBox(height: 16),
-              _label("Department"),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.apartment),
-                    const SizedBox(width: 8),
-                    Text(department),
-                  ],
-                ),
-              ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _label("Teacher Name"),
+            _field(_nameCtrl, Icons.person, "Enter full name"),
 
-              const SizedBox(height: 16),
-              _label("Assign Class"),
-              _dropdownField(
-                validator: (v) => v == null ? "Please select a class" : null,
-                onChanged: (v) => _selectedClass = v,
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAF7F1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.lightbulb, color: Color(0xFF009846)),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        "Note: Teacher will receive a confirmation email with login credentials after saving.",
-                        style: TextStyle(fontSize: 13),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF009846),
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Saving teacher...")),
-                    );
+            const SizedBox(height: 12),
+            _label("Email"),
+            _field(_emailCtrl, Icons.email, "teacher@email.com",
+                enabled: !isEdit),
 
-                    // save teacher later
-                  }
-                },
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text(
-                      "Save Teacher",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            if (!isEdit) ...[
               const SizedBox(height: 12),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
-              ),
-              const SizedBox(height: 20),
-
-              const Center(
-                child: Text(
-                  "Vsmart Academic Platform © 2024",
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ),
+              _label("Password"),
+              _field(_passwordCtrl, Icons.lock, "Enter password"),
             ],
-          ),
+
+            const SizedBox(height: 16),
+            _label("Departments"),
+            Wrap(
+              spacing: 8,
+              children: ["IF", "CO", "EJ"].map((dept) {
+                return FilterChip(
+                  label: Text(dept),
+                  selected: selectedDepartments.contains(dept),
+                  onSelected: isEdit
+                      ? (val) {
+                          setState(() {
+                            val
+                                ? selectedDepartments.add(dept)
+                                : selectedDepartments.remove(dept);
+                          });
+                        }
+                      : null,
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: 16),
+            _label("Assign Classes"),
+            Wrap(
+              spacing: 8,
+              children: visibleClasses.map((cls) {
+                return FilterChip(
+                  label: Text(cls),
+                  selected: selectedClasses.contains(cls),
+                  onSelected: (val) {
+                    setState(() {
+                      val
+                          ? selectedClasses.add(cls)
+                          : selectedClasses.remove(cls);
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: 16),
+            _label("Subjects"),
+            ...selectedClasses.map((cls) {
+              final base = _baseClass(cls);
+              final subjects = semesterSubjects[base] ?? [];
+
+              mockTeacherSubjects[teacherKey]![cls] ??= [];
+              final selectedSubs = mockTeacherSubjects[teacherKey]![cls]!;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(cls,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Wrap(
+                    spacing: 8,
+                    children: subjects.map((sub) {
+                      return FilterChip(
+                        label: Text(sub),
+                        selected: selectedSubs.contains(sub),
+                        onSelected: (val) {
+                          setState(() {
+                            val
+                                ? selectedSubs.add(sub)
+                                : selectedSubs.remove(sub);
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              );
+            }),
+
+            const SizedBox(height: 20),
+
+            // 🔹 FIXED SAVE BUTTON
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF009846),
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 48),
+              ),
+              onPressed: () {
+                if (isEdit) {
+                  final id = widget.teacherId!;
+                  mockTeacherDepartments[id] = selectedDepartments;
+                  mockTeacherClasses[id] = selectedClasses;
+                } else {
+                  final newId = mockTeachers.keys.isEmpty
+                      ? 1
+                      : mockTeachers.keys.last + 1;
+
+                  mockTeachers[newId] = {
+                    "name": _nameCtrl.text,
+                    "email": _emailCtrl.text,
+                    "phone": "0000000000",
+                  };
+
+                  mockTeacherDepartments[newId] = selectedDepartments;
+                  mockTeacherClasses[newId] = selectedClasses;
+                }
+
+                Navigator.pop(context);
+              },
+              child: Text(isEdit ? "Update Teacher" : "Save Teacher"),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // ---------- UI HELPERS ----------
+  Widget _label(String t) =>
+      Text(t, style: const TextStyle(fontWeight: FontWeight.w600));
 
-  Widget _label(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-        ),
-      ),
-    );
-  }
-
-  Widget _textField({
-    required String hint,
-    required IconData icon,
-    required TextEditingController controller,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
+  Widget _field(TextEditingController c, IconData i, String h,
+      {bool enabled = true}) {
+    return TextField(
+      controller: c,
+      enabled: enabled,
       decoration: InputDecoration(
-        hintText: hint,
-        prefixIcon: Icon(icon),
+        prefixIcon: Icon(i),
+        hintText: h,
         filled: true,
         fillColor: Colors.grey.shade100,
         border: OutlineInputBorder(
@@ -223,31 +296,6 @@ const SizedBox(height: 16),
           borderSide: BorderSide.none,
         ),
       ),
-    );
-  }
-
-  Widget _dropdownField({
-    String? Function(String?)? validator,
-    required Function(String?) onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        hintText: "Select a class",
-        prefixIcon: const Icon(Icons.group),
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-      items: const [
-        DropdownMenuItem(value: "IF6KA", child: Text("IF6KA")),
-        DropdownMenuItem(value: "IF6KB", child: Text("IF6KB")),
-        DropdownMenuItem(value: "IF5KA", child: Text("IF5KA")),
-      ],
-      onChanged: onChanged,
-      validator: validator,
     );
   }
 }

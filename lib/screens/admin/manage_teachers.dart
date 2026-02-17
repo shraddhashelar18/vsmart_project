@@ -7,9 +7,6 @@ import '../../mock/mock_teacher_departments.dart';
 import '../../mock/mock_teacher_classes.dart';
 import '../../mock/mock_teacher_subjects.dart';
 
-
-
-
 class ManageTeachers extends StatelessWidget {
   final String department;
 
@@ -35,7 +32,6 @@ class ManageTeachers extends StatelessWidget {
 
     return list;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +62,6 @@ class ManageTeachers extends StatelessWidget {
         ),
       ),
 
-      
-
       // 🔹 ADD BUTTON
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF009846),
@@ -78,7 +72,6 @@ class ManageTeachers extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => AddTeacher(department: department),
             ),
-
           );
         },
       ),
@@ -131,10 +124,9 @@ class TeacherCard extends StatelessWidget {
     required this.name,
     required this.teacherId,
     required this.email,
-     required this.department,
+    required this.department,
     required this.phone,
   }) : super(key: key);
-  
 
   @override
   Widget build(BuildContext context) {
@@ -145,54 +137,56 @@ class TeacherCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-           ListTile(
-  contentPadding: EdgeInsets.zero,
-  leading: const CircleAvatar(
-    backgroundColor: Color(0xFFE0F2E9),
-    child: Icon(Icons.person, color: Color(0xFF009846)),
-  ),
-  title: Text(
-    name,
-    style: const TextStyle(fontWeight: FontWeight.bold),
-  ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFFE0F2E9),
+                child: Icon(Icons.person, color: Color(0xFF009846)),
+              ),
+              title: Text(
+                name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
 
-  // 👇 ADD THIS
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => TeacherDetailScreen(
-          teacherId: teacherId,   // pass id
-          name: name,
-        ),
-      ),
-    );
-  },
+              // 👇 ADD THIS
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TeacherDetailScreen(
+                      teacherId: teacherId, // pass id
+                      name: name,
+                    ),
+                  ),
+                );
+              },
 
-  trailing: Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      IconButton(
-        icon: const Icon(Icons.edit, color: Colors.blue),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AddTeacher(department: department),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AddTeacher(
+                            department: department,
+                            teacherId: teacherId,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _confirmDelete(context, teacherId, name);
+                    },
+                  ),
+                ],
+              ),
             ),
-          );
-        },
-      ),
-      IconButton(
-        icon: const Icon(Icons.delete, color: Colors.red),
-        onPressed: () {
-          _confirmDelete(context, name);
-        },
-      ),
-    ],
-  ),
-),
-
             const SizedBox(height: 6),
             Row(
               children: [
@@ -217,7 +211,7 @@ class TeacherCard extends StatelessWidget {
 }
 
 // 🔴 DELETE CONFIRMATION DIALOG
-void _confirmDelete(BuildContext context, String name) {
+void _confirmDelete(BuildContext context, int teacherId, String name) {
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
@@ -231,7 +225,14 @@ void _confirmDelete(BuildContext context, String name) {
         TextButton(
           child: const Text("Delete", style: TextStyle(color: Colors.red)),
           onPressed: () {
+            // REMOVE FROM ALL MOCKS
+            mockTeachers.remove(teacherId);
+            mockTeacherDepartments.remove(teacherId);
+            mockTeacherClasses.remove(teacherId);
+            mockTeacherSubjects.remove(teacherId);
+
             Navigator.pop(context);
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("$name deleted")),
             );

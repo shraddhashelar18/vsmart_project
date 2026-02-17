@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_teacher_data.dart';
+import '../../mock/mock_student_data.dart';
 
 class TeacherSendNotifications extends StatefulWidget {
   final String className;
@@ -21,12 +21,19 @@ class TeacherSendNotifications extends StatefulWidget {
 class _TeacherSendNotificationsState extends State<TeacherSendNotifications> {
   final msgCtrl = TextEditingController();
 
-  String notifyType = "Whole Class"; // default
+  String notifyType = "Whole Class";
   List<String> selectedStudents = [];
 
   @override
   Widget build(BuildContext context) {
-    final students = mockStudents[widget.className] ?? [];
+    /// 🔥 FIXED STUDENT FETCH
+    final students = mockStudents.entries
+        .where((e) => e.value["class"] == widget.className)
+        .map((e) => {
+              "enrollment": e.key,
+              ...e.value,
+            })
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -83,7 +90,9 @@ class _TeacherSendNotificationsState extends State<TeacherSendNotifications> {
                   itemCount: students.length,
                   itemBuilder: (_, i) {
                     final s = students[i];
-                    final id = s['id'];
+
+                    /// 🔥 ID FIXED → ENROLLMENT
+                    final id = s['enrollment'];
 
                     return CheckboxListTile(
                       value: selectedStudents.contains(id),

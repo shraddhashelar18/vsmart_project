@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'manage_students.dart';
+import 'select_class_screen.dart';
 
 class StudentDepartments extends StatelessWidget {
   const StudentDepartments({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class StudentDepartments extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _deptCard(context, "IT"),
+            _deptCard(context, "IF"),
             _deptCard(context, "CO"),
             _deptCard(context, "EJ"),
           ],
@@ -34,7 +35,7 @@ class StudentDepartments extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => ManageStudents(department: dept),
+              builder: (_) => SelectClassScreen(department: dept),
             ),
           );
         },

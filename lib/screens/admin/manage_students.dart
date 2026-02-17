@@ -1,54 +1,35 @@
 import 'package:flutter/material.dart';
-
 import 'add_student.dart';
+import '../../mock/mock_student_data.dart';
 
 class ManageStudents extends StatelessWidget {
-  final String department;
+  final String className;
 
-  const ManageStudents({Key? key, required this.department}) : super(key: key);
-
+  const ManageStudents({Key? key, required this.className}) : super(key: key);
 
   static const green = Color(0xFF009846);
-  List<Widget> _getStudents() {
-    if (department == "IT") {
-      return const [
-        _StudentCard(
-          name: "Emma Johnson",
-          email: "emma@student.com",
-          phone: "+91 5678903451",
-          className: "IF6K-A",
-        ),
-        _StudentCard(
-          name: "Liam Smith",
-          email: "liam@student.com",
-          phone: "+91 5678903452",
-          className: "IF6K-A",
-        ),
-      ];
-    } else if (department == "CO") {
-      return const [
-        _StudentCard(
-          name: "Olivia Brown",
-          email: "olivia@student.com",
-          phone: "+91 5678903453",
-          className: "CO5K-B",
-        ),
-      ];
-    } else {
-      return const [
-        _StudentCard(
-          name: "Noah Davis",
-          email: "noah@student.com",
-          phone: "+91 5678903454",
-          className: "EJ4K-A",
-        ),
-      ];
-    }
-  }
 
+  List<Widget> _getStudents() {
+    return mockStudents.entries
+        .where((e) => e.value["class"] == className)
+        .map((entry) {
+      final s = entry.value;
+      final enrollment = entry.key;
+
+      return _StudentCard(
+        enrollment: enrollment,
+        name: s["name"] ?? "",
+        email: s["email"] ?? "",
+        phone: s["phone"] ?? "",
+        className: s["class"] ?? "",
+      );
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final students = _getStudents();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -58,7 +39,7 @@ class ManageStudents extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text("Manage Students"),
+        title: Text("Manage Students - $className"),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(20),
           child: Padding(
@@ -73,31 +54,26 @@ class ManageStudents extends StatelessWidget {
           ),
         ),
       ),
-      
+
+      // 🔹 ADD BUTTON
       floatingActionButton: FloatingActionButton(
         backgroundColor: green,
         child: const Icon(Icons.add),
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddStudent()),
+            MaterialPageRoute(
+              builder: (_) => AddStudent(className: className),
+            ),
           );
         },
       ),
+
+      // 🔹 BODY
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Row(
-              children: [
-                _statsBox("Total Students", "4"),
-                const SizedBox(width: 12),
-                _statsBox("With Parents", "3"),
-                const SizedBox(width: 12),
-                _statsBox("Without", "1"),
-              ],
-            ),
-            const SizedBox(height: 16),
             TextField(
               decoration: InputDecoration(
                 hintText: "Search by name, email, phone or ID...",
@@ -111,44 +87,17 @@ class ManageStudents extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "4 students found",
-                style: TextStyle(color: Colors.grey),
+                "${students.length} students found",
+                style: const TextStyle(color: Colors.grey),
               ),
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: ListView(
-                children: _getStudents(),
-              ),
+              child: ListView(children: students),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _statsBox(String title, String value) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: green,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
-            const SizedBox(height: 4),
-            Text(value,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -157,17 +106,20 @@ class ManageStudents extends StatelessWidget {
 }
 
 class _StudentCard extends StatelessWidget {
+  final String enrollment;
   final String name;
   final String email;
   final String phone;
   final String className;
 
   const _StudentCard({
+    Key? key,
+    required this.enrollment,
     required this.name,
     required this.email,
     required this.phone,
     required this.className,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -197,18 +149,26 @@ class _StudentCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
+                    // 🔹 EDIT
                     IconButton(
                       icon: const Icon(Icons.edit, color: Colors.blue),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => AddStudent()),
+                          MaterialPageRoute(
+                            builder: (_) => AddStudent(
+                              enrollment: enrollment,
+                              className: className,
+                            ),
+                          ),
                         );
                       },
                     ),
+
+                    // 🔹 DELETE
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _confirmDelete(context, name),
+                      onPressed: () => _confirmDelete(context),
                     ),
                   ],
                 )
@@ -243,31 +203,36 @@ class _StudentCard extends StatelessWidget {
       ),
     );
   }
-}
 
+  // 🔴 DELETE CONFIRMATION
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Confirm Delete"),
+        content: Text("Delete $name?"),
+        actions: [
+          TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            onPressed: () {
+              mockStudents.remove(enrollment);
 
+              Navigator.pop(context); // close dialog
 
-void _confirmDelete(BuildContext context, String name) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: const Text("Confirm Delete"),
-      content: Text("Delete student $name?"),
-      actions: [
-        TextButton(
-          child: const Text("Cancel"),
-          onPressed: () => Navigator.pop(context),
-        ),
-        TextButton(
-          child: const Text("Delete", style: TextStyle(color: Colors.red)),
-          onPressed: () {
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("$name deleted")),
-            );
-          },
-        ),
-      ],
-    ),
-  );
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ManageStudents(className: className),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }

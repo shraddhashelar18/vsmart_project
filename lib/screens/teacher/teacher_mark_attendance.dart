@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../mock/mock_teacher_data.dart';
+import '../../mock/mock_student_data.dart';
 
 class TeacherMarkAttendance extends StatefulWidget {
   final String className;
-  final String subject; // ⬅ Added Subject
+  final String subject;
 
   const TeacherMarkAttendance({
     Key? key,
@@ -21,6 +21,7 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
 
   DateTime selectedDate = DateTime.now();
 
+  /// 🔥 SAME TYPE — ONLY DATA SOURCE CHANGED
   List<Map<String, dynamic>> students = [];
   int present = 0;
   int late = 0;
@@ -29,7 +30,16 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
   @override
   void initState() {
     super.initState();
-    students = mockStudents[widget.className] ?? [];
+
+    /// 🔥 FIXED STUDENT FETCH
+    students = mockStudents.entries
+        .where((e) => e.value["class"] == widget.className)
+        .map((e) => {
+              "enrollment": e.key,
+              ...e.value,
+              "status": null,
+            })
+        .toList();
   }
 
   void setStatus(int index, String status) {
@@ -71,15 +81,10 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
           children: [
             _label("Class"),
             _inputBox(widget.className),
-
             const SizedBox(height: 10),
-
             _label("Subject"),
             _inputBox(widget.subject.isEmpty ? "-" : widget.subject),
-            // ⬅ Added
-
             const SizedBox(height: 10),
-
             _label("Date"),
             GestureDetector(
               onTap: pickDate,
@@ -88,9 +93,7 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
                 trailing: Icons.calendar_today,
               ),
             ),
-
             const SizedBox(height: 20),
-
             Row(
               children: [
                 _counterBox("Present", present, Colors.green),
@@ -98,16 +101,12 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
                 _counterBox("Absent", absent, Colors.red),
               ],
             ),
-
             const SizedBox(height: 18),
-
             Text(
               "Students (${students.length})",
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
             ),
-
             const SizedBox(height: 8),
-
             Expanded(
               child: ListView.builder(
                 itemCount: students.length,
@@ -153,7 +152,6 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
                 },
               ),
             ),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -172,8 +170,9 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
                       {};
 
                   for (var s in students) {
+                    /// 🔥 ID FIXED → ENROLLMENT
                     mockAttendance[widget.className]![widget.subject]![
-                        dateKey]![s["id"]] = s["status"] ?? "A";
+                        dateKey]![s["enrollment"]] = s["status"] ?? "A";
                   }
 
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -190,7 +189,7 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
     );
   }
 
-  // Helpers below remain same...
+  // Helpers
 
   Widget _label(String text) => Text(text,
       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500));

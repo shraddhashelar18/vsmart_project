@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import '../../mock/mock_student_data.dart';
 import '../../mock/mock_teacher_data.dart';
 
-
-
-
 class EnterMarksScreen extends StatefulWidget {
   final int teacherId;
   final String className;
@@ -41,11 +38,17 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
   }
 
   void _initControllers() {
-    final students = mockStudents[widget.className] ?? [];
+    final students = mockStudents.entries
+        .where((e) => e.value["class"] == widget.className)
+        .map((e) => {
+              "enrollment": e.key,
+              ...e.value,
+            })
+        .toList();
 
     for (var exam in exams) {
       for (var s in students) {
-        final sid = s["id"];
+        final sid = s["enrollment"];
 
         final published =
             mockStudentReports[sid]?["marks"]?[widget.subject]?[exam];
@@ -59,13 +62,21 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final students = mockStudents[widget.className] ?? [];
+    // 🔥 FIXED STUDENT FETCH
+    final students = mockStudents.entries
+        .where((e) => e.value["class"] == widget.className)
+        .map((e) => {
+              "enrollment": e.key,
+              ...e.value,
+            })
+        .toList();
+
     final ctrls = controllers[selectedExam]!;
 
     /// ✅ Stats PER EXAM
     final values = ctrls.values
         .map((c) => int.tryParse(c.text) ?? 0)
-        .where((v) => v > 0) // 🔥 THIS IS THE KEY FIX
+        .where((v) => v > 0)
         .toList();
 
     final completed = values.length;
@@ -104,7 +115,7 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
 
           const SizedBox(height: 16),
 
-          /// ✅ STATS — PER EXAM
+          /// ✅ STATS
           Row(children: [
             _statBox("$maxMarks", "Max Marks"),
             _statBox("$completed/${students.length}", "Completed"),
@@ -116,7 +127,7 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
           const SizedBox(height: 10),
 
           ...students.map((s) {
-            final sid = s["id"];
+            final sid = s["enrollment"];
             final controller = ctrls[sid]!;
 
             return Container(
@@ -175,13 +186,19 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
     );
   }
 
-  /// ✅ PUBLISH — DOES NOT RESET STATS
   void _publishMarks() {
-    final students = mockStudents[widget.className] ?? [];
+    final students = mockStudents.entries
+        .where((e) => e.value["class"] == widget.className)
+        .map((e) => {
+              "enrollment": e.key,
+              ...e.value,
+            })
+        .toList();
+
     final ctrls = controllers[selectedExam]!;
 
     for (var s in students) {
-      final sid = s["id"];
+      final sid = s["enrollment"];
       final score = int.tryParse(ctrls[sid]!.text) ?? 0;
 
       mockStudentReports[sid] ??= {
@@ -203,14 +220,15 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
     );
   }
 
-  /// UI helpers
   Widget _label(String t) =>
       Text(t, style: const TextStyle(fontWeight: FontWeight.w600));
+
   Widget _card({required Widget child}) => Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(14)),
       child: child);
+
   Widget _statBox(String t, String s) => Expanded(
       child: Container(
           height: 70,
@@ -225,4 +243,3 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
             Text(s, style: TextStyle(color: Colors.grey.shade600)),
           ])));
 }
-//test
