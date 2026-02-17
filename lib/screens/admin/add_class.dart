@@ -1,41 +1,61 @@
 import 'package:flutter/material.dart';
+import '../../mock/mock_class_data.dart';
+import '../../mock/mock_teacher_data.dart';
+import '../../mock/mock_teacher_departments.dart';
 
-class AddClass extends StatelessWidget {
-  AddClass({Key? key}) : super(key: key);
+class AddClass extends StatefulWidget {
+  final String? className; // null = add, not null = edit
 
+  const AddClass({Key? key, this.className}) : super(key: key);
+
+  @override
+  State<AddClass> createState() => _AddClassState();
+}
+
+class _AddClassState extends State<AddClass> {
   static const green = Color(0xFF009846);
 
   final _formKey = GlobalKey<FormState>();
   final _classNameCtrl = TextEditingController();
+
   String? _selectedDepartment;
   String? _selectedTeacher;
 
+  bool get isEdit => widget.className != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (isEdit) {
+      final c = mockClasses[widget.className]!;
+      _classNameCtrl.text = widget.className!;
+      _selectedDepartment = c["department"];
+      _selectedTeacher = c["teacher"];
+    }
+  }
+
+  /// 🔥 TEACHERS ONLY OF SELECTED DEPARTMENT
+  List<String> _teachersForDept(String? dept) {
+    if (dept == null) return [];
+
+    final ids = mockTeacherDepartments.entries
+        .where((e) => e.value.contains(dept))
+        .map((e) => e.key)
+        .toList();
+
+    return ids.map((id) => mockTeachers[id]!["name"]!).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final teacherList = _teachersForDept(_selectedDepartment);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
-
       appBar: AppBar(
-        backgroundColor: const Color(0xFF009846),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text("Add Class"),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(20),
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 8, left: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Fill in class details",
-                style: TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-            ),
-          ),
-        ),
+        backgroundColor: green,
+        title: Text(isEdit ? "Edit Class" : "Add Class"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -49,40 +69,37 @@ class AddClass extends StatelessWidget {
                 hint: "Enter class name (e.g. IF6K-A)",
                 icon: Icons.class_,
                 controller: _classNameCtrl,
-                validator: (v) {
-  if (v == null || v.isEmpty) {
-    return "Class name is required";
-  }
-  if (RegExp(r'^[0-9]+$').hasMatch(v)) {
-    return "Class name cannot be only numbers";
-  }
-  return null;
-},
-
+                enabled: !isEdit, // 🔒 LOCK IN EDIT
               ),
+
               const SizedBox(height: 16),
+
               _label("Department"),
               _dropdown(
                 hint: "Select department",
-                items: const ["IT", "CO", "EJ"],
-                onChanged: (v) => _selectedDepartment = v,
-                validator: (v) =>
-                    v == null ? "Please select a department" : null,
+                items: const ["IF", "CO", "EJ"],
+                value: _selectedDepartment,
+                enabled: !isEdit, // 🔒 LOCK IN EDIT
+                onChanged: (v) {
+                  setState(() {
+                    _selectedDepartment = v;
+                    _selectedTeacher = null;
+                  });
+                },
               ),
+
               const SizedBox(height: 16),
+
               _label("Class Teacher"),
               _dropdown(
                 hint: "Select class teacher",
-                items: const [
-                  "Prof Sunil Dodake",
-                  "Mrs Sushma Pawar",
-                  "Mrs Gauri Bobade",
-                ],
-                onChanged: (v) => _selectedTeacher = v,
-                validator: (v) =>
-                    v == null ? "Please select a class teacher" : null,
+                items: teacherList,
+                value: _selectedTeacher,
+                onChanged: (v) => setState(() => _selectedTeacher = v),
               ),
+
               const SizedBox(height: 16),
+
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -95,13 +112,14 @@ class AddClass extends StatelessWidget {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        "Note: Students and teachers can be assigned to this class later.",
+                        "Note: Students and teachers can be assigned later.",
                         style: TextStyle(fontSize: 13),
                       ),
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(height: 20),
 
               ElevatedButton(
@@ -112,32 +130,15 @@ class AddClass extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Saving class...")),
-                    );
-
-                    // save class later
-                  }
-                },
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text(
-                      "Save Class",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                onPressed: _saveClass,
+                child: Text(
+                  isEdit ? "Update Class" : "Save Class",
+                  style: const TextStyle(color: Colors.white),
                 ),
-                
               ),
+
               const SizedBox(height: 12),
+
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
@@ -145,9 +146,7 @@ class AddClass extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+                onPressed: () => Navigator.pop(context),
                 child: const Text("Cancel"),
               ),
             ],
@@ -157,27 +156,36 @@ class AddClass extends StatelessWidget {
     );
   }
 
-  // ---------- Reusable widgets ----------
+  void _saveClass() {
+    if (!_formKey.currentState!.validate()) return;
+
+    final name = _classNameCtrl.text;
+
+    mockClasses[name] = {
+      "department": _selectedDepartment ?? "",
+      "teacher": _selectedTeacher ?? "",
+    };
+
+    Navigator.pop(context);
+  }
+
+  // ---------- UI WIDGETS (UNCHANGED STYLE) ----------
 
   Widget _label(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
       );
 
   Widget _textField({
     required String hint,
     required IconData icon,
     required TextEditingController controller,
-    String? Function(String?)? validator,
+    bool enabled = true,
   }) {
     return TextFormField(
       controller: controller,
-      validator: validator,
+      enabled: enabled,
+      validator: (v) => v == null || v.isEmpty ? "Required" : null,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon),
@@ -191,10 +199,12 @@ class AddClass extends StatelessWidget {
   Widget _dropdown({
     required String hint,
     required List<String> items,
-    String? Function(String?)? validator,
     required Function(String?) onChanged,
+    String? value,
+    bool enabled = true,
   }) {
     return DropdownButtonFormField<String>(
+      value: value,
       decoration: InputDecoration(
         hintText: hint,
         border: OutlineInputBorder(
@@ -202,15 +212,9 @@ class AddClass extends StatelessWidget {
         ),
       ),
       items: items
-          .map(
-            (e) => DropdownMenuItem(
-              value: e,
-              child: Text(e),
-            ),
-          )
+          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
           .toList(),
-      onChanged: onChanged,
-      validator: validator,
+      onChanged: enabled ? onChanged : null,
     );
   }
 }

@@ -3,10 +3,23 @@ import 'admin_bottom_nav.dart';
 import 'add_class.dart';
 
 class ManageClasses extends StatelessWidget {
-  const ManageClasses({Key? key}) : super(key: key);
+  final String department; // 🔥 STORE IT
+
+  const ManageClasses({Key? key, required this.department}) : super(key: key);
+
+  // 🔹 MOCK CLASS DATA
+  final List<Map<String, String>> allClasses = const [
+    {"name": "IF6K-A", "dept": "IF", "teacher": "Mr. Sharma"},
+    {"name": "IF6K-B", "dept": "IF", "teacher": "Ms. Patel"},
+    {"name": "CO5K-A", "dept": "CO", "teacher": "Mr. Khan"},
+    {"name": "EJ4K-A", "dept": "EJ", "teacher": "Mrs. Rao"},
+  ];
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 FILTER BY DEPARTMENT
+    final filtered = allClasses.where((c) => c["dept"] == department).toList();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF009846),
@@ -15,7 +28,7 @@ class ManageClasses extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text("Manage Classes"),
+        title: Text("Manage Classes - $department"),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(20),
           child: Padding(
@@ -37,17 +50,19 @@ class ManageClasses extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) =>  AddClass()),
+            MaterialPageRoute(builder: (_) => AddClass()),
           );
         },
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: [
-          ClassCard(className: "IF6K-A", dept: "IT"),
-          ClassCard(className: "IF6K-B", dept: "IT"),
-          ClassCard(className: "CO5K-A", dept: "CO"),
-        ],
+        children: filtered.map((c) {
+          return ClassCard(
+            className: c["name"]!,
+            dept: c["dept"]!,
+            teacher: c["teacher"]!, // 🔥 NEW
+          );
+        }).toList(),
       ),
     );
   }
@@ -56,8 +71,13 @@ class ManageClasses extends StatelessWidget {
 class ClassCard extends StatelessWidget {
   final String className;
   final String dept;
+  final String teacher; // 🔥 NEW
 
-  const ClassCard({required this.className, required this.dept});
+  const ClassCard({
+    required this.className,
+    required this.dept,
+    required this.teacher,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,22 +87,26 @@ class ClassCard extends StatelessWidget {
       child: ListTile(
         title: Text(className,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text("Department: $dept"),
+        subtitle: Column(
+          // 🔥 CHANGED
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Department: $dept"),
+            Text("Class Teacher: $teacher"), // 🔥 NEW LINE
+          ],
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // EDIT BUTTON
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.blue),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) =>  AddClass()),
+                  MaterialPageRoute(builder: (_) => AddClass()),
                 );
               },
             ),
-
-            // DELETE BUTTON
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () => _confirmDelete(context, className),

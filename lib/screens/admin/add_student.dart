@@ -20,6 +20,7 @@ class _AddStudentState extends State<AddStudent> {
 
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController(); // 🔹 NEW
   final _phoneCtrl = TextEditingController();
   final _parentPhoneCtrl = TextEditingController();
   final _rollCtrl = TextEditingController();
@@ -57,13 +58,18 @@ class _AddStudentState extends State<AddStudent> {
             children: [
               _field(_nameCtrl, "Full Name", Icons.person),
               _field(_emailCtrl, "Email", Icons.email, enabled: !isEdit),
+
+              /// 🔹 PASSWORD ONLY IN ADD
+              if (!isEdit)
+                _field(_passwordCtrl, "Password", Icons.lock, obscure: true),
+
               _field(_phoneCtrl, "Mobile", Icons.phone),
               _field(_parentPhoneCtrl, "Parent Mobile", Icons.phone),
               _field(_rollCtrl, "Roll No", Icons.badge),
               _field(_enrollCtrl, "Enrollment", Icons.numbers,
                   enabled: !isEdit),
 
-              /// 🔒 CLASS — VIEW ONLY (NO DROPDOWN)
+              /// 🔒 CLASS — VIEW ONLY
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: TextFormField(
@@ -103,11 +109,10 @@ class _AddStudentState extends State<AddStudent> {
     mockStudents[enrollment] = {
       "name": _nameCtrl.text,
       "email": _emailCtrl.text,
+      "password": _passwordCtrl.text, // 🔹 NEW
       "phone": _phoneCtrl.text,
       "parentPhone": _parentPhoneCtrl.text,
       "roll": _rollCtrl.text,
-
-      /// 🔥 ALWAYS FROM SCREEN
       "class": widget.className,
     };
 
@@ -115,12 +120,13 @@ class _AddStudentState extends State<AddStudent> {
   }
 
   Widget _field(TextEditingController c, String hint, IconData i,
-      {bool enabled = true}) {
+      {bool enabled = true, bool obscure = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: c,
         enabled: enabled,
+        obscureText: obscure, // 🔹 NEW
         validator: (v) => v == null || v.isEmpty ? "Required" : null,
         decoration: InputDecoration(
           hintText: hint,

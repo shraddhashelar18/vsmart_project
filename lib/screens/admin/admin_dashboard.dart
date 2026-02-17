@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vsmart_app/screens/admin/class_departments.dart';
+import 'package:vsmart_app/screens/admin/parent_department_screen.dart';
 import 'package:vsmart_app/screens/admin/student_departments.dart';
 import 'manage_teachers.dart';
 import 'manage_students.dart';
@@ -210,12 +212,12 @@ class AdminDashboard extends StatelessWidget {
             } else if (text == "Manage Parents") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const ManageParents()),
+                MaterialPageRoute(builder: (_) => const ParentDepartmentScreen()),
               );
             } else if (text == "Manage Classes") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const ManageClasses()),
+                MaterialPageRoute(builder: (_) =>  ClassDepartments()),
               );
             }
           },

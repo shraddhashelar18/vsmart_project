@@ -1,185 +1,111 @@
 import 'package:flutter/material.dart';
+import '../../mock/mock_parent_data.dart';
 
-class AddParent extends StatelessWidget {
-  const AddParent({Key? key}) : super(key: key);
+class AddParent extends StatefulWidget {
+  final String? parentPhone; // null = add, not null = edit
+
+  const AddParent({Key? key, this.parentPhone}) : super(key: key);
+
+  @override
+  State<AddParent> createState() => _AddParentState();
+}
+
+class _AddParentState extends State<AddParent> {
+  final _formKey = GlobalKey<FormState>();
+final _passwordCtrl = TextEditingController();
+
+  final _nameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _enrollCtrl = TextEditingController();
+
+  bool get isEdit => widget.parentPhone != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (isEdit) {
+      final p = mockParents[widget.parentPhone]!;
+      _nameCtrl.text = p["name"] ?? "";
+      _emailCtrl.text = p["email"] ?? "";
+      _phoneCtrl.text = widget.parentPhone!;
+      _enrollCtrl.text = p["children"][0];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF009846),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text("Add Parent"),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(20),
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 8, left: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Fill parent and linked student details",
-                style: TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-            ),
-          ),
-        ),
+        title: Text(isEdit ? "Edit Parent" : "Add Parent"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Fill in parent details",
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              _field(_nameCtrl, "Parent Name", Icons.person),
+              _field(_emailCtrl, "Email", Icons.email, enabled: !isEdit),
+              if (!isEdit) ...[
+                _field(_passwordCtrl, "Password", Icons.lock),
+              ],
+
+              _field(_phoneCtrl, "Phone Number", Icons.phone),
+              _field(
+                _enrollCtrl,
+                "Student Enrollment",
+                Icons.badge,
+                enabled: !isEdit, // 🔒 LOCK IN EDIT
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _inputField(
-              hint: "Parent Name",
-              icon: Icons.person,
-            ),
-
-            _inputField(
-              hint: "Email Address",
-              icon: Icons.email,
-            ),
-
-            _inputField(
-              hint: "Phone Number",
-              icon: Icons.phone,
-              keyboardType: TextInputType.phone,
-            ),
-
-            _dropdownField(
-              hint: "Link Student (optional)",
-              icon: Icons.school,
-            ),
-
-            const SizedBox(height: 16),
-
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.lightbulb, color: Color(0xFF009846)),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      "Parent will receive login credentials via email after saving.",
-                      style: TextStyle(fontSize: 13),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            /// FIX: instead of Spacer()
-            const SizedBox(height: 40),
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF009846),
-                minimumSize: Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF009846),
+                  minimumSize: const Size(double.infinity, 48),
                 ),
-              ),
-              onPressed: () {},
-              child: const Text(
-                "Save Parent",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                minimumSize: Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Cancel"),
-            ),
-
-            const SizedBox(height: 12),
-
-            const Center(
-              child: Text(
-                "Vsmart Academic Platform © 2024",
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _inputField({
-    required String hint,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: TextField(
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          hintText: hint,
-          prefixIcon: Icon(icon),
-          filled: true,
-          fillColor: Colors.grey.shade100,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+                onPressed: _saveParent,
+                child: Text(isEdit ? "Update Parent" : "Save Parent"),
+              )
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _dropdownField({
-    required String hint,
-    required IconData icon,
-  }) {
+  void _saveParent() {
+    if (!_formKey.currentState!.validate()) return;
+
+    final phone = _phoneCtrl.text;
+
+    mockParents[phone] = {
+      "name": _nameCtrl.text,
+      "email": _emailCtrl.text,
+       "password": _passwordCtrl.text, 
+      "children": [_enrollCtrl.text],
+    };
+
+    Navigator.pop(context);
+  }
+
+  Widget _field(TextEditingController c, String hint, IconData i,
+      {bool enabled = true}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: DropdownButtonFormField<String>(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: c,
+        enabled: enabled,
+        validator: (v) => v == null || v.isEmpty ? "Required" : null,
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: Icon(icon),
-          filled: true,
-          fillColor: Colors.grey.shade100,
+          prefixIcon: Icon(i),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
           ),
         ),
-        items: const [
-          DropdownMenuItem(value: "Emma Johnson", child: Text("Emma Johnson")),
-          DropdownMenuItem(value: "Liam Smith", child: Text("Liam Smith")),
-        ],
-        onChanged: (_) {},
       ),
     );
   }

@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
 import 'admin_bottom_nav.dart';
 import 'add_parent.dart';
+import '../../mock/mock_student_data.dart';
+import '../../mock/mock_parent_data.dart';
 
 class ManageParents extends StatefulWidget {
-  const ManageParents({Key? key}) : super(key: key);
+  final String className;
+
+  const ManageParents({
+    Key? key,
+    required this.className,
+  }) : super(key: key);
 
   @override
   State<ManageParents> createState() => _ManageParentsState();
 }
 
 class _ManageParentsState extends State<ManageParents> {
-  String selectedDept = "All";
-
- 
-
   @override
   Widget build(BuildContext context) {
+    // 🔹 FIX 1 — MOVED HERE
+    final filteredParents = mockParents.entries.where((p) {
+      final children = p.value["children"] as List;
+
+      for (var enroll in children) {
+        if (mockStudents[enroll]?["class"] == widget.className) {
+          return true;
+        }
+      }
+      return false;
+    }).toList();
+
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -27,7 +42,8 @@ class _ManageParentsState extends State<ManageParents> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text("Manage Parents"),
+        // 🔹 FIX 2 — ONLY ONE TITLE
+        title: Text("Manage Parents - ${widget.className}"),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(20),
           child: Padding(
@@ -51,28 +67,18 @@ class _ManageParentsState extends State<ManageParents> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddParent()),
+            MaterialPageRoute(
+              builder: (_) => const AddParent(), // 🔥 NO PARAMETER
+            ),
           );
         },
       ),
+
 
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 🔹 STATS ROW
-            Row(
-              children: [
-                _statCard("Total Parents", "5"),
-                const SizedBox(width: 12),
-                _statCard("Active Students", "8"),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-            
-
-
             // 🔹 SEARCH BAR
             TextField(
               decoration: InputDecoration(
@@ -86,32 +92,14 @@ class _ManageParentsState extends State<ManageParents> {
                 ),
               ),
             ),
-Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                DropdownButton<String>(
-                  value: selectedDept,
-                  items: ["All", "IT", "CO", "EJ"]
-                      .map((dept) => DropdownMenuItem(
-                            value: dept,
-                            child: Text(dept),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedDept = value!;
-                    });
-                  },
-                ),
-              ],
-            ),
+
             const SizedBox(height: 12),
 
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "5 parents found",
-                style: TextStyle(color: Colors.grey),
+                "${filteredParents.length} parents found",
+                style: const TextStyle(color: Colors.grey),
               ),
             ),
 
@@ -120,56 +108,22 @@ Row(
             // 🔹 LIST
             Expanded(
               child: ListView(
-                children: const [
-                  ParentCard(
-                    name: "Sarah Johnson",
-                    parentId: "P12345",
-                    email: "sarah.johnson@email.com",
-                    phone: "+1 234 567 8901",
-                    studentName: "Emma Johnson",
-                    studentId: "S001",
-                    studentClass: "IF6K-A",
-                  ),
-                  ParentCard(
-                    name: "Michael Smith",
-                    parentId: "P12346",
-                    email: "michael.smith@email.com",
-                    phone: "+1 234 567 8902",
-                    studentName: "Liam Smith",
-                    studentId: "S002",
-                    studentClass: "IF6K-B",
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+                children: filteredParents.map((p) {
+                  final parentPhone = p.key;
+                  final parent = p.value;
+                  final childEnroll = parent["children"][0];
+                  final student = mockStudents[childEnroll];
 
-  // ---------- UI HELPERS ----------
-
-  Widget _statCard(String title, String value) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFF009846),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+                  return ParentCard(
+                    name: parent["name"],
+                    parentId: parentPhone,
+                    email: "—",
+                    phone: parentPhone,
+                    studentName: student?["name"] ?? "",
+                    studentId: childEnroll,
+                    studentClass: student?["class"] ?? "",
+                  );
+                }).toList(),
               ),
             ),
           ],
@@ -183,6 +137,7 @@ Row(
 
 class ParentCard extends StatelessWidget {
   final String name;
+  
   final String parentId;
   final String email;
   final String phone;
@@ -210,7 +165,6 @@ class ParentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // HEADER
             Row(
               children: [
                 const CircleAvatar(
@@ -218,7 +172,6 @@ class ParentCard extends StatelessWidget {
                   child: Icon(Icons.person, color: Color(0xFF009846)),
                 ),
                 const SizedBox(width: 12),
-
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,19 +184,20 @@ class ParentCard extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                // 🔹 ACTION BUTTONS
                 Row(
                   children: [
-                    IconButton(
+                   IconButton(
                       icon: const Icon(Icons.edit, color: Colors.blue),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => AddParent()),
+                          MaterialPageRoute(
+                            builder: (_) => AddParent(parentPhone: parentId),
+                          ),
                         );
                       },
                     ),
+
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () => _confirmDelete(context, name),
@@ -252,25 +206,19 @@ class ParentCard extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 10),
-
             Row(children: [
               const Icon(Icons.email, size: 16, color: Colors.grey),
               const SizedBox(width: 6),
               Text(email),
             ]),
-
             const SizedBox(height: 6),
-
             Row(children: [
               const Icon(Icons.phone, size: 16, color: Colors.grey),
               const SizedBox(width: 6),
               Text(phone),
             ]),
-
             const SizedBox(height: 12),
-
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(

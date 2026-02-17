@@ -128,6 +128,22 @@ class _AddTeacherState extends State<AddTeacher> {
     }).toList();
   }
 
+  List<String> _classesForSelectedDepartments() {
+    return allClasses.where((cls) {
+      // 1. Department filter
+      final deptMatch = selectedDepartments.any((dept) => cls.startsWith(dept));
+      if (!deptMatch) return false;
+
+      // 2. Semester filter
+      final sem = int.parse(cls[2]);
+      if (activeSemType == "EVEN") {
+        return sem % 2 == 0;
+      } else {
+        return sem % 2 != 0;
+      }
+    }).toList();
+  }
+
   String _baseClass(String cls) {
     return cls.substring(0, cls.length - 1);
   }
@@ -137,8 +153,12 @@ class _AddTeacherState extends State<AddTeacher> {
     final int teacherKey = widget.teacherId ?? -1;
     mockTeacherSubjects[teacherKey] ??= {};
 
-    final visibleClasses =
-        isEdit ? allClasses : _classesForDept(widget.department);
+    final visibleClasses = isEdit
+        ? allClasses
+            .where((cls) => selectedDepartments.any((d) => cls.startsWith(d)))
+            .toList()
+        : _classesForSelectedDepartments();
+
 
     return Scaffold(
       appBar: AppBar(
@@ -187,21 +207,53 @@ class _AddTeacherState extends State<AddTeacher> {
 
             const SizedBox(height: 16),
             _label("Assign Classes"),
-            Wrap(
-              spacing: 8,
-              children: visibleClasses.map((cls) {
-                return FilterChip(
-                  label: Text(cls),
-                  selected: selectedClasses.contains(cls),
-                  onSelected: (val) {
-                    setState(() {
-                      val
-                          ? selectedClasses.add(cls)
-                          : selectedClasses.remove(cls);
-                    });
-                  },
-                );
-              }).toList(),
+            SizedBox(
+              height: 220, // 🔥 controls congestion
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: selectedDepartments.map((dept) {
+                    final deptClasses = visibleClasses
+                        .where((c) => c.startsWith(dept))
+                        .toList();
+
+                    if (deptClasses.isEmpty) return const SizedBox();
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          dept,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: deptClasses.map((cls) {
+                            return FilterChip(
+                              label: Text(cls),
+                              selected: selectedClasses.contains(cls),
+                              onSelected: (val) {
+                                setState(() {
+                                  val
+                                      ? selectedClasses.add(cls)
+                                      : selectedClasses.remove(cls);
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
 
             const SizedBox(height: 16),
