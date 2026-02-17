@@ -9,10 +9,10 @@ class ManageClasses extends StatelessWidget {
 
   // 🔹 MOCK CLASS DATA
   final List<Map<String, String>> allClasses = const [
-    {"name": "IF6K-A", "dept": "IF", "teacher": "Mr. Sharma"},
-    {"name": "IF6K-B", "dept": "IF", "teacher": "Ms. Patel"},
-    {"name": "CO5K-A", "dept": "CO", "teacher": "Mr. Khan"},
-    {"name": "EJ4K-A", "dept": "EJ", "teacher": "Mrs. Rao"},
+    {"name": "IF6KA", "dept": "IF", "teacher": "Prof Sunil Dodake"},
+    {"name": "IF6KB", "dept": "IF", "teacher": "Mrs Samidha Chavan"},
+    {"name": "CO5KA", "dept": "CO", "teacher": "Mr. Khan"},
+    {"name": "EJ4KA", "dept": "EJ", "teacher": "Mrs. Rao"},
   ];
 
   @override
@@ -50,7 +50,9 @@ class ManageClasses extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddClass()),
+            MaterialPageRoute(
+              builder: (_) => AddClass(department: department),
+            ),
           );
         },
       ),
@@ -103,7 +105,12 @@ class ClassCard extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => AddClass()),
+                  MaterialPageRoute(
+                    builder: (_) => AddClass(
+                      className: className,
+                      department: dept,
+                    ),
+                  ),
                 );
               },
             ),

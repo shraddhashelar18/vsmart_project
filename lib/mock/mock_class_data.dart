@@ -3,4 +3,8 @@ final Map<String, Map<String, String>> mockClasses = {
     "department": "IF",
     "teacher": "Prof Sunil Dodake",
   },
+  "IF6KB": {
+    "department": "IF",
+    "teacher": "Mrs Samidha Chavan",
+  },
 };
