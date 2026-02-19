@@ -10,9 +10,12 @@ class PerformanceReport extends StatefulWidget {
 class _PerformanceReportState extends State<PerformanceReport> {
   static const green = Color(0xFF009846);
 
-  String selectedDept = "IT";
+  String selectedDept = "IF";
   String selectedClass = "IF1KA";
   String selectedExam = "CT1";
+  bool isCT1Conducted = true;
+  bool isCT2Conducted = false;
+
 
   // ---------- DUMMY DATA (REPLACE WITH API LATER) ----------
   List<Map<String, dynamic>> students = [
@@ -50,8 +53,46 @@ class _PerformanceReportState extends State<PerformanceReport> {
                 selectedClass,
                 ["IF1KA", "IF1KB", "CO1KA", "EJ1KA"],
                 (v) => setState(() => selectedClass = v!)),
-            _dropdown("Exam", selectedExam, ["CT1", "CT2"],
-                (v) => setState(() => selectedExam = v!)),
+           Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: DropdownButtonFormField<String>(
+                value: selectedExam,
+                decoration: InputDecoration(
+                  labelText: "Exam",
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: isCT1Conducted ? "CT1" : null,
+                    child: Text(
+                      "CT1",
+                      style: TextStyle(
+                        color: isCT1Conducted ? Colors.black : Colors.grey,
+                      ),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: isCT2Conducted ? "CT2" : null,
+                    child: Text(
+                      "CT2",
+                      style: TextStyle(
+                        color: isCT2Conducted ? Colors.black : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+                onChanged: (v) {
+                  if (v == null) return; // disabled click ignore
+                  setState(() => selectedExam = v);
+                },
+              ),
+            ),
+
             const SizedBox(height: 12),
             Expanded(
               child: ListView(

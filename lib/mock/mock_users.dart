@@ -11,7 +11,7 @@ List<UserAuth> mockUsers = [
     user_id: 2,
     email: "teacher@test.com",
     role: "teacher",
-    status: "approved",
+    status: "pending",
     departments: ["IF", "CO"], // multiple dept
   ),
   UserAuth(
@@ -25,13 +25,13 @@ List<UserAuth> mockUsers = [
     user_id: 3,
     email: "parent@test.com",
     role: "parent",
-    status: "approved",
+    status: "pending",
   ),
   UserAuth(
     user_id: 1,
     email: "student@test.com",
     role: "student",
-    status: "approved",
+    status: "pending",
   ),
   UserAuth(
     user_id: 10,

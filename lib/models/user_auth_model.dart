@@ -3,8 +3,6 @@ class UserAuth {
   final String email;
   final String role;
   final String status;
-
-  // 🔑 OPTIONAL (only for teacher)
   final List<String> departments;
 
   UserAuth({
@@ -14,4 +12,39 @@ class UserAuth {
     required this.status,
     List<String>? departments,
   }) : departments = departments ?? [];
+
+  UserAuth copyWith({
+    String? status,
+    List<String>? departments,
+  }) {
+    return UserAuth(
+      user_id: user_id,
+      email: email,
+      role: role,
+      status: status ?? this.status,
+      departments: departments ?? this.departments,
+    );
+  }
+
+  factory UserAuth.fromJson(Map<String, dynamic> json) {
+    return UserAuth(
+      user_id: json['user_id'],
+      email: json['email'],
+      role: json['role'],
+      status: json['status'],
+      departments: json['departments'] != null
+          ? List<String>.from(json['departments'])
+          : [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "user_id": user_id,
+      "email": email,
+      "role": role,
+      "status": status,
+      "departments": departments,
+    };
+  }
 }

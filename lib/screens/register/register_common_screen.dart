@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../mock/mock_registration_requests.dart';
+import '../../models/registration_request_model.dart';
+
 class RegisterCommonScreen extends StatefulWidget {
   const RegisterCommonScreen({Key? key}) : super(key: key);
 
@@ -171,15 +174,46 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
+                    Map<String, dynamic> extraData = {};
+
+                    if (selectedRole == "student") {
+                      extraData = {
+                        "Enrollment No": studentEnrollmentNo,
+                        "Roll No": rollNo,
+                        "Class": studentClass,
+                        "Student Mobile": studentMobile,
+                        "Parent Mobile": parentMobile,
+                      };
+                    } else if (selectedRole == "teacher") {
+                      extraData = {
+                        "Employee ID": employeeId,
+                        "Mobile": teacherMobile,
+                      };
+                    } else if (selectedRole == "parent") {
+                      extraData = {
+                        "Enrollment No": enrollmentNo,
+                        "Mobile": parentOwnMobile,
+                      };
+                    }
+
+                    final newRequest = RegistrationRequest(
+                      requestId: DateTime.now().millisecondsSinceEpoch,
+                      fullName: fullName,
+                      email: email,
+                      role: selectedRole,
+                      extraData: extraData,
+                    );
+
+                    mockRegistrationRequests.add(newRequest);
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          "Registration request sent to admin for approval",
-                        ),
+                        content: Text("Registration request sent to admin"),
                       ),
                     );
                   }
                 },
+
                 child: const Text(
                   "Register",
                   style: TextStyle(color: Colors.white),

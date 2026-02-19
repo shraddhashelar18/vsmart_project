@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vsmart_app/screens/admin/performance_report.dart';
 import 'admin_bottom_nav.dart';
+import 'admin_user_approval_screen.dart';
 import 'result_control.dart';
 import 'attendance_report.dart'; // ADD THIS
 
@@ -70,25 +71,23 @@ class ReportsScreen extends StatelessWidget {
                 );
               },
             ),
+// USER APPROVALS
+            _reportCard(
+              context: context,
+              icon: Icons.verified_user,
+              title: "User Approvals",
+              subtitle: "Verify & approve registrations",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AdminUserApprovalScreen(),
+                  ),
+                );
+              },
+            ),
 
-            _reportCard(
-              context: context,
-              icon: Icons.school,
-              title: "Teacher Report",
-              subtitle: "Teacher activity & allocation",
-            ),
-            _reportCard(
-              context: context,
-              icon: Icons.people,
-              title: "Parent Engagement",
-              subtitle: "Parent interactions & reports",
-            ),
-            _reportCard(
-              context: context,
-              icon: Icons.download,
-              title: "Download Reports",
-              subtitle: "Export reports as PDF",
-            ),
+          
           ],
         ),
       ),

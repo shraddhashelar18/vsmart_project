@@ -10,19 +10,7 @@ class ResultControlScreen extends StatefulWidget {
 
 class _ResultControlScreenState extends State<ResultControlScreen> {
   bool allowMarksheetUpload = false;
-
-  // ODD = 1,3,5 | EVEN = 2,4,6
-  String activeGroup = "ODD";
-
-  void _toggleGroup() {
-    setState(() {
-      activeGroup = activeGroup == "ODD" ? "EVEN" : "ODD";
-    });
-  }
-
-  String get groupLabel {
-    return activeGroup == "ODD" ? "Semesters 1, 3, 5" : "Semesters 2, 4, 6";
-  }
+  bool allowReUpload = false; // 🔥 NEW
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +29,7 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
             const SizedBox(height: 10),
 
             const Text(
-              "Semester Result Settings",
+              "Result Upload Settings",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -51,46 +39,13 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
             const SizedBox(height: 8),
 
             const Text(
-              "Control active semester group & marksheet upload.",
+              "Control student marksheet upload permissions.",
               style: TextStyle(color: Colors.grey),
             ),
 
             const SizedBox(height: 25),
 
-            // -------- ACTIVE GROUP CARD --------
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    const Icon(Icons.school,
-                        color: Color(0xFF009846), size: 28),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        "Active Group: $groupLabel",
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF009846),
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: _toggleGroup,
-                      child: const Text("Switch"),
-                    )
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // -------- MARKSHEET TOGGLE --------
+            // -------- UPLOAD TOGGLE --------
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -117,8 +72,48 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
                       onChanged: (value) {
                         setState(() {
                           allowMarksheetUpload = value;
+                          if (!value) allowReUpload = false; // 🔒 safety
                         });
                       },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // -------- REUPLOAD TOGGLE --------
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.refresh,
+                        color: Color(0xFF009846), size: 26),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Text(
+                        "Allow Marksheet Re-Upload",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Switch(
+                      activeColor: const Color(0xFF009846),
+                      value: allowReUpload,
+                      onChanged: allowMarksheetUpload
+                          ? (value) {
+                              setState(() {
+                                allowReUpload = value;
+                              });
+                            }
+                          : null, // 🔒 disabled if upload off
                     ),
                   ],
                 ),
@@ -147,8 +142,10 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
                   Expanded(
                     child: Text(
                       allowMarksheetUpload
-                          ? "Students CAN upload marksheets."
-                          : "Marksheet upload is DISABLED.",
+                          ? allowReUpload
+                              ? "Students can upload & re-upload marksheets."
+                              : "Students can upload marksheets once."
+                          : "Marksheet upload is disabled.",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: allowMarksheetUpload ? Colors.green : Colors.red,
@@ -175,8 +172,8 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      "KT students remain in their semester. "
-                      "Semester group only controls marksheet upload visibility.",
+                      "Semester control is managed from Admin Settings. "
+                      "This screen only controls upload permissions.",
                       style: TextStyle(fontSize: 13),
                     ),
                   ),
@@ -202,7 +199,7 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
                   ),
                 );
 
-                // SEND activeGroup + allowMarksheetUpload to backend
+                // SEND allowMarksheetUpload + allowReUpload to backend
               },
               child: const Text(
                 "Save Settings",

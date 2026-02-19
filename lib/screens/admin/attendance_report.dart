@@ -1,22 +1,97 @@
 import 'package:flutter/material.dart';
+import '../../mock/mock_academics.dart'; // 🔥 ADD
+ 
 
 class AttendanceReport extends StatefulWidget {
   const AttendanceReport({Key? key}) : super(key: key);
 
   @override
   State<AttendanceReport> createState() => _AttendanceReportState();
+
+}
+class StudentAttendanceCard extends StatelessWidget {
+  final String name;
+  final int present;
+  final int total;
+
+  const StudentAttendanceCard({
+    Key? key,
+    required this.name,
+    required this.present,
+    required this.total,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    double percent = (present / total) * 100;
+
+    Color percentColor = percent >= 75 ? const Color(0xFF009846) : Colors.red;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: const CircleAvatar(
+          backgroundColor: Color(0xFFEAF7F1),
+          child: Icon(Icons.person, color: Color(0xFF009846)),
+        ),
+        title: Text(name),
+        subtitle: Text("Present: $present / $total lectures"),
+
+        trailing: Text(
+          "${percent.toStringAsFixed(0)}%",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: percentColor,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _AttendanceReportState extends State<AttendanceReport> {
   static const Color green = Color(0xFF009846);
 
-  String selectedDept = "IT";
-  String selectedClass = "IF1KA";
-  String selectedMonth = "January";
+  late String selectedDept;
+  late String selectedClass;
+  late String selectedMonth;
 
-  final List<String> departments = ["IT", "CO", "EJ"];
-  final List<String> classes = ["IF1KA", "IF1KB", "IF2KA"];
-  final List<String> months = ["January", "February", "March", "April", "May"];
+  // 🔹 DEPARTMENTS FROM MOCK
+  List<String> get departments => mockAcademics.keys.toList();
+
+  // 🔹 MONTHS BASED ON EVEN / ODD
+ List<String> get months => activeSemType == "EVEN" ? evenMonths : oddMonths;
+ 
+
+
+  // 🔹 CLASSES BASED ON DEPT + SEM TYPE
+  List<String> getClasses(String dept) {
+    final years = mockAcademics[dept]!;
+    List<String> result = [];
+
+    years.forEach((year, sems) {
+      sems.forEach((semName, classList) {
+        if (isSemesterAllowed(semName)) {
+          result.addAll(classList);
+        }
+      });
+    });
+
+    return result;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    selectedDept = departments.first;
+    selectedClass = getClasses(selectedDept).first;
+
+    selectedMonth = months.first;
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +112,10 @@ class _AttendanceReportState extends State<AttendanceReport> {
                   .map((d) => DropdownMenuItem(value: d, child: Text(d)))
                   .toList(),
               onChanged: (v) {
-                setState(() => selectedDept = v!);
+                setState(() {
+                  selectedDept = v!;
+                  selectedClass = getClasses(selectedDept).first;
+                });
               },
             ),
 
@@ -47,7 +125,7 @@ class _AttendanceReportState extends State<AttendanceReport> {
             DropdownButtonFormField<String>(
               value: selectedClass,
               decoration: _decoration("Class"),
-              items: classes
+              items: getClasses(selectedDept)
                   .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                   .toList(),
               onChanged: (v) {
@@ -59,14 +137,29 @@ class _AttendanceReportState extends State<AttendanceReport> {
 
             // 🔹 MONTH
             DropdownButtonFormField<String>(
-              value: selectedMonth,
+              value:
+                  months.contains(selectedMonth) ? selectedMonth : months.first,
+
               decoration: _decoration("Month"),
-              items: months
-                  .map((m) => DropdownMenuItem(value: m, child: Text(m)))
-                  .toList(),
+              items: months.map((m) {
+                final enabled = isMonthEnabled(m);
+
+                return DropdownMenuItem(
+                  value: enabled ? m : null, // null disables selection
+                  child: Text(
+                    m,
+                    style: TextStyle(
+                      color: enabled ? Colors.black : Colors.grey,
+                    ),
+                  ),
+                );
+              }).toList(),
+
               onChanged: (v) {
-                setState(() => selectedMonth = v!);
+                if (v == null) return; // disabled
+                setState(() => selectedMonth = v);
               },
+
             ),
 
             const SizedBox(height: 20),
@@ -84,10 +177,11 @@ class _AttendanceReportState extends State<AttendanceReport> {
 
             const SizedBox(height: 10),
 
-            // 🔹 STUDENT LIST
+            // 🔹 STUDENT LIST (UNCHANGED)
             Expanded(
               child: ListView(
-                children: const [
+                shrinkWrap: true,
+                children: [
                   StudentAttendanceCard(
                     name: "Emma Johnson",
                     present: 22,
@@ -120,47 +214,6 @@ class _AttendanceReportState extends State<AttendanceReport> {
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
-      ),
-    );
-  }
-}
-
-class StudentAttendanceCard extends StatelessWidget {
-  final String name;
-  final int present;
-  final int total;
-
-  const StudentAttendanceCard({
-    Key? key,
-    required this.name,
-    required this.present,
-    required this.total,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    double percent = (present / total) * 100;
-
-    Color percentColor = percent >= 75 ? const Color(0xFF009846) : Colors.red;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: Color(0xFFEAF7F1),
-          child: Icon(Icons.person, color: Color(0xFF009846)),
-        ),
-        title: Text(name),
-        subtitle: Text("Present: $present / $total days"),
-        trailing: Text(
-          "${percent.toStringAsFixed(0)}%",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: percentColor,
-            fontSize: 16,
-          ),
-        ),
       ),
     );
   }

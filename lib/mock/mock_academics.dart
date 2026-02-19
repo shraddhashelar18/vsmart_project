@@ -44,4 +44,70 @@ final mockAcademics = {
       "SEM 6": ["EJ6K-A", "EJ6K-B", "EJ6K-C"],
     },
   } // same structure
+  
 };
+// ---------- MONTHS ----------
+final evenMonths = ["December", "January", "February", "March", "April", "May"];
+
+final oddMonths = [
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November"
+];
+String getCurrentMonth() {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+
+  return months[DateTime.now().month - 1];
+}
+List<String> getAllowedMonths() {
+  return activeSemType == "EVEN" ? evenMonths : oddMonths;
+}
+bool isSemesterAllowed(String semName) {
+  final semNumber = int.parse(semName.split(" ").last);
+
+  if (activeSemType == "EVEN") {
+    return semNumber % 2 == 0;
+  } else {
+    return semNumber % 2 != 0;
+  }
+}
+List<String> getCompletedMonths() {
+  final allowed = activeSemType == "EVEN" ? evenMonths : oddMonths;
+
+  final current = getCurrentMonth();
+
+  // if current month not in this semester → return all allowed
+  if (!allowed.contains(current)) return allowed;
+
+  final index = allowed.indexOf(current);
+
+  // return only months BEFORE current
+  return allowed.sublist(0, index);
+}
+bool isMonthEnabled(String month) {
+  final allowed = activeSemType == "EVEN" ? evenMonths : oddMonths;
+
+  final current = getCurrentMonth();
+
+  if (!allowed.contains(month)) return false;
+
+  if (!allowed.contains(current)) return true;
+
+  return allowed.indexOf(month) < allowed.indexOf(current);
+}
