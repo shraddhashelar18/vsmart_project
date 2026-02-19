@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:vsmart_app/mock/mock_academics.dart';
+import '../../services/app_settings_service.dart';
 import 'manage_parents.dart';
 
-class ParentClassScreen extends StatelessWidget {
+class ParentClassScreen extends StatefulWidget {
   final String department;
- ParentClassScreen({Key? key, required this.department})
-      : super(key: key);
+
+  const ParentClassScreen({
+    Key? key,
+    required this.department,
+  }) : super(key: key);
+
+  @override
+  State<ParentClassScreen> createState() => _ParentClassScreenState();
+}
+
+class _ParentClassScreenState extends State<ParentClassScreen> {
+  final AppSettingsService _settingsService = AppSettingsService();
+  String activeSemester = "EVEN";
 
   static const green = Color(0xFF009846);
 
-  final allClasses = [
+  final List<String> allClasses = [
     "IF1KA",
     "IF1KB",
     "IF1KC",
@@ -66,14 +77,25 @@ class ParentClassScreen extends StatelessWidget {
     "EJ6KC",
   ];
 
-   @override
+  @override
+  void initState() {
+    super.initState();
+    _loadSemester();
+  }
+
+  Future<void> _loadSemester() async {
+    activeSemester = await _settingsService.getActiveSemester();
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     final classes = allClasses.where((c) {
-      if (!c.startsWith(department)) return false;
+      if (!c.startsWith(widget.department)) return false;
 
-      final sem = int.parse(c[2]); // IF2KA → 2
+      final sem = int.parse(c[2]);
 
-      if (activeSemType == "EVEN") {
+      if (activeSemester == "EVEN") {
         return sem % 2 == 0;
       } else {
         return sem % 2 != 0;
@@ -82,8 +104,8 @@ class ParentClassScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title:  Text("$department Classes"),
-        backgroundColor: const Color(0xFF009846),
+        title: Text("${widget.department} Classes"),
+        backgroundColor: green,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),

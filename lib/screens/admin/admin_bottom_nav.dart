@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'admin_dashboard.dart';
 import 'reports_screen.dart';
-import 'settings_screen.dart';
+import '../settings/settings_screen.dart';
 
 class AdminBottomNav extends StatefulWidget {
   final int currentIndex;
@@ -24,7 +24,9 @@ class _AdminBottomNavState extends State<AdminBottomNav> {
           context, MaterialPageRoute(builder: (_) => const ReportsScreen()));
     } else if (index == 2) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+          context,
+          MaterialPageRoute(
+              builder: (_) => const SettingsScreen(role: "admin")));
     }
   }
 

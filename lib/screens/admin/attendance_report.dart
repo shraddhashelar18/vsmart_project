@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_academics.dart'; // 🔥 ADD
- 
+import '../../mock/mock_academics.dart';
+import '../../services/app_settings_service.dart';
 
 class AttendanceReport extends StatefulWidget {
   const AttendanceReport({Key? key}) : super(key: key);
 
   @override
   State<AttendanceReport> createState() => _AttendanceReportState();
-
 }
+
 class StudentAttendanceCard extends StatelessWidget {
   final String name;
   final int present;
@@ -37,7 +37,6 @@ class StudentAttendanceCard extends StatelessWidget {
         ),
         title: Text(name),
         subtitle: Text("Present: $present / $total lectures"),
-
         trailing: Text(
           "${percent.toStringAsFixed(0)}%",
           style: TextStyle(
@@ -54,6 +53,9 @@ class StudentAttendanceCard extends StatelessWidget {
 class _AttendanceReportState extends State<AttendanceReport> {
   static const Color green = Color(0xFF009846);
 
+  final AppSettingsService _settingsService = AppSettingsService();
+  String activeSemester = "EVEN";
+
   late String selectedDept;
   late String selectedClass;
   late String selectedMonth;
@@ -62,9 +64,7 @@ class _AttendanceReportState extends State<AttendanceReport> {
   List<String> get departments => mockAcademics.keys.toList();
 
   // 🔹 MONTHS BASED ON EVEN / ODD
- List<String> get months => activeSemType == "EVEN" ? evenMonths : oddMonths;
- 
-
+  List<String> get months => activeSemester == "EVEN" ? evenMonths : oddMonths;
 
   // 🔹 CLASSES BASED ON DEPT + SEM TYPE
   List<String> getClasses(String dept) {
@@ -73,7 +73,11 @@ class _AttendanceReportState extends State<AttendanceReport> {
 
     years.forEach((year, sems) {
       sems.forEach((semName, classList) {
-        if (isSemesterAllowed(semName)) {
+        final semNumber = int.parse(semName.replaceAll(RegExp(r'[^0-9]'), ''));
+
+        if (activeSemester == "EVEN" && semNumber % 2 == 0) {
+          result.addAll(classList);
+        } else if (activeSemester == "ODD" && semNumber % 2 != 0) {
           result.addAll(classList);
         }
       });
@@ -85,12 +89,21 @@ class _AttendanceReportState extends State<AttendanceReport> {
   @override
   void initState() {
     super.initState();
+    _loadSemester();
+  }
 
-    selectedDept = departments.first;
-    selectedClass = getClasses(selectedDept).first;
+  Future<void> _loadSemester() async {
+    activeSemester = await _settingsService.getActiveSemester();
 
-    selectedMonth = months.first;
+    selectedDept = departments.isNotEmpty ? departments.first : "";
 
+    final classList = selectedDept.isNotEmpty ? getClasses(selectedDept) : [];
+
+    selectedClass = classList.isNotEmpty ? classList.first : "";
+
+    selectedMonth = months.isNotEmpty ? months.first : "";
+
+    setState(() {});
   }
 
   @override
@@ -106,7 +119,7 @@ class _AttendanceReportState extends State<AttendanceReport> {
           children: [
             // 🔹 DEPARTMENT
             DropdownButtonFormField<String>(
-              value: selectedDept,
+              value: departments.contains(selectedDept) ? selectedDept : null,
               decoration: _decoration("Department"),
               items: departments
                   .map((d) => DropdownMenuItem(value: d, child: Text(d)))
@@ -123,7 +136,9 @@ class _AttendanceReportState extends State<AttendanceReport> {
 
             // 🔹 CLASS
             DropdownButtonFormField<String>(
-              value: selectedClass,
+              value: getClasses(selectedDept).contains(selectedClass)
+                  ? selectedClass
+                  : null,
               decoration: _decoration("Class"),
               items: getClasses(selectedDept)
                   .map((c) => DropdownMenuItem(value: c, child: Text(c)))
@@ -136,16 +151,16 @@ class _AttendanceReportState extends State<AttendanceReport> {
             const SizedBox(height: 12),
 
             // 🔹 MONTH
-            DropdownButtonFormField<String>(
-              value:
-                  months.contains(selectedMonth) ? selectedMonth : months.first,
 
+            DropdownButtonFormField<String>(
+              value: months.contains(selectedMonth) ? selectedMonth : null,
               decoration: _decoration("Month"),
               items: months.map((m) {
                 final enabled = isMonthEnabled(m);
 
                 return DropdownMenuItem(
-                  value: enabled ? m : null, // null disables selection
+                  value: m, // ✅ ALWAYS keep real value
+                  enabled: enabled, // ✅ disable properly
                   child: Text(
                     m,
                     style: TextStyle(
@@ -154,12 +169,10 @@ class _AttendanceReportState extends State<AttendanceReport> {
                   ),
                 );
               }).toList(),
-
               onChanged: (v) {
-                if (v == null) return; // disabled
+                if (v == null) return;
                 setState(() => selectedMonth = v);
               },
-
             ),
 
             const SizedBox(height: 20),
@@ -177,11 +190,10 @@ class _AttendanceReportState extends State<AttendanceReport> {
 
             const SizedBox(height: 10),
 
-            // 🔹 STUDENT LIST (UNCHANGED)
             Expanded(
               child: ListView(
                 shrinkWrap: true,
-                children: [
+                children: const [
                   StudentAttendanceCard(
                     name: "Emma Johnson",
                     present: 22,

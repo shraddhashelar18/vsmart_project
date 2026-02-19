@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../services/app_settings_service.dart';
 import '../../mock/mock_teacher_data.dart';
 import '../../mock/mock_teacher_departments.dart';
 import '../../mock/mock_teacher_classes.dart';
 import '../../mock/mock_teacher_subjects.dart';
-import '../../mock/mock_academics.dart';
 
 class AddTeacher extends StatefulWidget {
   final String department;
@@ -20,6 +20,9 @@ class AddTeacher extends StatefulWidget {
 }
 
 class _AddTeacherState extends State<AddTeacher> {
+  final AppSettingsService _settingsService = AppSettingsService();
+  String activeSemester = "EVEN";
+
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
@@ -29,7 +32,6 @@ class _AddTeacherState extends State<AddTeacher> {
 
   bool get isEdit => widget.teacherId != null;
 
-  // 🔹 ALL CLASSES WITH A B C
   final List<String> allClasses = [
     "IF1KA",
     "IF1KB",
@@ -100,6 +102,7 @@ class _AddTeacherState extends State<AddTeacher> {
   @override
   void initState() {
     super.initState();
+    _loadSemester();
 
     if (isEdit) {
       final t = mockTeachers[widget.teacherId]!;
@@ -114,13 +117,18 @@ class _AddTeacherState extends State<AddTeacher> {
     }
   }
 
+  Future<void> _loadSemester() async {
+    activeSemester = await _settingsService.getActiveSemester();
+    setState(() {});
+  }
+
   List<String> _classesForDept(String dept) {
     return allClasses.where((c) {
       if (!c.startsWith(dept)) return false;
 
       final sem = int.parse(c[2]);
 
-      if (activeSemType == "EVEN") {
+      if (activeSemester == "EVEN") {
         return sem % 2 == 0;
       } else {
         return sem % 2 != 0;
@@ -130,13 +138,12 @@ class _AddTeacherState extends State<AddTeacher> {
 
   List<String> _classesForSelectedDepartments() {
     return allClasses.where((cls) {
-      // 1. Department filter
       final deptMatch = selectedDepartments.any((dept) => cls.startsWith(dept));
       if (!deptMatch) return false;
 
-      // 2. Semester filter
       final sem = int.parse(cls[2]);
-      if (activeSemType == "EVEN") {
+
+      if (activeSemester == "EVEN") {
         return sem % 2 == 0;
       } else {
         return sem % 2 != 0;
@@ -159,7 +166,6 @@ class _AddTeacherState extends State<AddTeacher> {
             .toList()
         : _classesForSelectedDepartments();
 
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF009846),
@@ -172,18 +178,15 @@ class _AddTeacherState extends State<AddTeacher> {
           children: [
             _label("Teacher Name"),
             _field(_nameCtrl, Icons.person, "Enter full name"),
-
             const SizedBox(height: 12),
             _label("Email"),
             _field(_emailCtrl, Icons.email, "teacher@email.com",
                 enabled: !isEdit),
-
             if (!isEdit) ...[
               const SizedBox(height: 12),
               _label("Password"),
               _field(_passwordCtrl, Icons.lock, "Enter password"),
             ],
-
             const SizedBox(height: 16),
             _label("Departments"),
             Wrap(
@@ -204,11 +207,10 @@ class _AddTeacherState extends State<AddTeacher> {
                 );
               }).toList(),
             ),
-
             const SizedBox(height: 16),
             _label("Assign Classes"),
             SizedBox(
-              height: 220, // 🔥 controls congestion
+              height: 220,
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +257,6 @@ class _AddTeacherState extends State<AddTeacher> {
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
             _label("Subjects"),
             ...selectedClasses.map((cls) {
@@ -290,10 +291,7 @@ class _AddTeacherState extends State<AddTeacher> {
                 ],
               );
             }),
-
             const SizedBox(height: 20),
-
-            // 🔹 FIXED SAVE BUTTON
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF009846),
