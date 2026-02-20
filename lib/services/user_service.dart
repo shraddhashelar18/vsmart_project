@@ -4,7 +4,6 @@ import '../models/user_auth_model.dart';
 import '../mock/mock_users.dart';
 
 class UserService {
-
   Future<List<RegistrationRequest>> getPendingRequests() async {
     await Future.delayed(const Duration(milliseconds: 300));
 
@@ -16,7 +15,6 @@ class UserService {
   Future<void> approveRequest(RegistrationRequest request) async {
     request.status = "approved";
 
-    // Add to login users after approval
     mockUsers.add(
       UserAuth(
         user_id: request.requestId,

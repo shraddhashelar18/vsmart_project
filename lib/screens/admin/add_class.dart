@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_class_data.dart';
-import '../../mock/mock_teacher_data.dart';
-import '../../mock/mock_teacher_departments.dart';
+import '../../services/teacher_new_service.dart';
+import '../../services/class_service.dart';
 
 class AddClass extends StatefulWidget {
   final String? className;
@@ -18,6 +17,8 @@ class AddClass extends StatefulWidget {
 }
 
 class _AddClassState extends State<AddClass> {
+  final TeacherService _teacherService = TeacherService();
+  final ClassService _classService = ClassService();
   static const green = Color(0xFF009846);
 
   final _formKey = GlobalKey<FormState>();
@@ -36,30 +37,17 @@ class _AddClassState extends State<AddClass> {
     _selectedDepartment = widget.department;
 
     if (isEdit) {
-      final c = mockClasses[widget.className] ?? {};
+      final c = _classService.getClass(widget.className!) ?? {};
       _classNameCtrl.text = widget.className ?? "";
       _selectedTeacher = c["teacher"];
     }
   }
 
-  // 🔹 TEACHERS FILTER
-  List<String> _teachersForDept(String? dept) {
-    if (dept == null) return [];
-
-    final ids = mockTeacherDepartments.entries
-        .where((e) => e.value.contains(dept))
-        .map((e) => e.key)
-        .toList();
-
-    return ids
-        .map((id) => mockTeachers[id]?["name"] ?? "")
-        .where((n) => n.isNotEmpty)
-        .toList();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final teacherList = _teachersForDept(_selectedDepartment);
+    final List<String> teacherList = _selectedDepartment == null
+        ? <String>[]
+        : _teacherService.getTeacherNamesByDepartment(_selectedDepartment!);
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -96,7 +84,7 @@ class _AddClassState extends State<AddClass> {
               /// CLASS NAME
               _label("Class Name"),
               _textField(
-                hint: "Enter class name (e.g. IF6K-A)",
+                hint: "Enter class name (e.g. IF6KA)",
                 icon: Icons.class_,
                 controller: _classNameCtrl,
                 enabled: true, // EDITABLE
@@ -107,31 +95,19 @@ class _AddClassState extends State<AddClass> {
               /// DEPARTMENT
               _label("Department"),
 
-              isEdit
-                  ? TextFormField(
-                      enabled: false,
-                      initialValue: _selectedDepartment ?? "",
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.school),
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    )
-                  : _dropdown(
-                      hint: "Select department",
-                      items: const ["IF", "CO", "EJ"],
-                      value: _selectedDepartment,
-                      onChanged: (v) {
-                        setState(() {
-                          _selectedDepartment = v;
-                          _selectedTeacher = null;
-                        });
-                      },
-                    ),
+              TextFormField(
+                enabled: false,
+                initialValue: _selectedDepartment ?? "",
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.school),
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
 
               const SizedBox(height: 16),
 
@@ -212,10 +188,11 @@ class _AddClassState extends State<AddClass> {
 
     final name = _classNameCtrl.text.trim();
 
-    mockClasses[name] = {
-      "department": _selectedDepartment ?? "",
-      "teacher": _selectedTeacher ?? "",
-    };
+    _classService.saveClass(
+      name: name,
+      department: _selectedDepartment ?? "",
+      teacher: _selectedTeacher ?? "",
+    );
 
     Navigator.pop(context);
   }

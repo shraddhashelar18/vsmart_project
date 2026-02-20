@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/app_settings_service.dart';
+import '../../services/performance_service.dart';
 
 class PerformanceReport extends StatefulWidget {
   const PerformanceReport({Key? key}) : super(key: key);
@@ -11,74 +11,18 @@ class PerformanceReport extends StatefulWidget {
 class _PerformanceReportState extends State<PerformanceReport> {
   static const green = Color(0xFF009846);
 
-  final AppSettingsService _settingsService = AppSettingsService();
-  String activeSemester = "EVEN";
+  final PerformanceService _service = PerformanceService();
 
-  String selectedDept = "IF";
-  String selectedClass = "";
+  List<String> departments = [];
+  List<String> classes = [];
+
+  String? selectedDept;
+  String? selectedClass;
+
   String selectedExam = "CT1";
   bool isCT1Conducted = true;
   bool isCT2Conducted = false;
 
-  // 🔹 ALL CLASSES
-  final List<String> allClasses = [
-    "IF1KA",
-    "IF1KB",
-    "IF1KC",
-    "IF2KA",
-    "IF2KB",
-    "IF2KC",
-    "IF3KA",
-    "IF3KB",
-    "IF3KC",
-    "IF4KA",
-    "IF4KB",
-    "IF4KC",
-    "IF5KA",
-    "IF5KB",
-    "IF5KC",
-    "IF6KA",
-    "IF6KB",
-    "IF6KC",
-    "CO1KA",
-    "CO1KB",
-    "CO1KC",
-    "CO2KA",
-    "CO2KB",
-    "CO2KC",
-    "CO3KA",
-    "CO3KB",
-    "CO3KC",
-    "CO4KA",
-    "CO4KB",
-    "CO4KC",
-    "CO5KA",
-    "CO5KB",
-    "CO5KC",
-    "CO6KA",
-    "CO6KB",
-    "CO6KC",
-    "EJ1KA",
-    "EJ1KB",
-    "EJ1KC",
-    "EJ2KA",
-    "EJ2KB",
-    "EJ2KC",
-    "EJ3KA",
-    "EJ3KB",
-    "EJ3KC",
-    "EJ4KA",
-    "EJ4KB",
-    "EJ4KC",
-    "EJ5KA",
-    "EJ5KB",
-    "EJ5KC",
-    "EJ6KA",
-    "EJ6KB",
-    "EJ6KC",
-  ];
-
-  // ---------- DUMMY DATA ----------
   List<Map<String, dynamic>> students = [
     {"name": "Emma Johnson", "ct1_total": 126, "ct2_total": null, "max": 150},
     {
@@ -93,39 +37,26 @@ class _PerformanceReportState extends State<PerformanceReport> {
   @override
   void initState() {
     super.initState();
-    _loadSemester();
+    _loadData();
   }
 
-  Future<void> _loadSemester() async {
-    activeSemester = await _settingsService.getActiveSemester();
-    selectedClass = _getClasses(selectedDept).first;
-    setState(() {});
-  }
+  Future<void> _loadData() async {
+    departments = await _service.getDepartments();
 
-  // 🔹 FILTER CLASSES BASED ON ACTIVE SEMESTER
-  List<String> _getClasses(String dept) {
-    return allClasses.where((c) {
-      if (!c.startsWith(dept)) return false;
+    if (departments.isNotEmpty) {
+      selectedDept = departments.first;
+      classes = await _service.getClasses(selectedDept!);
 
-      final sem = int.parse(c[2]);
-
-      if (activeSemester == "EVEN") {
-        return sem % 2 == 0;
-      } else {
-        return sem % 2 != 0;
+      if (classes.isNotEmpty) {
+        selectedClass = classes.first;
       }
-    }).toList();
+    }
+
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredClasses = _getClasses(selectedDept);
-
-    if (!filteredClasses.contains(selectedClass) &&
-        filteredClasses.isNotEmpty) {
-      selectedClass = filteredClasses.first;
-    }
-
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
@@ -139,32 +70,25 @@ class _PerformanceReportState extends State<PerformanceReport> {
             _dropdown(
               "Department",
               selectedDept,
-              ["IF", "CO", "EJ"],
-              (v) {
-                selectedDept = v!;
-                selectedClass = _getClasses(selectedDept).first;
+              departments,
+              (v) async {
+                selectedDept = v;
+                classes = await _service.getClasses(selectedDept!);
+                selectedClass = classes.isNotEmpty ? classes.first : null;
                 setState(() {});
               },
             ),
             _dropdown(
               "Class",
               selectedClass,
-              filteredClasses,
-              (v) => setState(() => selectedClass = v!),
+              classes,
+              (v) => setState(() => selectedClass = v),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: DropdownButtonFormField<String>(
                 value: selectedExam,
-                decoration: InputDecoration(
-                  labelText: "Exam",
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                decoration: _inputDecoration("Exam"),
                 items: [
                   DropdownMenuItem(
                     value: "CT1",
@@ -172,8 +96,7 @@ class _PerformanceReportState extends State<PerformanceReport> {
                     child: Text(
                       "CT1",
                       style: TextStyle(
-                        color: isCT1Conducted ? Colors.black : Colors.grey,
-                      ),
+                          color: isCT1Conducted ? Colors.black : Colors.grey),
                     ),
                   ),
                   DropdownMenuItem(
@@ -182,8 +105,7 @@ class _PerformanceReportState extends State<PerformanceReport> {
                     child: Text(
                       "CT2",
                       style: TextStyle(
-                        color: isCT2Conducted ? Colors.black : Colors.grey,
-                      ),
+                          color: isCT2Conducted ? Colors.black : Colors.grey),
                     ),
                   ),
                 ],
@@ -207,22 +129,13 @@ class _PerformanceReportState extends State<PerformanceReport> {
     );
   }
 
-  // ---------- DROPDOWN ----------
-  Widget _dropdown(String label, String value, List<String> items,
+  Widget _dropdown(String label, String? value, List<String> items,
       Function(String?) onChanged) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: DropdownButtonFormField<String>(
         value: value,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-        ),
+        decoration: _inputDecoration(label),
         items: items
             .map((e) => DropdownMenuItem(value: e, child: Text(e)))
             .toList(),
@@ -231,7 +144,18 @@ class _PerformanceReportState extends State<PerformanceReport> {
     );
   }
 
-  // ---------- STUDENT CARD ----------
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
+
   Widget _studentCard(Map<String, dynamic> s) {
     dynamic marks = selectedExam == "CT1" ? s["ct1_total"] : s["ct2_total"];
     int max = s["max"];

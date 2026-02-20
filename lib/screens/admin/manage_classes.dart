@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'admin_bottom_nav.dart';
 import 'add_class.dart';
+import '../../services/class_service.dart';
 
 class ManageClasses extends StatelessWidget {
+  final ClassService _classService = ClassService();
+
   final String department; // 🔥 STORE IT
 
-  const ManageClasses({Key? key, required this.department}) : super(key: key);
-
-  // 🔹 MOCK CLASS DATA
-  final List<Map<String, String>> allClasses = const [
-    {"name": "IF6KA", "dept": "IF", "teacher": "Prof Sunil Dodake"},
-    {"name": "IF6KB", "dept": "IF", "teacher": "Mrs Samidha Chavan"},
-    {"name": "CO5KA", "dept": "CO", "teacher": "Mr. Khan"},
-    {"name": "EJ4KA", "dept": "EJ", "teacher": "Mrs. Rao"},
-  ];
+  ManageClasses({Key? key, required this.department}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // 🔥 FILTER BY DEPARTMENT
-    final filtered = allClasses.where((c) => c["dept"] == department).toList();
+    final filtered = _classService.getClassesByDepartment(department);
 
     return Scaffold(
       appBar: AppBar(
@@ -61,7 +56,7 @@ class ManageClasses extends StatelessWidget {
         children: filtered.map((c) {
           return ClassCard(
             className: c["name"]!,
-            dept: c["dept"]!,
+            dept: c["department"]!,
             teacher: c["teacher"]!, // 🔥 NEW
           );
         }).toList(),

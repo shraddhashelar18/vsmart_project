@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_academics.dart';
-import '../../services/app_settings_service.dart';
+import '../../services/attendance_service.dart';
 
 class AttendanceReport extends StatefulWidget {
   const AttendanceReport({Key? key}) : super(key: key);
@@ -24,7 +23,6 @@ class StudentAttendanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double percent = (present / total) * 100;
-
     Color percentColor = percent >= 75 ? const Color(0xFF009846) : Colors.red;
 
     return Card(
@@ -53,55 +51,39 @@ class StudentAttendanceCard extends StatelessWidget {
 class _AttendanceReportState extends State<AttendanceReport> {
   static const Color green = Color(0xFF009846);
 
-  final AppSettingsService _settingsService = AppSettingsService();
-  String activeSemester = "EVEN";
+  final AttendanceService _attendanceService = AttendanceService();
 
-  late String selectedDept;
-  late String selectedClass;
-  late String selectedMonth;
+  List<String> departments = [];
+  List<String> classes = [];
+  List<String> months = [];
 
-  // 🔹 DEPARTMENTS FROM MOCK
-  List<String> get departments => mockAcademics.keys.toList();
-
-  // 🔹 MONTHS BASED ON EVEN / ODD
-  List<String> get months => activeSemester == "EVEN" ? evenMonths : oddMonths;
-
-  // 🔹 CLASSES BASED ON DEPT + SEM TYPE
-  List<String> getClasses(String dept) {
-    final years = mockAcademics[dept]!;
-    List<String> result = [];
-
-    years.forEach((year, sems) {
-      sems.forEach((semName, classList) {
-        final semNumber = int.parse(semName.replaceAll(RegExp(r'[^0-9]'), ''));
-
-        if (activeSemester == "EVEN" && semNumber % 2 == 0) {
-          result.addAll(classList);
-        } else if (activeSemester == "ODD" && semNumber % 2 != 0) {
-          result.addAll(classList);
-        }
-      });
-    });
-
-    return result;
-  }
+  String? selectedDept;
+  String? selectedClass;
+  String? selectedMonth;
 
   @override
   void initState() {
     super.initState();
-    _loadSemester();
+    _loadData();
   }
 
-  Future<void> _loadSemester() async {
-    activeSemester = await _settingsService.getActiveSemester();
+  Future<void> _loadData() async {
+    departments = _attendanceService.getDepartments();
 
-    selectedDept = departments.isNotEmpty ? departments.first : "";
+    if (departments.isNotEmpty) {
+      selectedDept = departments.first;
+      classes = await _attendanceService.getClasses(selectedDept!);
 
-    final classList = selectedDept.isNotEmpty ? getClasses(selectedDept) : [];
+      if (classes.isNotEmpty) {
+        selectedClass = classes.first;
+      }
+    }
 
-    selectedClass = classList.isNotEmpty ? classList.first : "";
+    months = await _attendanceService.getMonths();
 
-    selectedMonth = months.isNotEmpty ? months.first : "";
+    if (months.isNotEmpty) {
+      selectedMonth = months.first;
+    }
 
     setState(() {});
   }
@@ -117,82 +99,73 @@ class _AttendanceReportState extends State<AttendanceReport> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 🔹 DEPARTMENT
             DropdownButtonFormField<String>(
-              value: departments.contains(selectedDept) ? selectedDept : null,
+              value: selectedDept,
               decoration: _decoration("Department"),
               items: departments
                   .map((d) => DropdownMenuItem(value: d, child: Text(d)))
                   .toList(),
-              onChanged: (v) {
-                setState(() {
-                  selectedDept = v!;
-                  selectedClass = getClasses(selectedDept).first;
-                });
+              onChanged: (v) async {
+                selectedDept = v;
+                classes = await _attendanceService.getClasses(selectedDept!);
+                selectedClass = classes.isNotEmpty ? classes.first : null;
+                setState(() {});
               },
             ),
-
             const SizedBox(height: 12),
-
-            // 🔹 CLASS
             DropdownButtonFormField<String>(
-              value: getClasses(selectedDept).contains(selectedClass)
-                  ? selectedClass
-                  : null,
+              value: selectedClass,
               decoration: _decoration("Class"),
-              items: getClasses(selectedDept)
+              items: classes
                   .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                   .toList(),
               onChanged: (v) {
-                setState(() => selectedClass = v!);
+                setState(() => selectedClass = v);
               },
             ),
-
             const SizedBox(height: 12),
-
-            // 🔹 MONTH
-
             DropdownButtonFormField<String>(
-              value: months.contains(selectedMonth) ? selectedMonth : null,
+              value: selectedMonth,
               decoration: _decoration("Month"),
               items: months.map((m) {
-                final enabled = isMonthEnabled(m);
+                return DropdownMenuItem<String>(
+                  value: m,
+                  child: FutureBuilder<bool>(
+                    future: _attendanceService.isMonthEnabled(m),
+                    builder: (context, snapshot) {
+                      final enabled = snapshot.data ?? false;
 
-                return DropdownMenuItem(
-                  value: m, // ✅ ALWAYS keep real value
-                  enabled: enabled, // ✅ disable properly
-                  child: Text(
-                    m,
-                    style: TextStyle(
-                      color: enabled ? Colors.black : Colors.grey,
-                    ),
+                      return Text(
+                        m,
+                        style: TextStyle(
+                          color: enabled ? Colors.black : Colors.grey,
+                        ),
+                      );
+                    },
                   ),
                 );
               }).toList(),
-              onChanged: (v) {
+              onChanged: (v) async {
                 if (v == null) return;
+
+                final enabled = await _attendanceService.isMonthEnabled(v);
+
+                if (!enabled) return; // block selection
+
                 setState(() => selectedMonth = v);
               },
             ),
-
             const SizedBox(height: 20),
-
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Students",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
-
             const SizedBox(height: 10),
-
             Expanded(
               child: ListView(
-                shrinkWrap: true,
                 children: const [
                   StudentAttendanceCard(
                     name: "Emma Johnson",

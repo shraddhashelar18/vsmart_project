@@ -136,9 +136,8 @@ class VerifyUserScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                     onPressed: () async {
-                        if (request.role.toLowerCase() == "teacher")
- {
+                      onPressed: () async {
+                        if (request.role.toLowerCase() == "teacher") {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -152,7 +151,6 @@ class VerifyUserScreen extends StatelessWidget {
                           Navigator.pop(context);
                         }
                       },
-
                       child: const Text("Approve"),
                     ),
                   ),

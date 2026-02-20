@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'admin_bottom_nav.dart';
 import 'add_parent.dart';
-import '../../mock/mock_student_data.dart';
-import '../../mock/mock_parent_data.dart';
+import '../../services/parent_service.dart';
 
 class ManageParents extends StatefulWidget {
   final String className;
@@ -17,19 +16,12 @@ class ManageParents extends StatefulWidget {
 }
 
 class _ManageParentsState extends State<ManageParents> {
+  final ParentService _parentService = ParentService();
   @override
   Widget build(BuildContext context) {
     // 🔹 FIX 1 — MOVED HERE
-    final filteredParents = mockParents.entries.where((p) {
-      final children = p.value["children"] as List;
-
-      for (var enroll in children) {
-        if (mockStudents[enroll]?["class"] == widget.className) {
-          return true;
-        }
-      }
-      return false;
-    }).toList();
+    final filteredParents =
+        _parentService.getParentsFilteredByClass(widget.className);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -74,7 +66,6 @@ class _ManageParentsState extends State<ManageParents> {
         },
       ),
 
-
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -112,16 +103,22 @@ class _ManageParentsState extends State<ManageParents> {
                   final parentPhone = p.key;
                   final parent = p.value;
                   final childEnroll = parent["children"][0];
-                  final student = mockStudents[childEnroll];
 
-                  return ParentCard(
-                    name: parent["name"],
-                    parentId: parentPhone,
-                    email: "—",
-                    phone: parentPhone,
-                    studentName: student?["name"] ?? "",
-                    studentId: childEnroll,
-                    studentClass: student?["class"] ?? "",
+                  return FutureBuilder<Map<String, dynamic>?>(
+                    future: _parentService.getStudent(childEnroll),
+                    builder: (context, snapshot) {
+                      final student = snapshot.data;
+
+                      return ParentCard(
+                        name: parent["name"],
+                        parentId: parentPhone,
+                        email: parent["email"] ?? "—",
+                        phone: parentPhone,
+                        studentName: student?["name"] ?? "",
+                        studentId: childEnroll,
+                        studentClass: student?["class"] ?? "",
+                      );
+                    },
                   );
                 }).toList(),
               ),
@@ -137,7 +134,7 @@ class _ManageParentsState extends State<ManageParents> {
 
 class ParentCard extends StatelessWidget {
   final String name;
-  
+
   final String parentId;
   final String email;
   final String phone;
@@ -186,7 +183,7 @@ class ParentCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                   IconButton(
+                    IconButton(
                       icon: const Icon(Icons.edit, color: Colors.blue),
                       onPressed: () {
                         Navigator.push(
@@ -197,10 +194,9 @@ class ParentCard extends StatelessWidget {
                         );
                       },
                     ),
-
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _confirmDelete(context, name),
+                      onPressed: () => _confirmDelete(context, name, parentId),
                     ),
                   ],
                 ),
@@ -265,7 +261,7 @@ class ParentCard extends StatelessWidget {
 
 // ---------- CONFIRM DELETE ----------
 
-void _confirmDelete(BuildContext context, String name) {
+void _confirmDelete(BuildContext context, String name, String phone) {
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
@@ -279,8 +275,8 @@ void _confirmDelete(BuildContext context, String name) {
           child: const Text("Delete", style: TextStyle(color: Colors.red)),
           onPressed: () {
             Navigator.pop(context);
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text("$name deleted")));
+            ParentService().deleteParent(phone);
+            Navigator.pop(context); // refresh
           },
         ),
       ],

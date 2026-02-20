@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
- // contains UserAuth
+// contains UserAuth
 import '../../services/user_service.dart';
 import '../../models/registration_request_model.dart';
-
 
 class AssignTeacherScreen extends StatefulWidget {
   final RegistrationRequest request;
@@ -11,7 +10,6 @@ class AssignTeacherScreen extends StatefulWidget {
     Key? key,
     required this.request,
   }) : super(key: key);
-
 
   @override
   State<AssignTeacherScreen> createState() => _AssignTeacherScreenState();
@@ -62,8 +60,7 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
                   backgroundColor: Color(0xFF009846),
                   child: Icon(Icons.person, color: Colors.white),
                 ),
-               title: Text(widget.request.email),
-
+                title: Text(widget.request.email),
                 subtitle: const Text("Role: Teacher"),
               ),
             ),
@@ -165,8 +162,6 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
 
                         Navigator.popUntil(context, (route) => route.isFirst);
                       },
-
-
                 child: const Text(
                   "Assign & Approve",
                 ),

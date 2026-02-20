@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_teacher_classes.dart';
-import '../../mock/mock_teacher_subjects.dart';
+import '../../services/teacher_service.dart';
 
 class TeacherDetailScreen extends StatelessWidget {
   final int teacherId;
   final String name;
 
-  const TeacherDetailScreen({
+  final TeacherService _teacherService = TeacherService();
+
+  TeacherDetailScreen({
     Key? key,
     required this.teacherId,
     required this.name,
@@ -14,7 +15,7 @@ class TeacherDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final classes = mockTeacherClasses[teacherId] ?? [];
+    final classes = _teacherService.getTeacherClasses(teacherId);
 
     return Scaffold(
       appBar: AppBar(
@@ -27,7 +28,8 @@ class TeacherDetailScreen extends StatelessWidget {
           itemCount: classes.length,
           itemBuilder: (context, index) {
             final className = classes[index];
-            final subjects = mockTeacherSubjects[teacherId]?[className] ?? [];
+            final subjects =
+                _teacherService.getSubjectsForClass(teacherId, className);
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),

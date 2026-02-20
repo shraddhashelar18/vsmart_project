@@ -1,75 +1,55 @@
 import 'package:flutter/material.dart';
 import 'add_student.dart';
-import '../../mock/mock_student_data.dart';
+import '../../services/student_new_service.dart';
 
-class ManageStudents extends StatelessWidget {
+class ManageStudents extends StatefulWidget {
   final String className;
 
   const ManageStudents({Key? key, required this.className}) : super(key: key);
 
+  @override
+  State<ManageStudents> createState() => _ManageStudentsState();
+}
+
+class _ManageStudentsState extends State<ManageStudents> {
   static const green = Color(0xFF009846);
 
-  List<Widget> _getStudents() {
-    return mockStudents.entries
-        .where((e) => e.value["class"] == className)
-        .map((entry) {
-      final s = entry.value;
-      final enrollment = entry.key;
+  final StudentService _studentService = StudentService();
 
-      return _StudentCard(
-        enrollment: enrollment,
-        name: s["name"] ?? "",
-        email: s["email"] ?? "",
-        phone: s["phone"] ?? "",
-        className: s["class"] ?? "",
-      );
-    }).toList();
+  List<Map<String, dynamic>> students = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStudents();
+  }
+
+  Future<void> _loadStudents() async {
+    students = await _studentService.getStudentsByClass(widget.className);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final students = _getStudents();
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: green,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text("Manage Students - $className"),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(20),
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 8, left: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "View and manage student information",
-                style: TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-            ),
-          ),
-        ),
+        title: Text("Manage Students - ${widget.className}"),
       ),
-
-      // 🔹 ADD BUTTON
       floatingActionButton: FloatingActionButton(
         backgroundColor: green,
         child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => AddStudent(className: className),
+              builder: (_) => AddStudent(className: widget.className),
             ),
           );
+          _loadStudents();
         },
       ),
-
-      // 🔹 BODY
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -96,7 +76,33 @@ class ManageStudents extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: ListView(children: students),
+              child: ListView(
+                children: students.map((s) {
+                  return _StudentCard(
+                    enrollment: s["enrollment"],
+                    name: s["name"] ?? "",
+                    email: s["email"] ?? "",
+                    phone: s["phone"] ?? "",
+                    className: s["class"] ?? "",
+                    onEdit: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AddStudent(
+                            enrollment: s["enrollment"],
+                            className: widget.className,
+                          ),
+                        ),
+                      );
+                      _loadStudents(); // reload after edit
+                    },
+                    onDelete: () async {
+                      await _studentService.deleteStudent(s["enrollment"]);
+                      _loadStudents();
+                    },
+                  );
+                }).toList(),
+              ),
             ),
           ],
         ),
@@ -111,6 +117,8 @@ class _StudentCard extends StatelessWidget {
   final String email;
   final String phone;
   final String className;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
   const _StudentCard({
     Key? key,
@@ -119,13 +127,14 @@ class _StudentCard extends StatelessWidget {
     required this.email,
     required this.phone,
     required this.className,
+    required this.onDelete,
+    required this.onEdit,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -147,64 +156,30 @@ class _StudentCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    // 🔹 EDIT
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => AddStudent(
-                              enrollment: enrollment,
-                              className: className,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
 
-                    // 🔹 DELETE
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _confirmDelete(context),
-                    ),
-                  ],
-                )
+                /// ✅ EDIT BUTTON
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue),
+                  onPressed: onEdit,
+                ),
+
+                /// ✅ DELETE BUTTON
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _confirmDelete(context),
+                ),
               ],
             ),
             const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(Icons.email, size: 16, color: Colors.grey),
-                const SizedBox(width: 6),
-                Text(email),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.phone, size: 16, color: Colors.grey),
-                const SizedBox(width: 6),
-                Text(phone),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.badge, size: 16, color: Colors.grey),
-                const SizedBox(width: 6),
-                Text(className),
-              ],
-            ),
+            Text(email),
+            Text(phone),
+            Text(className),
           ],
         ),
       ),
     );
   }
 
-  // 🔴 DELETE CONFIRMATION
   void _confirmDelete(BuildContext context) {
     showDialog(
       context: context,
@@ -219,16 +194,8 @@ class _StudentCard extends StatelessWidget {
           TextButton(
             child: const Text("Delete", style: TextStyle(color: Colors.red)),
             onPressed: () {
-              mockStudents.remove(enrollment);
-
-              Navigator.pop(context); // close dialog
-
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ManageStudents(className: className),
-                ),
-              );
+              Navigator.pop(context);
+              onDelete();
             },
           ),
         ],

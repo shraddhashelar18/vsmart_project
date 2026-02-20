@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_parent_data.dart';
+import '../../services/parent_service.dart';
 
 class AddParent extends StatefulWidget {
   final String? parentPhone; // null = add, not null = edit
@@ -11,8 +11,9 @@ class AddParent extends StatefulWidget {
 }
 
 class _AddParentState extends State<AddParent> {
+  final ParentService _parentService = ParentService();
   final _formKey = GlobalKey<FormState>();
-final _passwordCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
 
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
@@ -24,14 +25,21 @@ final _passwordCtrl = TextEditingController();
   @override
   void initState() {
     super.initState();
+    _loadParent();
+  }
 
-    if (isEdit) {
-      final p = mockParents[widget.parentPhone]!;
-      _nameCtrl.text = p["name"] ?? "";
-      _emailCtrl.text = p["email"] ?? "";
-      _phoneCtrl.text = widget.parentPhone!;
-      _enrollCtrl.text = p["children"][0];
-    }
+  void _loadParent() {
+    if (!isEdit) return;
+
+    final p = _parentService.getParent(widget.parentPhone!);
+
+    if (p == null) return;
+
+    _nameCtrl.text = p["name"] ?? "";
+    _emailCtrl.text = p["email"] ?? "";
+    _phoneCtrl.text = widget.parentPhone!;
+    _enrollCtrl.text =
+        (p["children"] as List).isNotEmpty ? p["children"][0] : "";
   }
 
   @override
@@ -52,7 +60,6 @@ final _passwordCtrl = TextEditingController();
               if (!isEdit) ...[
                 _field(_passwordCtrl, "Password", Icons.lock),
               ],
-
               _field(_phoneCtrl, "Phone Number", Icons.phone),
               _field(
                 _enrollCtrl,
@@ -81,12 +88,15 @@ final _passwordCtrl = TextEditingController();
 
     final phone = _phoneCtrl.text;
 
-    mockParents[phone] = {
-      "name": _nameCtrl.text,
-      "email": _emailCtrl.text,
-       "password": _passwordCtrl.text, 
-      "children": [_enrollCtrl.text],
-    };
+    _parentService.saveParent(
+      phone: phone,
+      data: {
+        "name": _nameCtrl.text,
+        "email": _emailCtrl.text,
+        "password": _passwordCtrl.text,
+        "children": [_enrollCtrl.text],
+      },
+    );
 
     Navigator.pop(context);
   }
