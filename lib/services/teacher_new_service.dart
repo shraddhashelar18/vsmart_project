@@ -133,4 +133,29 @@ class TeacherService {
   }) async {
     mockTeacherSubjects[teacherId] = subjectsPerClass;
   }
+
+  bool isSubjectAlreadyAssigned({
+    required String className,
+    required String subject,
+    int? excludeTeacherId,
+  }) {
+    for (var entry in mockTeacherSubjects.entries) {
+      final teacherId = entry.key;
+
+      // Skip current teacher in edit mode
+      if (excludeTeacherId != null && teacherId == excludeTeacherId) {
+        continue;
+      }
+
+      final subjectsPerClass = entry.value;
+
+      if (subjectsPerClass.containsKey(className)) {
+        if (subjectsPerClass[className]!.contains(subject)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
 }

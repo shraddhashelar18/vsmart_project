@@ -113,16 +113,45 @@ class _AddClassState extends State<AddClass> {
 
               /// CLASS TEACHER
               _label("Class Teacher"),
-              _dropdown(
-                hint: "Select class teacher",
-                items: teacherList,
+
+              DropdownButtonFormField<String>(
                 value: teacherList.contains(_selectedTeacher)
                     ? _selectedTeacher
                     : null,
-                onChanged: (v) => setState(() => _selectedTeacher = v),
-              ),
+                decoration: InputDecoration(
+                  hintText: "Select class teacher",
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                items: teacherList.map((teacherName) {
+                  final assignedClass =
+                      _classService.getClassWhereTeacherAssigned(teacherName);
 
-              const SizedBox(height: 16),
+                  final isAssignedElsewhere = assignedClass != null &&
+                      assignedClass != widget.className;
+
+                  return DropdownMenuItem<String>(
+                    value: isAssignedElsewhere ? null : teacherName,
+                    enabled: !isAssignedElsewhere,
+                    child: Text(
+                      isAssignedElsewhere
+                          ? "$teacherName ($assignedClass Class Teacher)"
+                          : teacherName,
+                      style: TextStyle(
+                        color: isAssignedElsewhere ? Colors.grey : Colors.black,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value == null) return;
+                  setState(() => _selectedTeacher = value);
+                },
+              ),
 
               /// NOTE BOX
               Container(

@@ -9,4 +9,9 @@ Map<int, Map<String, String>> mockTeachers = {
     "email": "samidha@teacher.com",
     "phone": "+91 5678903454",
   },
+  5: {
+    "name": "Mrs Sushma Pawar",
+    "email": "sushma@teacher.com",
+    "phone": "+91 5678903454",
+  },
 };

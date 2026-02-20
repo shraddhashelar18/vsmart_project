@@ -45,7 +45,7 @@ class _AddTeacherState extends State<AddTeacher> {
     "IF3K": ["DBMS"],
     "IF4K": ["Java"],
     "IF5K": ["OS"],
-    "IF6K": ["Networking"],
+    "IF6K": ["Networking", "JAVA"],
     "CO4K": ["SOM"],
   };
 
@@ -262,16 +262,24 @@ class _AddTeacherState extends State<AddTeacher> {
                   Wrap(
                     spacing: 8,
                     children: subjects.map((sub) {
+                      final isTaken = _teacherService.isSubjectAlreadyAssigned(
+                        className: cls,
+                        subject: sub,
+                        excludeTeacherId: widget.teacherId,
+                      );
+
                       return FilterChip(
                         label: Text(sub),
                         selected: selectedSubs.contains(sub),
-                        onSelected: (val) {
-                          setState(() {
-                            val
-                                ? selectedSubs.add(sub)
-                                : selectedSubs.remove(sub);
-                          });
-                        },
+                        onSelected: isTaken
+                            ? null // 🔒 disables chip
+                            : (val) {
+                                setState(() {
+                                  val
+                                      ? selectedSubs.add(sub)
+                                      : selectedSubs.remove(sub);
+                                });
+                              },
                       );
                     }).toList(),
                   ),

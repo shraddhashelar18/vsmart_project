@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/teacher_service.dart';
+import '../../services/teacher_new_service.dart';
 import 'add_teacher.dart';
 import 'teacher_detail_screen.dart';
 

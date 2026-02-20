@@ -45,4 +45,14 @@ class ClassService {
   void deleteClass(String className) {
     mockClasses.remove(className);
   }
+
+  // 🔹 CHECK IF TEACHER IS ALREADY CLASS TEACHER
+  String? getClassWhereTeacherAssigned(String teacherName) {
+    for (var entry in mockClasses.entries) {
+      if (entry.value["teacher"] == teacherName) {
+        return entry.key; // return class name
+      }
+    }
+    return null;
+  }
 }
