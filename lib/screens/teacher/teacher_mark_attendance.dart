@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../mock/mock_student_data.dart';
+import '../../services/teacher_attendance_service.dart';
 
 class TeacherMarkAttendance extends StatefulWidget {
   final String className;
@@ -21,25 +21,22 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
 
   DateTime selectedDate = DateTime.now();
 
-  /// 🔥 SAME TYPE — ONLY DATA SOURCE CHANGED
   List<Map<String, dynamic>> students = [];
   int present = 0;
   int late = 0;
   int absent = 0;
 
+  final TeacherAttendanceService _service = TeacherAttendanceService();
+
   @override
   void initState() {
     super.initState();
+    _loadStudents();
+  }
 
-    /// 🔥 FIXED STUDENT FETCH
-    students = mockStudents.entries
-        .where((e) => e.value["class"] == widget.className)
-        .map((e) => {
-              "enrollment": e.key,
-              ...e.value,
-              "status": null,
-            })
-        .toList();
+  Future<void> _loadStudents() async {
+    students = await _service.getStudentsByClass(widget.className);
+    setState(() {});
   }
 
   void setStatus(int index, String status) {
@@ -161,24 +158,20 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () {
-                  final dateKey = DateFormat("yyyy-MM-dd").format(selectedDate);
+                onPressed: () async {
+  final dateKey = DateFormat("yyyy-MM-dd").format(selectedDate);
 
-                  mockAttendance[widget.className] ??= {};
-                  mockAttendance[widget.className]![widget.subject] ??= {};
-                  mockAttendance[widget.className]![widget.subject]![dateKey] =
-                      {};
+  await _service.submitAttendance(
+    className: widget.className,
+    subject: widget.subject,
+    dateKey: dateKey,
+    students: students,
+  );
 
-                  for (var s in students) {
-                    /// 🔥 ID FIXED → ENROLLMENT
-                    mockAttendance[widget.className]![widget.subject]![
-                        dateKey]![s["enrollment"]] = s["status"] ?? "A";
-                  }
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Attendance Submitted!")),
-                  );
-                },
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Attendance Submitted!")),
+  );
+},
                 child: const Text("Submit Attendance",
                     style: TextStyle(color: Colors.white)),
               ),

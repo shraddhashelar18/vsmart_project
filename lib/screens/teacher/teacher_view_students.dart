@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_student_data.dart';
+import '../../services/teacher_report_service.dart';
 import 'student_report_details.dart';
 
-class TeacherViewStudents extends StatelessWidget {
+class TeacherViewStudents extends StatefulWidget {
   final String className;
   static const green = Color(0xFF009846);
 
@@ -10,20 +10,30 @@ class TeacherViewStudents extends StatelessWidget {
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    /// 🔥 FIXED STUDENT FETCH
-    final students = mockStudents.entries
-        .where((e) => e.value["class"] == className)
-        .map((e) => {
-              "enrollment": e.key,
-              ...e.value,
-            })
-        .toList();
+  State<TeacherViewStudents> createState() => _TeacherViewStudentsState();
+}
 
+class _TeacherViewStudentsState extends State<TeacherViewStudents> {
+  final TeacherReportService _service = TeacherReportService();
+  List<Map<String, dynamic>> students = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStudents();
+  }
+
+  Future<void> _loadStudents() async {
+    students = await _service.getStudentsByClass(widget.className);
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: green,
-        title: Text("$className Students"),
+        backgroundColor: TeacherViewStudents.green,
+        title: Text("${widget.className} Students"),
       ),
       body: students.isEmpty
           ? const Center(
@@ -54,19 +64,18 @@ class TeacherViewStudents extends StatelessWidget {
                     ],
                   ),
                   child: InkWell(
-                    onTap: () {
-                      /// 🔥 ID FIXED → ENROLLMENT
+                    onTap: () async {
                       final studentId = s['enrollment'];
 
-                      final report = mockStudentReports[studentId];
+                      final report = await _service.getStudentReport(studentId);
 
                       if (report == null ||
                           report["marks"] == null ||
                           (report["marks"] as Map).isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content:
-                                  Text("No report found for this student")),
+                            content: Text("No report found for this student"),
+                          ),
                         );
                         return;
                       }
@@ -81,12 +90,11 @@ class TeacherViewStudents extends StatelessWidget {
                     },
                     child: Row(
                       children: [
-                        // Avatar bubble
                         Container(
                           height: 45,
                           width: 45,
                           decoration: const BoxDecoration(
-                            color: green,
+                            color: TeacherViewStudents.green,
                             shape: BoxShape.circle,
                           ),
                           alignment: Alignment.center,
@@ -99,10 +107,7 @@ class TeacherViewStudents extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         const SizedBox(width: 14),
-
-                        // Name + Roll
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +130,6 @@ class TeacherViewStudents extends StatelessWidget {
                             ],
                           ),
                         ),
-
                         const Icon(Icons.arrow_forward_ios,
                             size: 18, color: Colors.grey),
                       ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_student_data.dart';
+import '../../services/teacher_notification_service.dart';
 
 class TeacherSendNotifications extends StatefulWidget {
   final String className;
@@ -20,20 +20,14 @@ class TeacherSendNotifications extends StatefulWidget {
 
 class _TeacherSendNotificationsState extends State<TeacherSendNotifications> {
   final msgCtrl = TextEditingController();
-
+final TeacherNotificationService _service = TeacherNotificationService();
   String notifyType = "Whole Class";
   List<String> selectedStudents = [];
 
   @override
   Widget build(BuildContext context) {
     /// 🔥 FIXED STUDENT FETCH
-    final students = mockStudents.entries
-        .where((e) => e.value["class"] == widget.className)
-        .map((e) => {
-              "enrollment": e.key,
-              ...e.value,
-            })
-        .toList();
+    final students = _service.getStudentsByClass(widget.className);
 
     return Scaffold(
       appBar: AppBar(
@@ -119,26 +113,32 @@ class _TeacherSendNotificationsState extends State<TeacherSendNotifications> {
                 minimumSize: const Size(double.infinity, 50),
               ),
               onPressed: () {
-                if (msgCtrl.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Message cannot be empty")));
-                  return;
-                }
+  if (msgCtrl.text.trim().isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Message cannot be empty")));
+    return;
+  }
 
-                if (notifyType == "Whole Class") {
-                  print("Sending to WHOLE CLASS: ${widget.className}");
-                } else {
-                  print("Sending to SELECTED: $selectedStudents");
-                }
+  if (notifyType == "Students" && selectedStudents.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Select at least one student")));
+    return;
+  }
 
-                print("Message: ${msgCtrl.text}");
+  _service.sendNotification(
+    className: widget.className,
+    subject: widget.subject,
+    message: msgCtrl.text.trim(),
+    notifyType: notifyType,
+    selectedStudents: selectedStudents,
+  );
 
-                msgCtrl.clear();
-                selectedStudents.clear();
+  msgCtrl.clear();
+  selectedStudents.clear();
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Notification Sent!")));
-              },
+  ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Notification Sent!")));
+},
               child: const Text("Send", style: TextStyle(color: Colors.white)),
             ),
           ],

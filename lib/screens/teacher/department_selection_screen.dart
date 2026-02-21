@@ -3,12 +3,14 @@ import 'teacher_dashboard.dart';
 
 class DepartmentSelectionScreen extends StatefulWidget {
   final List<String> departments;
-  final int teacherId; // ✅ ADD THIS
+  final int teacherId;
+  final String teacherName; // ✅ ADD THIS
 
   const DepartmentSelectionScreen({
     Key? key,
     required this.departments,
     required this.teacherId,
+    required this.teacherName, // ✅ ADD THIS
   }) : super(key: key);
 
   @override
@@ -59,7 +61,8 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
                           builder: (_) => TeacherDashboard(
   activeDepartment: selectedDepartment!,
   teacherId: widget.teacherId,
-  departments: widget.departments, // ✅ ADD THIS
+  
+  departments: widget.departments, teacherName: widget.teacherName, // ✅ ADD THIS
 ),
 
                         ),

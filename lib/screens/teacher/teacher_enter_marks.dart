@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../mock/mock_student_data.dart';
-import '../../mock/mock_teacher_data.dart';
+import '../../services/teacher_marks_service.dart';
 
 class EnterMarksScreen extends StatefulWidget {
   final int teacherId;
@@ -20,7 +19,7 @@ class EnterMarksScreen extends StatefulWidget {
 
 class _EnterMarksScreenState extends State<EnterMarksScreen> {
   static const green = Color(0xFF009846);
-
+final TeacherMarksService _service = TeacherMarksService();
   final List<String> exams = ["CT-1", "CT-2"];
   String selectedExam = "CT-1";
   int maxMarks = 30;
@@ -37,24 +36,21 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
     _initControllers();
   }
 
-  void _initControllers() {
-    final students = mockStudents.entries
-        .where((e) => e.value["class"] == widget.className)
-        .map((e) => {
-              "enrollment": e.key,
-              ...e.value,
-            })
-        .toList();
+ void _initControllers() {
+    final students = _service.getStudentsByClass(widget.className);
 
     for (var exam in exams) {
       for (var s in students) {
         final sid = s["enrollment"];
 
-        final published =
-            mockStudentReports[sid]?["marks"]?[widget.subject]?[exam];
+        final examData = _service.getExamData(
+          studentId: sid,
+          subject: widget.subject,
+          exam: exam,
+        );
 
         controllers[exam]![sid] = TextEditingController(
-          text: published != null ? published["score"].toString() : "",
+          text: examData != null ? examData["score"].toString() : "",
         );
       }
     }
@@ -63,16 +59,23 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
   @override
   Widget build(BuildContext context) {
     // 🔥 FIXED STUDENT FETCH
-    final students = mockStudents.entries
-        .where((e) => e.value["class"] == widget.className)
-        .map((e) => {
-              "enrollment": e.key,
-              ...e.value,
-            })
-        .toList();
+   final students = _service.getStudentsByClass(widget.className);
 
     final ctrls = controllers[selectedExam]!;
+String? examStatus;
 
+if (students.isNotEmpty) {
+  final firstStudentId = students.first["enrollment"];
+
+  final examData = _service.getExamData(
+    studentId: firstStudentId,
+    subject: widget.subject,
+    exam: selectedExam,
+  );
+
+  examStatus = examData?["status"];
+}
+final bool isPublished = examStatus == "published";
     /// ✅ Stats PER EXAM
     final values = ctrls.values
         .map((c) => int.tryParse(c.text) ?? 0)
@@ -151,9 +154,16 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
                   width: 85,
                   child: TextField(
                     controller: controller,
+                    enabled: examStatus != "published", // 🔒 lock editing
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                        hintText: "0", suffixText: "/$maxMarks"),
+                      hintText: "0",
+                      suffixText: "/$maxMarks",
+                      filled: examStatus == "published",
+                      fillColor: examStatus == "published"
+                          ? Colors.grey.shade200
+                          : null,
+                    ),
                     onChanged: (v) {
                       final val = int.tryParse(v);
                       if (val != null && val > maxMarks) {
@@ -174,52 +184,125 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              backgroundColor: green,
-              minimumSize: const Size(double.infinity, 50)),
-          onPressed: _publishMarks,
-          child: const Text("Publish Marks",
-              style: TextStyle(color: Colors.white)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            OutlinedButton(
+              onPressed: isPublished ? null : () => _saveMarks(isDraft: true),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text("Save Draft"),
+            ),
+            const SizedBox(height: 10),
+           ElevatedButton(
+              onPressed: isPublished ? null : () => _confirmPublish(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: green,
+                disabledBackgroundColor: Colors.grey.shade400,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                "Publish Marks",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void _publishMarks() {
-    final students = mockStudents.entries
-        .where((e) => e.value["class"] == widget.className)
-        .map((e) => {
-              "enrollment": e.key,
-              ...e.value,
-            })
-        .toList();
+void _saveMarks({required bool isDraft}) {
+  _service.saveMarks(
+    className: widget.className,
+    subject: widget.subject,
+    exam: selectedExam,
+    maxMarks: maxMarks,
+    isDraft: isDraft,
+    controllers: controllers[selectedExam]!,
+  );
+
+  setState(() {});
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        isDraft
+            ? "$selectedExam saved as draft"
+            : "$selectedExam published successfully!",
+      ),
+    ),
+  );
+}
+Future<void> _confirmPublish() async {
+    final students = _service.getStudentsByClass(widget.className);
 
     final ctrls = controllers[selectedExam]!;
 
+    // 🔥 Find students with empty marks
+    List<String> missingRolls = [];
+
     for (var s in students) {
       final sid = s["enrollment"];
-      final score = int.tryParse(ctrls[sid]!.text) ?? 0;
+      final roll = s["roll"];
 
-      mockStudentReports[sid] ??= {
-        "name": s["name"],
-        "roll": s["roll"],
-        "marks": {},
-      };
-
-      final marks = mockStudentReports[sid]!["marks"] as Map;
-      marks[widget.subject] ??= {};
-      marks[widget.subject][selectedExam] = {
-        "score": score,
-        "max": maxMarks,
-      };
+      if (ctrls[sid]!.text.trim().isEmpty) {
+        missingRolls.add(roll);
+      }
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("$selectedExam published successfully!")),
-    );
-  }
+    // 🔥 If any missing → show warning
+    if (missingRolls.isNotEmpty) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Incomplete Marks"),
+          content: Text(
+            "Marks not entered for Roll No: ${missingRolls.join(", ")}\n\n"
+            "If you continue, blank entries will be marked as AB.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Continue"),
+            ),
+          ],
+        ),
+      );
 
+      if (proceed != true) return;
+    }
+
+    // 🔥 If all marks entered → confirm publish
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Confirm Publish"),
+        content: Text(
+            "Are you sure you want to publish $selectedExam marks?\n\nOnce published, marks cannot be edited."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: green),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Publish", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      _saveMarks(isDraft: false);
+    }
+  }
   Widget _label(String t) =>
       Text(t, style: const TextStyle(fontWeight: FontWeight.w600));
 

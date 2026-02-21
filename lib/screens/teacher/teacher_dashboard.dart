@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../mock/mock_teacher_classes.dart';
-import '../../mock/mock_teacher_subjects.dart';
 
+import '../../services/teacher_dashboard_service.dart';
 import '../teacher/department_selection_screen.dart';
 import '../teacher/teacher_mark_attendance.dart';
 import '../teacher/teacher_enter_marks.dart';
@@ -14,6 +13,7 @@ import '../teacher/teacher_send_notifications.dart';
 class TeacherDashboard extends StatefulWidget {
   final String activeDepartment;
   final int teacherId;
+  final String teacherName;
   final List<String> departments;
 
   const TeacherDashboard({
@@ -21,6 +21,7 @@ class TeacherDashboard extends StatefulWidget {
     required this.activeDepartment,
     required this.teacherId,
     required this.departments,
+     required this.teacherName, 
   }) : super(key: key);
 
   @override
@@ -30,35 +31,45 @@ class TeacherDashboard extends StatefulWidget {
 class _TeacherDashboardState extends State<TeacherDashboard> {
   static const green = Color(0xFF009846);
 
-  String teacherName = "Mr. Sunil Dodake";
+ 
   String selectedClass = "";
   String selectedSubject = "";
 
   List<String> allocatedClasses = [];
   List<String> subjectList = [];
-
-  @override
+final TeacherDashboardService _service = TeacherDashboardService();
+ @override
   void initState() {
     super.initState();
+    _loadClasses();
+  }
 
-    allocatedClasses = mockTeacherClasses[widget.teacherId] ?? [];
+  Future<void> _loadClasses() async {
+    final allClasses = await _service.getAllocatedClasses(widget.teacherId);
+
+    // 🔥 FILTER BY ACTIVE DEPARTMENT
+    allocatedClasses = allClasses
+        .where((cls) => cls.startsWith(widget.activeDepartment))
+        .toList();
 
     if (allocatedClasses.isNotEmpty) {
       selectedClass = allocatedClasses.first;
-      loadSubjects();
+      await loadSubjects();
+    } else {
+      selectedClass = "";
+      selectedSubject = "";
     }
-  }
 
-  void loadSubjects() {
-    // Load subjects for selected class
-    subjectList = mockTeacherSubjects[widget.teacherId]?[selectedClass] ?? [];
+    setState(() {});
+  }
+  Future<void> loadSubjects() async {
+    subjectList = await _service.getSubjects(widget.teacherId, selectedClass);
 
     if (subjectList.isEmpty) {
       selectedSubject = "";
     } else if (subjectList.length == 1) {
       selectedSubject = subjectList.first;
     } else {
-      // Default choose first if not selected
       if (!subjectList.contains(selectedSubject)) {
         selectedSubject = subjectList.first;
       }
@@ -66,7 +77,6 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
 
     setState(() {});
   }
-
   @override
   Widget build(BuildContext context) {
     final String today =
@@ -113,7 +123,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
               style: TextStyle(color: Colors.white70)),
           const SizedBox(height: 18),
           Text(
-            "Good Afternoon, $teacherName",
+            "Good Afternoon, ${widget.teacherName}",
             style: const TextStyle(
                 color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
           ),
@@ -138,7 +148,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
               MaterialPageRoute(
                 builder: (_) => DepartmentSelectionScreen(
                   departments: widget.departments,
-                  teacherId: widget.teacherId,
+                  
+                  teacherId: widget.teacherId, teacherName: widget.teacherName,
                 ),
               ),
             );

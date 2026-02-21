@@ -23,3 +23,4 @@ final Map<String, Map<String, dynamic>> mockStudentReports = {};
 
 final Map<String, Map<String, Map<String, Map<String, String>>>>
     mockAttendance = {};
+final Map<String, List<Map<String, dynamic>>> mockStudentNotifications = {};
