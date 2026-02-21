@@ -17,7 +17,7 @@ class AddClass extends StatefulWidget {
 }
 
 class _AddClassState extends State<AddClass> {
-  final TeacherService _teacherService = TeacherService();
+  final TeacherNewService _teacherService = TeacherNewService();
   final ClassService _classService = ClassService();
   static const green = Color(0xFF009846);
 
