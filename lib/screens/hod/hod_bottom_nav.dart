@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../models/user_session.dart';
 import '../settings/settings_screen.dart';
 import 'hod_dashboard.dart';
-
-
-import 'hod_settings.dart';
 
 class HodBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -32,12 +30,15 @@ class HodBottomNav extends StatelessWidget {
                   builder: (_) => HodDashboard(department: department)),
             );
             break;
-          
+
           case 1:
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (_) => SettingsScreen(role: 'hod',)),
+                builder: (_) => SettingsScreen(
+                  role: UserSession.currentUser!.role,
+                ),
+              ),
             );
             break;
         }
@@ -45,8 +46,6 @@ class HodBottomNav extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(
             icon: Icon(Icons.dashboard), label: "Dashboard"),
-        
-        
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
       ],
     );

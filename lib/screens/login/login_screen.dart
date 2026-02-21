@@ -5,6 +5,7 @@ import '../../mock/mock_users.dart';
 import '../../models/user_auth_model.dart';
 
 // dashboards / homes
+import '../../models/user_session.dart';
 import '../admin/admin_dashboard.dart';
 import '../teacher/teacher_home.dart';
 import '../hod/hod_dashboard.dart';
@@ -98,6 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
       (u) => u.email == email,
       orElse: () => UserAuth(
         user_id: -1,
+        name: "",
         email: "",
         role: "",
         status: "",
@@ -113,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _showMessage("Waiting for admin approval");
       return;
     }
-
+    UserSession.setUser(user);
     if (user.role == "admin") {
       Navigator.pushReplacement(
         context,

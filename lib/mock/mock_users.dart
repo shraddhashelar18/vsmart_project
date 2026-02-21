@@ -3,12 +3,14 @@ import '../models/user_auth_model.dart';
 List<UserAuth> mockUsers = [
   UserAuth(
     user_id: 99,
+    name: "System Admin",
     email: "admin@test.com",
     role: "admin",
     status: "approved",
   ),
   UserAuth(
     user_id: 2,
+    name: "Sunil Dodake",
     email: "teacher@test.com",
     role: "teacher",
     status: "approved",
@@ -16,6 +18,7 @@ List<UserAuth> mockUsers = [
   ),
   UserAuth(
     user_id: 4,
+    name: "Samidha",
     email: "teacher_it@test.com",
     role: "teacher",
     status: "approved",
@@ -23,18 +26,21 @@ List<UserAuth> mockUsers = [
   ),
   UserAuth(
     user_id: 3,
+    name: "mr sharma",
     email: "parent@test.com",
     role: "parent",
     status: "pending",
   ),
   UserAuth(
     user_id: 1,
+    name: "emma",
     email: "student@test.com",
     role: "student",
     status: "pending",
   ),
   UserAuth(
     user_id: 10,
+    name: "Yogita Khandagale",
     email: "hod_it@test.com",
     role: "hod",
     status: "approved",
@@ -42,6 +48,7 @@ List<UserAuth> mockUsers = [
   ),
   UserAuth(
     user_id: 11,
+    name: "Vijay Patil",
     email: "hod_co@test.com",
     role: "hod",
     status: "approved",
@@ -49,6 +56,7 @@ List<UserAuth> mockUsers = [
   ),
   UserAuth(
     user_id: 12,
+    name: "Anjum Mujawar",
     email: "hod_ej@test.com",
     role: "hod",
     status: "approved",
@@ -56,6 +64,7 @@ List<UserAuth> mockUsers = [
   ),
   UserAuth(
     user_id: 30,
+    name: "ashish sir",
     email: "principal@test.com",
     role: "principal",
     status: "approved",

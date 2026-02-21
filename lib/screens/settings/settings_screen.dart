@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../models/user_session.dart';
 import '../admin/admin_bottom_nav.dart';
 import 'change_password_screen.dart';
 import 'about_screen.dart';
 import '../../services/app_settings_service.dart';
+import '../hod/hod_bottom_nav.dart';
 
 class SettingsScreen extends StatefulWidget {
   final String role;
@@ -51,26 +53,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: primaryGreen,
         title: const Text("Settings"),
       ),
-      bottomNavigationBar:
-          widget.role == "admin" ? const AdminBottomNav(currentIndex: 2) : null,
+      bottomNavigationBar: widget.role == "admin"
+          ? const AdminBottomNav(currentIndex: 2)
+          : widget.role == "hod"
+              ? HodBottomNav(
+                  currentIndex: 1,
+                  department: widget.department ?? "",
+                )
+              : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-           if (widget.role == "hod") ...[
-              // 🔹 PROFILE
+            // 🔹 PROFILE (For Admin + HOD)
+            if (widget.role == "hod" || widget.role == "admin") ...[
               _sectionTitle("Profile"),
               _settingsCard([
-                _infoTile(Icons.person, "Name", "HOD User"),
-                _infoTile(Icons.email, "Email", "hod@college.com"),
-                if (widget.department != null)
-                  _infoTile(Icons.school, "Department", widget.department!),
+                _infoTile(
+                    Icons.person, "Name", UserSession.currentUser?.name ?? ""),
+                _infoTile(
+                    Icons.email, "Email", UserSession.currentUser?.email ?? ""),
+                if (UserSession.currentUser?.departments != null &&
+                    UserSession.currentUser!.departments!.isNotEmpty)
+                  _infoTile(
+                    Icons.school,
+                    "Department",
+                    UserSession.currentUser!.departments!.join(", "),
+                  ),
               ]),
-
               const SizedBox(height: 20),
+            ],
 
-              // 🔹 ACADEMIC INFO (READ ONLY)
+// 🔹 ACADEMIC INFO (HOD ONLY)
+            if (widget.role == "hod") ...[
               _sectionTitle("Academic Information"),
               _settingsCard([
                 _infoTile(Icons.school, "Active Semester", activeSemester),
@@ -81,7 +97,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   registrationOpen ? "Open" : "Closed",
                 ),
               ]),
-
               const SizedBox(height: 20),
             ],
             if (widget.role == "admin") ...[
@@ -89,10 +104,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _semesterSwitch(),
               _registrationSwitch(),
               _attendanceSwitch(),
-                            _atktLimitCard(),
+              _atktLimitCard(),
               const SizedBox(height: 20),
             ],
-           
             _sectionTitle("Account"),
             _settingsTile(
               Icons.lock,
@@ -128,7 +142,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
-        
       ),
     );
   }
@@ -174,7 +187,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
     );
   }
-Widget _atktLimitCard() {
+
+  Widget _atktLimitCard() {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
@@ -216,6 +230,7 @@ Widget _atktLimitCard() {
       ),
     );
   }
+
   Widget _switchCard({
     required IconData icon,
     required String title,
@@ -262,7 +277,8 @@ Widget _atktLimitCard() {
       ),
     );
   }
-Widget _settingsCard(List<Widget> children) {
+
+  Widget _settingsCard(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -286,6 +302,7 @@ Widget _settingsCard(List<Widget> children) {
       ),
     );
   }
+
   Widget _settingsTile(
     IconData icon,
     String title, {
@@ -314,6 +331,7 @@ Widget _settingsCard(List<Widget> children) {
       ),
     );
   }
+
   Widget _infoTile(IconData icon, String title, String value) {
     return ListTile(
       leading: Icon(icon, color: primaryGreen),
@@ -324,7 +342,6 @@ Widget _settingsCard(List<Widget> children) {
       ),
     );
   }
-  
 
   // ================== LOGOUT ==================
 

@@ -18,6 +18,7 @@ class UserService {
     mockUsers.add(
       UserAuth(
         user_id: request.requestId,
+        name: request.fullName,
         email: request.email,
         role: request.role,
         status: "approved",
