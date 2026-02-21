@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import '../settings/settings_screen.dart';
 import 'principal_dashboard.dart';
-import 'principal_settings.dart';
 
 class PrincipalBottomNav extends StatelessWidget {
   final int currentIndex;
+  final List<String> departments;
 
-  const PrincipalBottomNav({Key? key, required this.currentIndex})
-      : super(key: key);
+  const PrincipalBottomNav({
+    Key? key,
+    required this.currentIndex,
+    required this.departments,
+  }) : super(key: key);
 
   static const green = Color(0xFF009846);
 
@@ -25,7 +29,7 @@ class PrincipalBottomNav extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) => const PrincipalDashboard(departments: [],),
+                builder: (_) => PrincipalDashboard(departments: departments),
               ),
             );
             break;
@@ -34,7 +38,7 @@ class PrincipalBottomNav extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) => const PrincipalSettings(),
+                builder: (_) => SettingsScreen(role: "principal"),
               ),
             );
             break;

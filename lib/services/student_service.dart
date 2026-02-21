@@ -29,7 +29,7 @@ class StudentService {
           "Physics": "PASS",
           "Programming": "PASS",
         },
-        
+
         backlogCount: 0, // temporary
       ),
       Student(
@@ -87,14 +87,6 @@ class StudentService {
     // 🔹 Auto calculate backlog count
     for (var student in students) {
       student.backlogCount = _calculateBacklogs(student);
-
-      if (student.backlogCount == 0) {
-        student.promotionStatus = "PROMOTED";
-      } else if (student.backlogCount <= 2) {
-        student.promotionStatus = "PROMOTED_WITH_ATKT";
-      } else {
-        student.promotionStatus = "DETAINED";
-      }
     }
     return students;
   }
@@ -110,13 +102,13 @@ class StudentService {
 
     return backlogs;
   }
-  
+
   Future<List<Student>> getPromotedStudents(String className) async {
     final students = await getStudentsByClass(className);
 
     return students.where((s) => s.promotionStatus == "PROMOTED").toList();
   }
-  
+
   Future<List<Student>> getDetainedStudents(String className) async {
     final students = await getStudentsByClass(className);
 

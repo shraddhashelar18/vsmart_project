@@ -12,9 +12,6 @@ class PrincipalDashboard extends StatelessWidget {
 
   static const green = Color(0xFF009846);
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +19,10 @@ class PrincipalDashboard extends StatelessWidget {
         backgroundColor: green,
         title: const Text("Principal Dashboard"),
       ),
-      bottomNavigationBar: const PrincipalBottomNav(currentIndex: 0),
+      bottomNavigationBar: PrincipalBottomNav(
+        currentIndex: 0,
+        departments: departments,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -48,8 +48,10 @@ class PrincipalDashboard extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                PrincipalDepartmentView(department: dept),
+                            builder: (_) => PrincipalDepartmentView(
+                              department: dept,
+                              departments: departments,
+                            ),
                           ),
                         );
                       },

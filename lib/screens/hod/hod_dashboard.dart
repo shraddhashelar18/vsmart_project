@@ -43,7 +43,6 @@ class _HodDashboardState extends State<HodDashboard> {
         currentIndex: 0,
         department: widget.department,
       ),
-
       body: FutureBuilder<DepartmentSummary>(
         future: _summaryFuture,
         builder: (context, snapshot) {
@@ -156,17 +155,16 @@ class _HodDashboardState extends State<HodDashboard> {
                     ),
                   );
                 }),
-               
                 _actionButton("View ATKT List", () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => HodATKTClasses(
-        department: widget.department,
-      ),
-    ),
-  );
-}),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => HodATKTClasses(
+                        department: widget.department,
+                      ),
+                    ),
+                  );
+                }),
                 _actionButton("View Detained List", () {
                   Navigator.push(
                     context,
