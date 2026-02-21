@@ -49,4 +49,15 @@ class AppSettingsService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_attendanceKey, value);
   }
+  int _atktLimit = 2; // default
+
+  Future<int> getAtktLimit() async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    return _atktLimit;
+  }
+
+  Future<void> setAtktLimit(int value) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    _atktLimit = value;
+  }
 }

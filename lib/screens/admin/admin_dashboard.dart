@@ -217,7 +217,7 @@ class AdminDashboard extends StatelessWidget {
             } else if (text == "Manage Classes") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) =>  ClassDepartments()),
+                MaterialPageRoute(builder: (_) => const ClassDepartments()),
               );
             }
           },

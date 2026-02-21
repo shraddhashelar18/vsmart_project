@@ -1,118 +1,190 @@
 import 'package:flutter/material.dart';
+import 'package:vsmart_app/screens/hod/hod_promoted_students.dart';
+import 'package:vsmart_app/screens/hod/hod_promoted_with_kt_students.dart';
+import '../../services/department_service.dart';
+import '../../models/department_summary.dart';
+import '../../widgets/summary_card.dart';
 import 'hod_bottom_nav.dart';
 import 'hod_students.dart';
 import 'hod_teachers.dart';
 import 'hod_promoted_classes.dart';
 import 'hod_detained_classes.dart';
-import 'hod_settings.dart';
+import 'hod_atkt_classes.dart';
 
-class HodDashboard extends StatelessWidget {
+class HodDashboard extends StatefulWidget {
   final String department;
 
-  const HodDashboard({Key? key, required this.department}) : super(key: key);
+  const HodDashboard({super.key, required this.department});
+
+  @override
+  State<HodDashboard> createState() => _HodDashboardState();
+}
+
+class _HodDashboardState extends State<HodDashboard> {
+  final DepartmentService _service = DepartmentService();
+  late Future<DepartmentSummary> _summaryFuture;
 
   static const green = Color(0xFF009846);
+
+  @override
+  void initState() {
+    super.initState();
+    _summaryFuture = _service.getSummary(widget.department);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: green,
-        elevation: 0,
-        title: Text("HOD Dashboard ($department)"),
+        title: Text("HOD Dashboard (${widget.department})"),
       ),
-      bottomNavigationBar:
-          HodBottomNav(currentIndex: 0, department: department),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 1.1,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+      bottomNavigationBar: HodBottomNav(
+        currentIndex: 0,
+        department: widget.department,
+      ),
+
+      body: FutureBuilder<DepartmentSummary>(
+        future: _summaryFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(child: Text("Error loading data"));
+          }
+
+          final data = snapshot.data!;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _card(Icons.school, "Total Students", "350"),
-                _card(Icons.person, "Total Teachers", "18"),
-                _card(Icons.arrow_upward, "Promoted", "312"),
-                _card(Icons.warning, "Detained", "38"),
+                Column(
+                  children: [
+                    // 🔹 Row 1 — Main Stats
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SummaryCard(
+                            icon: Icons.school,
+                            title: "Total Students",
+                            value: data.totalStudents.toString(),
+                            color: green,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SummaryCard(
+                            icon: Icons.person,
+                            title: "Total Teachers",
+                            value: data.totalTeachers.toString(),
+                            color: green,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // 🔹 Row 2 — Academic Status
+                    // 🔹 Row 2 — Academic Status
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SummaryCard(
+                            icon: Icons.arrow_upward,
+                            title: "Promoted",
+                            value: data.promoted.toString(),
+                            color: green,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SummaryCard(
+                            icon: Icons.trending_up,
+                            title: "With ATKT",
+                            value: data.promotedWithBacklog.toString(),
+                            color: Colors.orange,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SummaryCard(
+                            icon: Icons.warning,
+                            title: "Detained",
+                            value: data.detained.toString(),
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Academic Actions",
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                ),
+                const SizedBox(height: 12),
+                _actionButton("View Students", () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          HodStudents(department: widget.department),
+                    ),
+                  );
+                }),
+                _actionButton("View Teachers", () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          HodTeachers(department: widget.department),
+                    ),
+                  );
+                }),
+                _actionButton("View Promoted List", () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          HodPromotedClasses(department: widget.department),
+                    ),
+                  );
+                }),
+               
+                _actionButton("View ATKT List", () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => HodATKTClasses(
+        department: widget.department,
+      ),
+    ),
+  );
+}),
+                _actionButton("View Detained List", () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          HodDetainedClasses(department: widget.department),
+                    ),
+                  );
+                }),
               ],
             ),
-            const SizedBox(height: 20),
-            const Text(
-              "Academic Actions",
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-            ),
-            const SizedBox(height: 12),
-            _button(context, "View Students", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => HodStudents(department: department),
-                ),
-              );
-            }),
-            _button(context, "View Teachers", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => HodTeachers(department: department),
-                ),
-              );
-            }),
-            _button(context, "View Promoted List", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => HodPromotedClasses(department: department),
-                ),
-              );
-            }),
-            _button(context, "View Detained List", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => HodDetainedClasses(department: department),
-                ),
-              );
-            }),
-            
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _card(IconData icon, String title, String value) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: Colors.white,
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: green, size: 28),
-          const SizedBox(height: 6),
-          Text(title, style: const TextStyle(fontSize: 14)),
-          const SizedBox(height: 4),
-          Text(value,
-              style:
-                  const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-  Widget _button(BuildContext context, String text, VoidCallback onTap) {
+  Widget _actionButton(String text, VoidCallback onTap) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: SizedBox(

@@ -1,27 +1,38 @@
 import 'package:flutter/material.dart';
+import '../../models/student.dart';
+import '../../services/student_service.dart';
+import 'student_detail_screen.dart';
 
-class HodStudentClasses extends StatelessWidget {
+class HodStudentClasses extends StatefulWidget {
   final String className;
-  final String semester;
-  final String department;
 
   const HodStudentClasses({
-    Key? key,
+    super.key,
     required this.className,
-    required this.department,
-    required this.semester,
-  }) : super(key: key);
+  });
+
+  @override
+  State<HodStudentClasses> createState() => _HodStudentClassesState();
+}
+
+class _HodStudentClassesState extends State<HodStudentClasses> {
+  final StudentService _service = StudentService();
+  late Future<List<Student>> _studentsFuture;
 
   static const green = Color(0xFF009846);
 
   @override
+  void initState() {
+    super.initState();
+    _studentsFuture = _service.getStudentsByClass(widget.className);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: green,
-        elevation: 0,
-        title: Text("$className Students"),
+        title: Text("${widget.className} Students"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -39,80 +50,89 @@ class HodStudentClasses extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "40 students found",
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Expanded(
-              child: ListView(
-                children: const [
-                  _StudentCard(
-                    name: "Emma Johnson",
-                    email: "emma@if.com",
-                    phone: "9876543210",
-                  ),
-                  _StudentCard(
-                    name: "Liam Smith",
-                    email: "liam@if.com",
-                    phone: "9876543211",
-                  ),
-                  _StudentCard(
-                    name: "Noah Davis",
-                    email: "noah@if.com",
-                    phone: "9876543212",
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+              child: FutureBuilder<List<Student>>(
+                future: _studentsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-class _StudentCard extends StatelessWidget {
-  final String name;
-  final String email;
-  final String phone;
+                  if (snapshot.hasError) {
+                    return const Center(child: Text("Error loading students"));
+                  }
 
-  const _StudentCard({
-    required this.name,
-    required this.email,
-    required this.phone,
-  });
+                  final students = snapshot.data ?? [];
 
-  static const green = Color(0xFF009846);
+                  if (students.isEmpty) {
+                    return const Center(child: Text("No students found"));
+                  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            const CircleAvatar(
-              backgroundColor: Color(0xFFEAF7F1),
-              child: Icon(Icons.person, color: green),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(email, style: const TextStyle(color: Colors.grey)),
-                  Text(phone, style: TextStyle(color: Colors.grey.shade600)),
-                ],
+                  return ListView.builder(
+                    itemCount: students.length,
+                    itemBuilder: (context, index) {
+                      final s = students[index];
+
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => StudentDetailScreen(student: s),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          elevation: 3,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Row(
+                              children: [
+                                const CircleAvatar(
+                                  radius: 24,
+                                  backgroundColor: Color(0xFFEAF7F1),
+                                  child: Icon(Icons.person, color: green),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        s.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "Roll No: ${s.rollNo}",
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 16,
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],

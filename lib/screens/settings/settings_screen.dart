@@ -6,9 +6,13 @@ import '../../services/app_settings_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final String role;
+  final String? department;
 
-  const SettingsScreen({Key? key, required this.role}) : super(key: key);
-
+  const SettingsScreen({
+    Key? key,
+    required this.role,
+    this.department,
+  }) : super(key: key);
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
@@ -20,6 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool registrationOpen = true;
   bool resultsPublished = false;
   bool attendanceLocked = false;
+  int atktLimit = 2;
 
   static const Color primaryGreen = Color(0xFF009846);
 
@@ -34,6 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     registrationOpen = await _settingsService.getRegistrationStatus();
     resultsPublished = await _settingsService.getResultsStatus();
     attendanceLocked = await _settingsService.getAttendanceLockStatus();
+    atktLimit = await _settingsService.getAtktLimit();
 
     setState(() {});
   }
@@ -52,13 +58,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+           if (widget.role == "hod") ...[
+              // 🔹 PROFILE
+              _sectionTitle("Profile"),
+              _settingsCard([
+                _infoTile(Icons.person, "Name", "HOD User"),
+                _infoTile(Icons.email, "Email", "hod@college.com"),
+                if (widget.department != null)
+                  _infoTile(Icons.school, "Department", widget.department!),
+              ]),
+
+              const SizedBox(height: 20),
+
+              // 🔹 ACADEMIC INFO (READ ONLY)
+              _sectionTitle("Academic Information"),
+              _settingsCard([
+                _infoTile(Icons.school, "Active Semester", activeSemester),
+                _infoTile(Icons.rule, "ATKT Limit", atktLimit.toString()),
+                _infoTile(
+                  Icons.how_to_reg,
+                  "Registration Status",
+                  registrationOpen ? "Open" : "Closed",
+                ),
+              ]),
+
+              const SizedBox(height: 20),
+            ],
             if (widget.role == "admin") ...[
               _sectionTitle("Academic Control"),
               _semesterSwitch(),
               _registrationSwitch(),
               _attendanceSwitch(),
+                            _atktLimitCard(),
               const SizedBox(height: 20),
             ],
+           
             _sectionTitle("Account"),
             _settingsTile(
               Icons.lock,
@@ -92,6 +126,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
+        
       ),
     );
   }
@@ -137,7 +172,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
     );
   }
-
+Widget _atktLimitCard() {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: primaryGreen.withOpacity(0.15),
+          child: const Icon(Icons.rule, color: primaryGreen),
+        ),
+        title: const Text(
+          "Max Backlogs Allowed",
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text("Current Limit: $atktLimit"),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.remove),
+              onPressed: atktLimit > 0
+                  ? () async {
+                      atktLimit--;
+                      await _settingsService.setAtktLimit(atktLimit);
+                      setState(() {});
+                    }
+                  : null,
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () async {
+                atktLimit++;
+                await _settingsService.setAtktLimit(atktLimit);
+                setState(() {});
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   Widget _switchCard({
     required IconData icon,
     required String title,
@@ -184,7 +260,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-
+Widget _settingsCard(List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i != children.length - 1)
+              const Divider(height: 1, thickness: 0.4),
+          ]
+        ],
+      ),
+    );
+  }
   Widget _settingsTile(
     IconData icon,
     String title, {
@@ -213,6 +312,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+  Widget _infoTile(IconData icon, String title, String value) {
+    return ListTile(
+      leading: Icon(icon, color: primaryGreen),
+      title: Text(title),
+      subtitle: Text(
+        value,
+        style: const TextStyle(color: Colors.grey),
+      ),
+    );
+  }
+  
 
   // ================== LOGOUT ==================
 
