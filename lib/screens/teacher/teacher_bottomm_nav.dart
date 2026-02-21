@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+
+import '../../models/user_session.dart';
+import '../settings/settings_screen.dart';
+import 'teacher_home.dart';
+
 class TeacherBottomNav extends StatelessWidget {
   final int currentIndex;
 
@@ -15,15 +20,29 @@ class TeacherBottomNav extends StatelessWidget {
       onTap: (index) {
         if (index == currentIndex) return;
 
+        final user = UserSession.currentUser;
+        if (user == null) return; // prevent crash
+
         if (index == 0) {
-          Navigator.pushReplacementNamed(context, '/teacherHome');
-        } else if (index == 1) {
-          Navigator.pushReplacementNamed(
+          Navigator.pushReplacement(
             context,
-            '/settings',
-            arguments: {
-              "role": "teacher",
-            },
+            MaterialPageRoute(
+              builder: (_) => TeacherHome(
+                teacherId: user.user_id,
+                teacherName: user.name,
+                department: user.departments.first,
+                departments: user.departments,
+              ),
+            ),
+          );
+        } else if (index == 1) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SettingsScreen(
+                role: user.role,
+              ),
+            ),
           );
         }
       },
