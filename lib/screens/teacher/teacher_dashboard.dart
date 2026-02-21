@@ -82,9 +82,9 @@ final TeacherDashboardService _service = TeacherDashboardService();
     final String today =
         DateFormat("EEEE, MMMM d, yyyy").format(DateTime.now());
 
-    return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      body: SingleChildScrollView(
+    return Container(
+      color: Colors.grey.shade100,
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

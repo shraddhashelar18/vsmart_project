@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'teacher_bottomm_nav.dart';
 import 'teacher_dashboard.dart';
-import 'teacher_settings.dart';
 
 class TeacherHome extends StatefulWidget {
   final int teacherId;
@@ -24,36 +24,14 @@ class _TeacherHomeState extends State<TeacherHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: index,
-        children: [
-          TeacherDashboard(
-            teacherId: widget.teacherId,
-            activeDepartment: widget.department,
-            departments: widget.departments, teacherName: widget.teacherName,
-          ),
-          TeacherSettingsScreen(
-            teacherName: "Teacher", // optional if stored later
-            departments: widget.departments,
-          ),
-        ],
+   return Scaffold(
+      body: TeacherDashboard(
+        teacherId: widget.teacherId,
+        activeDepartment: widget.department,
+        departments: widget.departments,
+        teacherName: widget.teacherName,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: index,
-        selectedItemColor: const Color(0xFF009846),
-        onTap: (i) => setState(() => index = i),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            label: "Dashboard",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
-          ),
-        ],
-      ),
+      bottomNavigationBar: const TeacherBottomNav(currentIndex: 0),
     );
   }
 }
