@@ -139,11 +139,13 @@ class _AddClassState extends State<AddClass> {
                     enabled: !isAssignedElsewhere,
                     child: Text(
                       isAssignedElsewhere
-                          ? "$teacherName ($assignedClass Class Teacher)"
+                          ? "$teacherName ($assignedClass)"
                           : teacherName,
                       style: TextStyle(
                         color: isAssignedElsewhere ? Colors.grey : Colors.black,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   );
                 }).toList(),
@@ -152,6 +154,7 @@ class _AddClassState extends State<AddClass> {
                   setState(() => _selectedTeacher = value);
                 },
               ),
+              const SizedBox(height: 16),
 
               /// NOTE BOX
               Container(

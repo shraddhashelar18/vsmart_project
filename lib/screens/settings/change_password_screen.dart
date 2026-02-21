@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
-  const ChangePasswordScreen({Key? key}) : super(key: key);
+  final String currentStoredPassword; // 🔥 pass from login
+
+  const ChangePasswordScreen({
+    Key? key,
+    required this.currentStoredPassword,
+  }) : super(key: key);
 
   @override
   State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
@@ -9,6 +14,8 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  String currentPassword = "";
   String newPassword = "";
   String confirmPassword = "";
 
@@ -27,6 +34,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           key: _formKey,
           child: Column(
             children: [
+              _passwordField("Current Password", (v) => currentPassword = v),
               _passwordField("New Password", (v) => newPassword = v),
               _passwordField("Confirm Password", (v) => confirmPassword = v),
               const SizedBox(height: 20),
@@ -34,26 +42,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryGreen,
                 ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    if (newPassword != confirmPassword) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Passwords do not match"),
-                        ),
-                      );
-                      return;
-                    }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Password changed successfully"),
-                      ),
-                    );
-
-                    Navigator.pop(context);
-                  }
-                },
+                onPressed: _updatePassword,
                 child: const Text("Update Password"),
               )
             ],
@@ -61,6 +50,40 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         ),
       ),
     );
+  }
+
+  void _updatePassword() {
+    if (!_formKey.currentState!.validate()) return;
+
+    // 🔒 Step 1: Verify current password
+    if (currentPassword != widget.currentStoredPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Current password is incorrect")),
+      );
+      return;
+    }
+
+    // 🔒 Step 2: Check new != old
+    if (newPassword == widget.currentStoredPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("New password must be different")),
+      );
+      return;
+    }
+
+    // 🔒 Step 3: Confirm match
+    if (newPassword != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match")),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Password changed successfully")),
+    );
+
+    Navigator.pop(context);
   }
 
   Widget _passwordField(String label, Function(String) onChanged) {

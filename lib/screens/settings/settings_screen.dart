@@ -67,7 +67,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const ChangePasswordScreen(),
+                    builder: (_) => const ChangePasswordScreen(
+                      currentStoredPassword: '123456',
+                    ),
                   ),
                 );
               },

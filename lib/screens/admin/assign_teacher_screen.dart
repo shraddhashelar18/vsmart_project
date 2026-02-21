@@ -34,6 +34,8 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
     "IF6KA": ["Java", "DBMS", "Python"],
     "IF6KB": ["Java", "DBMS", "Python"],
     "CO6KA": ["OS", "CN", "Java"],
+    "CO6KB": ["OS", "CN", "Java"],
+    "EJ6KA": ["Microprocessor", "Electronics"],
   };
 
   // 🔹 Mock Allocated Subjects (Per Class)
@@ -69,6 +71,7 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
 
             // 🔹 Department Dropdown
             DropdownButtonFormField<String>(
+              value: selectedDept,
               decoration: const InputDecoration(
                 labelText: "Department",
                 border: OutlineInputBorder(),
@@ -93,6 +96,7 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
             // 🔹 Class Dropdown (only after dept selected)
             if (selectedDept != null)
               DropdownButtonFormField<String>(
+                value: selectedClass,
                 decoration: const InputDecoration(
                   labelText: "Class",
                   border: OutlineInputBorder(),
@@ -115,32 +119,32 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
 
             // 🔹 Subjects (only after class selected)
             if (selectedClass != null)
-              Expanded(
-                child: ListView(
-                  children: classSubjects[selectedClass]!.map((subject) {
-                    bool isAllocated =
-                        allocatedSubjects[selectedClass]?.contains(subject) ??
-                            false;
+              ListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: classSubjects[selectedClass]!.map((subject) {
+                  bool isAllocated =
+                      allocatedSubjects[selectedClass]?.contains(subject) ??
+                          false;
 
-                    return CheckboxListTile(
-                      value: selectedSubjects.contains(subject),
-                      onChanged: isAllocated
-                          ? null
-                          : (value) {
-                              setState(() {
-                                if (value == true) {
-                                  selectedSubjects.add(subject);
-                                } else {
-                                  selectedSubjects.remove(subject);
-                                }
-                              });
-                            },
-                      title: Text(
-                        isAllocated ? "$subject (Allocated)" : subject,
-                      ),
-                    );
-                  }).toList(),
-                ),
+                  return CheckboxListTile(
+                    value: selectedSubjects.contains(subject),
+                    onChanged: isAllocated
+                        ? null
+                        : (value) {
+                            setState(() {
+                              if (value == true) {
+                                selectedSubjects.add(subject);
+                              } else {
+                                selectedSubjects.remove(subject);
+                              }
+                            });
+                          },
+                    title: Text(
+                      isAllocated ? "$subject (Allocated)" : subject,
+                    ),
+                  );
+                }).toList(),
               ),
 
             const SizedBox(height: 10),
