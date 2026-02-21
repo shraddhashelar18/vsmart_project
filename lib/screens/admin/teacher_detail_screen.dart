@@ -5,7 +5,7 @@ class TeacherDetailScreen extends StatelessWidget {
   final int teacherId;
   final String name;
 
-  final TeacherService _teacherService = TeacherService();
+  final TeacherNewService _teacherService = TeacherNewService();
 
   TeacherDetailScreen({
     Key? key,

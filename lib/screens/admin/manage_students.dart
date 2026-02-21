@@ -14,7 +14,7 @@ class ManageStudents extends StatefulWidget {
 class _ManageStudentsState extends State<ManageStudents> {
   static const green = Color(0xFF009846);
 
-  final StudentService _studentService = StudentService();
+  final StudentNewService _studentService = StudentNewService();
 
   List<Map<String, dynamic>> students = [];
 

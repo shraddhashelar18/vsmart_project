@@ -3,7 +3,7 @@ import '../mock/mock_student_data.dart';
 import 'student_new_service.dart';
 
 class ParentService {
-  final StudentService _studentService = StudentService();
+  final StudentNewService _studentService = StudentNewService();
   List<MapEntry<String, Map<String, dynamic>>> getParentsFilteredByClass(
       String className) {
     return mockParents.entries.where((p) {

@@ -20,7 +20,7 @@ class AddTeacher extends StatefulWidget {
 
 class _AddTeacherState extends State<AddTeacher> {
   final AppSettingsService _settingsService = AppSettingsService();
-  final TeacherService _teacherService = TeacherService();
+  final TeacherNewService _teacherService = TeacherNewService();
   final AttendanceService _attendanceService = AttendanceService();
 
   String activeSemester = "EVEN";

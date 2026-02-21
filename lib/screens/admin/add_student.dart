@@ -17,7 +17,7 @@ class AddStudent extends StatefulWidget {
 
 class _AddStudentState extends State<AddStudent> {
   final _formKey = GlobalKey<FormState>();
-  final StudentService _studentService = StudentService();
+  final StudentNewService _studentService = StudentNewService();
 
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();

@@ -13,7 +13,7 @@ class ManageTeachers extends StatefulWidget {
 }
 
 class _ManageTeachersState extends State<ManageTeachers> {
-  final TeacherService _teacherService = TeacherService();
+  final TeacherNewService _teacherService = TeacherNewService();
   List<Map<String, dynamic>> teachers = [];
 
   @override

@@ -3,7 +3,7 @@ import '../mock/mock_teacher_classes.dart';
 import '../mock/mock_teacher_departments.dart';
 import '../mock/mock_teacher_subjects.dart';
 
-class TeacherService {
+class TeacherNewService{
   // ===============================
   // GET ALL TEACHERS
   // ===============================

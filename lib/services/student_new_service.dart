@@ -1,6 +1,6 @@
 import '../mock/mock_student_data.dart';
 
-class StudentService {
+class StudentNewService {
   Future<List<Map<String, dynamic>>> getStudentsByClass(
       String className) async {
     return mockStudents.entries
