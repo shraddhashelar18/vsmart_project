@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/user_session.dart';
 import '../admin/admin_bottom_nav.dart';
+import '../principal/principal_bottom_nav.dart';
 import 'change_password_screen.dart';
 import 'about_screen.dart';
 import '../../services/app_settings_service.dart';
@@ -60,14 +61,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   currentIndex: 1,
                   department: widget.department ?? "",
                 )
-              : null,
+              : widget.role == "principal"
+                  ? PrincipalBottomNav(
+                      currentIndex: 1,
+                      departments: UserSession.currentUser?.departments ?? [],
+                    )
+                  : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 🔹 PROFILE (For Admin + HOD)
-            if (widget.role == "hod" || widget.role == "admin") ...[
+            if (widget.role == "admin" ||
+                widget.role == "principal" ||
+                widget.role == "hod") ...[
               _sectionTitle("Profile"),
               _settingsCard([
                 _infoTile(
@@ -86,7 +94,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
 
 // 🔹 ACADEMIC INFO (HOD ONLY)
-            if (widget.role == "hod") ...[
+            if (widget.role == "principal" || widget.role == "hod") ...[
               _sectionTitle("Academic Information"),
               _settingsCard([
                 _infoTile(Icons.school, "Active Semester", activeSemester),
