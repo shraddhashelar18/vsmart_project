@@ -3,21 +3,22 @@ import '../../models/student.dart';
 import '../../services/student_service.dart';
 import '../../services/promotion_service.dart';
 
-class HodPromotedStudents extends StatefulWidget {
+class HodPromotedWithKTStudents extends StatefulWidget {
   final String department;
   final String className;
 
-  const HodPromotedStudents({
+  const HodPromotedWithKTStudents({
     super.key,
     required this.department,
     required this.className,
   });
 
   @override
-  State<HodPromotedStudents> createState() => _HodPromotedStudentsState();
+  State<HodPromotedWithKTStudents> createState() =>
+      _HodPromotedWithKTStudentsState();
 }
 
-class _HodPromotedStudentsState extends State<HodPromotedStudents> {
+class _HodPromotedWithKTStudentsState extends State<HodPromotedWithKTStudents> {
   final StudentService _studentService = StudentService();
   final PromotionService _promotionService = PromotionService();
 
@@ -28,22 +29,35 @@ class _HodPromotedStudentsState extends State<HodPromotedStudents> {
   @override
   void initState() {
     super.initState();
-    _future = _loadPromotedStudents();
+    _future = _loadStudents();
   }
 
-  Future<List<Student>> _loadPromotedStudents() async {
+  Future<List<Student>> _loadStudents() async {
     final students = await _studentService.getStudentsByClass(widget.className);
 
     final evaluated = await _promotionService.evaluatePromotion(students);
 
-    return evaluated.where((s) => s.promotionStatus == "PROMOTED").toList();
+    return evaluated
+        .where((s) => s.promotionStatus == "PROMOTED_WITH_ATKT")
+        .toList();
+  }
+List<String> _getKTSubjects(Student student) {
+    List<String> ktSubjects = [];
+
+    student.finalResults.forEach((subject, result) {
+      if (result == "FAIL" || result == "ABSENT") {
+        ktSubjects.add(subject);
+      }
+    });
+
+    return ktSubjects;
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: green,
-        title: Text("${widget.className} - Promoted"),
+        title: Text("${widget.className} - Promoted With KT"),
       ),
       body: FutureBuilder<List<Student>>(
         future: _future,
@@ -52,19 +66,10 @@ class _HodPromotedStudentsState extends State<HodPromotedStudents> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text("Error loading students"));
-          }
-
           final students = snapshot.data ?? [];
 
           if (students.isEmpty) {
-            return const Center(
-              child: Text(
-                "No promoted students found",
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-            );
+            return const Center(child: Text("No ATKT students"));
           }
 
           return ListView.builder(
@@ -74,14 +79,18 @@ class _HodPromotedStudentsState extends State<HodPromotedStudents> {
               final s = students[i];
 
               return Card(
-                margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  title: Text(
-                    s.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Text(
-                    "Backlogs: ${s.backlogCount} | Status: ${s.promotionStatus}",
+                  title: Text(s.name),
+                 subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Backlogs: ${s.backlogCount}"),
+                      const SizedBox(height: 4),
+                      Text(
+                        "KT Subjects: ${_getKTSubjects(s).join(", ")}",
+                        style: const TextStyle(color: Colors.orange),
+                      ),
+                    ],
                   ),
                 ),
               );

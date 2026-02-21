@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import '../../services/app_settings_service.dart';
 import 'hod_bottom_nav.dart';
-import 'hod_detained_students.dart';
+import 'hod_promoted_with_kt_students.dart';
 
-class HodDetainedClasses extends StatefulWidget {
+class HodATKTClasses extends StatefulWidget {
   final String department;
 
-  const HodDetainedClasses({
+  const HodATKTClasses({
     super.key,
     required this.department,
   });
 
   @override
-  State<HodDetainedClasses> createState() => _HodDetainedClassesState();
+  State<HodATKTClasses> createState() => _HodATKTClassesState();
 }
 
-class _HodDetainedClassesState extends State<HodDetainedClasses> {
+class _HodATKTClassesState extends State<HodATKTClasses> {
   final AppSettingsService _settingsService = AppSettingsService();
 
   String activeSemester = "EVEN";
@@ -40,16 +40,15 @@ class _HodDetainedClassesState extends State<HodDetainedClasses> {
     List<String> classList = [];
 
     for (var sem in semesters) {
-      classList.add("${widget.department}${sem}KA");
-      classList.add("${widget.department}${sem}KB");
-      classList.add("${widget.department}${sem}KC");
+      classList.add("${widget.department}$sem" "KA");
+      classList.add("${widget.department}$sem" "KB");
+      classList.add("${widget.department}$sem" "KC");
     }
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: green,
-        elevation: 0,
-        title: Text("Detained Students (${widget.department})"),
+        backgroundColor: Color(0xFF009846),
+        title: Text("ATKT Classes (${widget.department})"),
       ),
       bottomNavigationBar: HodBottomNav(
         currentIndex: 0,
@@ -59,17 +58,17 @@ class _HodDetainedClassesState extends State<HodDetainedClasses> {
         padding: const EdgeInsets.all(16),
         itemCount: classList.length,
         itemBuilder: (_, i) {
-          final String className = classList[i];
+          final className = classList[i];
 
           return Card(
             child: ListTile(
               title: Text(className),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+              trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => HodDetainedStudents(
+                    builder: (_) => HodPromotedWithKTStudents(
                       department: widget.department,
                       className: className,
                     ),

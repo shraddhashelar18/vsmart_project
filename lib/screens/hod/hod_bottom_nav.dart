@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../settings/settings_screen.dart';
 import 'hod_dashboard.dart';
 
 
@@ -36,7 +37,7 @@ class HodBottomNav extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (_) => HodSettings(department: department)),
+                  builder: (_) => SettingsScreen(role: 'hod',)),
             );
             break;
         }
