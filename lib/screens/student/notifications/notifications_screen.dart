@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/notification_service.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/notification_service.dart';
 import '../models/notification_model.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -20,7 +21,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   void loadNotifications() async {
-    final data = await NotificationService.fetchNotifications();
+    final studentId = AuthService.currentUserId;
+
+    final data = await NotificationService.fetchNotifications(studentId);
+
     setState(() {
       notifications = data;
       loading = false;

@@ -15,7 +15,7 @@ class DashboardModel {
   final String rollNo;
   final String className;
   final int semester;
-
+final String enrollment;
   final double attendancePercent;
   final int presentDays;
   final int absentDays;
@@ -31,12 +31,14 @@ class DashboardModel {
     required this.rollNo,
     required this.className,
     required this.semester,
+    required this.enrollment,
     required this.attendancePercent,
     required this.presentDays,
     required this.absentDays,
     required this.ct1Declared,
     required this.ct2Declared,
     required this.performanceTrend,
-    required this.subjects,
+    required this.subjects, 
+    
   });
 }

@@ -2,7 +2,8 @@ import '../screens/student/models/dashboard_model.dart';
 
 DashboardModel mockDashboard = DashboardModel(
   studentName: "Rahul Sharma",
-  rollNo: "CS-2024-001",
+  rollNo: "23202A0059",
+  enrollment: "22001",
   className: "IF6K-A",
   semester: 6,
   attendancePercent: 87,
