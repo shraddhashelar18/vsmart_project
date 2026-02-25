@@ -1,63 +1,96 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../../services/app_settings_service.dart';
+import '../../../services/student_session_service.dart';
+import 'download_academic_screen.dart';
 import 'widgets/result_header.dart';
 import 'widgets/current_class_box.dart';
 import 'widgets/section_title.dart';
 import 'widgets/ct_result_card.dart';
 import 'widgets/final_exam_card.dart';
+import '../models/result_model.dart';
+import '../../../services/results_service.dart';
 
-class StudentResultsScreen extends StatelessWidget {
+class StudentResultsScreen extends StatefulWidget {
   const StudentResultsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // 🔹 MOCK DATA — REPLACE FROM BACKEND LATER
-    bool ct1Declared = true;
-    bool ct2Declared = true;
-    bool finalDeclared = false;
-    bool adminAllowedUpload = false; // from backend later
-    // TODO BACKEND:
-// [teacherCT1, teacherCT2, finalPdfPercentage]
-    List<double> currentSemData = [78, 85, 90]; // CT1, CT2, Final
-    List<double> allSemData = [72, 75, 80, 83, 86, 89];
+  State<StudentResultsScreen> createState() => _StudentResultsScreenState();
+}
 
+class _StudentResultsScreenState extends State<StudentResultsScreen> {
+  ResultModel? result;
+  bool loading = true;
+int? activeSemester;
+  @override
+  void initState() {
+    super.initState();
+    loadResult();
+  }
+
+  Future<void> loadResult() async {
+    final settingsService = AppSettingsService();
+    final currentStudentSemester =
+        await StudentSessionService.getCurrentStudentSemester();
+
+    final semesterNumber =
+        await settingsService.getActiveSemesterNumber(currentStudentSemester);
+
+    final data = await ResultsService.getResultForDisplay(semesterNumber);
+
+    setState(() {
+      activeSemester = semesterNumber;
+      result = data;
+      loading = false;
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+   
+if (loading || result == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: SafeArea(
         child: ListView(
+          padding: const EdgeInsets.only(bottom: 20),
           children: [
             const ResultHeader(),
             const CurrentClassBox(),
-            const Padding(
-              padding: EdgeInsets.all(16),
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: SectionTitle(
                 title: "Current Semester Results",
-                subtitle: "Semester 6 • In Progress",
+                subtitle: "Semester ${result!.semester} • In Progress",
               ),
             ),
-            if (ct1Declared)
+            if (result!.ct1Declared)
               const CTResultCard(
                 title: "Class Test 1 (CT1)",
-                grade: "A",
+              
               ),
-            if (ct2Declared)
+            if (result!.ct2Declared)
               const CTResultCard(
                 title: "Class Test 2 (CT2)",
-                grade: "A+",
+                
               ),
             FinalExamCard(
-              declared: finalDeclared,
-              allowUpload: adminAllowedUpload,
-            ),
+  declared: result!.finalDeclared,
+  allowUpload: result!.finalUploadAllowed,
+),
             const SizedBox(height: 20),
 
 // -------- CURRENT SEM PERFORMANCE --------
-            _performanceBarCard(currentSemData),
+           _performanceBarCard(result!.currentSemData),
 
             const SizedBox(height: 20),
 
 // -------- ALL SEM OVERVIEW --------
-            _allSemGraphCard(allSemData),
+            // -------- ALL SEM OVERVIEW --------
+            _allSemGraphCard(result!.allSemData),
 
             const SizedBox(height: 20),
 
@@ -65,7 +98,16 @@ class StudentResultsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DownloadAcademicReportScreen(
+                        activeSemester: 6,
+                      ),
+                    ),
+                  );
+                },
                 icon: const Icon(
                   Icons.download,
                   color: Colors.white,
@@ -136,7 +178,14 @@ class StudentResultsScreen extends StatelessWidget {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: 25,
+                      reservedSize: 35,
+                      interval: 20,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          value.toInt().toString(),
+                          style: const TextStyle(fontSize: 12),
+                        );
+                      },
                     ),
                   ),
                   rightTitles: AxisTitles(
@@ -226,8 +275,18 @@ class StudentResultsScreen extends StatelessWidget {
                 ),
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: true, interval: 25),
+                 leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 35,
+                      interval: 20,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          value.toInt().toString(),
+                          style: const TextStyle(fontSize: 12),
+                        );
+                      },
+                    ),
                   ),
                   rightTitles: AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
@@ -238,7 +297,9 @@ class StudentResultsScreen extends StatelessWidget {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
+                      interval: 1,
                       getTitlesWidget: (value, meta) {
+                        if (value % 1 != 0) return const SizedBox();
                         return Text("Sem ${value.toInt() + 1}");
                       },
                     ),
@@ -278,6 +339,16 @@ class StudentResultsScreen extends StatelessWidget {
   }
 
   BarChartGroupData _bar(int x, double y) {
+    Color barColor;
+
+    if (y >= 75) {
+      barColor = Colors.green;
+    } else if (y >= 60) {
+      barColor = Colors.orange;
+    } else {
+      barColor = Colors.red;
+    }
+
     return BarChartGroupData(
       x: x,
       barRods: [
@@ -285,7 +356,7 @@ class StudentResultsScreen extends StatelessWidget {
           toY: y,
           width: 18,
           borderRadius: BorderRadius.circular(6),
-          color: const Color(0xFF009846),
+          color: barColor,
         ),
       ],
     );

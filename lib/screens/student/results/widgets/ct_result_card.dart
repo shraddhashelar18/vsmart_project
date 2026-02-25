@@ -3,12 +3,10 @@ import 'subject_row.dart';
 
 class CTResultCard extends StatelessWidget {
   final String title;
-  final String grade;
 
   const CTResultCard({
     super.key,
     required this.title,
-    required this.grade,
   });
 
   @override
@@ -23,22 +21,31 @@ class CTResultCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold)),
-              Chip(label: Text(grade)),
-            ],
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           const SubjectRow("Data Structures", "18/20"),
           const SubjectRow("Operating Systems", "16/20"),
           const SubjectRow("Computer Networks", "19/20"),
-          const Divider(),
-          const Text("Total Marks 89/100"),
-          const Text("Percentage 89%"),
+          const Divider(height: 24, thickness: 1),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text(
+                "Percentage 89%",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              Text(
+                "Total Marks 89/100",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
         ],
       ),
     );

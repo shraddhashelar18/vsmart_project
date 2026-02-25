@@ -7,6 +7,8 @@ class ResultModel {
   final bool finalUploadAllowed;
   final bool finalPdfUploaded;
   final bool reuploadAllowed;
+  final List<double> currentSemData;
+  final List<double> allSemData;
 
   ResultModel({
     required this.semester,
@@ -16,17 +18,27 @@ class ResultModel {
     required this.finalUploadAllowed,
     required this.finalPdfUploaded,
     required this.reuploadAllowed,
+    required this.currentSemData,
+    required this.allSemData,
   });
 
   factory ResultModel.fromJson(Map<String, dynamic> json) {
     return ResultModel(
-      semester: json['semester'],
-      ct1Declared: json['ct1Declared'],
-      ct2Declared: json['ct2Declared'],
-      finalDeclared: json['finalDeclared'],
-      finalUploadAllowed: json['finalUploadAllowed'],
-      finalPdfUploaded: json['finalPdfUploaded'],
-      reuploadAllowed: json['reuploadAllowed'],
+      semester: json['semester'] ?? 0,
+      ct1Declared: json['ct1Declared'] ?? false,
+      ct2Declared: json['ct2Declared'] ?? false,
+      finalDeclared: json['finalDeclared'] ?? false,
+      finalUploadAllowed: json['finalUploadAllowed'] ?? false,
+      finalPdfUploaded: json['finalPdfUploaded'] ?? false,
+      reuploadAllowed: json['reuploadAllowed'] ?? false,
+      currentSemData: (json['currentSemData'] as List<dynamic>?)
+              ?.map((e) => (e as num).toDouble())
+              .toList() ??
+          [],
+      allSemData: (json['allSemData'] as List<dynamic>?)
+              ?.map((e) => (e as num).toDouble())
+              .toList() ??
+          [],
     );
   }
 }

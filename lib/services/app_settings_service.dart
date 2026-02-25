@@ -60,4 +60,18 @@ class AppSettingsService {
     await Future.delayed(const Duration(milliseconds: 200));
     _atktLimit = value;
   }
+  Future<int> getActiveSemesterNumber(int currentStudentSemester) async {
+    final cycle = await getActiveSemester();
+
+    if (cycle == "EVEN") {
+      // if student in 6 → 6, if in 5 → 6 not allowed
+      return currentStudentSemester.isEven
+          ? currentStudentSemester
+          : currentStudentSemester + 1;
+    } else {
+      return currentStudentSemester.isOdd
+          ? currentStudentSemester
+          : currentStudentSemester - 1;
+    }
+  }
 }

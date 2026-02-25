@@ -19,13 +19,13 @@ class TeacherNotificationService {
       mockStudentNotifications[studentId] ??= [];
 
       mockStudentNotifications[studentId]!.add({
-        "class": className,
-        "subject": subject,
+        "title": "New Message from $subject",
         "message": message,
         "date": DateTime.now().toString(),
       });
     }
   }
+
   List<Map<String, dynamic>> getStudentsByClass(String className) {
     return mockStudents.entries
         .where((e) => e.value["class"] == className)

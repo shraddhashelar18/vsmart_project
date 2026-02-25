@@ -1,32 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../../services/student_dashboard_service.dart';
 
-class StudentDashboard extends StatelessWidget {
- StudentDashboard({super.key});
+import '../models/dashboard_model.dart';
 
-  static const green = Color(0xFF009846);
-
-  // -------- MOCK DATA (REPLACE WITH BACKEND LATER) --------
-  final String studentName = "Harshita Wavhal";
-  final String studentId = "23202A0059";
-  final String department = "Information Technology";
-  final String className = "IF6K-A";
-  final int semester = 6;
-
-  final int presentDays = 156;
-  final int absentDays = 24;
-
-  final List<double> trend = [72, 75, 80, 85, 90, 88];
-
-  final List<Map<String, dynamic>> subjects = const [
-    {"name": "Data Structures", "marks": 92, "grade": "A+"},
-    {"name": "Operating Systems", "marks": 85, "grade": "A"},
-    {"name": "Computer Networks", "marks": 88, "grade": "A"},
-  ];
+class StudentDashboard extends StatefulWidget {
+  const StudentDashboard({super.key});
 
   @override
+  State<StudentDashboard> createState() => _StudentDashboardState();
+  
+}
+
+class _StudentDashboardState extends State<StudentDashboard> {
+  // -------- MOCK DATA (REPLACE WITH BACKEND LATER) --------
+  static const green = Color(0xFF009846);
+
+final StudentDashboardService _service = StudentDashboardService();
+@override
+  void initState() {
+    super.initState();
+    loadDashboard();
+  }
+
+  Future<void> loadDashboard() async {
+    final data = await _service.getDashboard("22001");
+
+    setState(() {
+      dashboard = data;
+
+      studentName = data.studentName;
+      studentId = data.rollNo;
+      className = data.className;
+      semester = data.semester;
+      department = "Information Technology";
+      presentDays = data.presentDays;
+      absentDays = data.absentDays;
+      trend = data.performanceTrend;
+
+      subjects = data.subjects
+          .map((s) => {
+                "name": s.name,
+                "marks": s.percent,
+                "grade": s.grade,
+              })
+          .toList();
+
+      loading = false;
+    });
+  }
+DashboardModel? dashboard;
+  bool loading = true;
+
+// These will be filled after loading
+  late String studentName;
+  late String studentId;
+  late String className;
+  late int semester;
+  late String department;
+  late int presentDays;
+  late int absentDays;
+  late List<double> trend;
+  late List<Map<String, dynamic>> subjects;
+  @override
   Widget build(BuildContext context) {
+    if (loading || dashboard == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    
     final totalDays = presentDays + absentDays;
     final attendancePercent = presentDays / totalDays;
 

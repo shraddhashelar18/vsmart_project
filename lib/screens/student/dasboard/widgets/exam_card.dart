@@ -1,27 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../../../mock/mock_student_data.dart';
+
 
 class ExamCard extends StatelessWidget {
-  final String title; // "Class Test 1 (CT1)"
-  final String examKey; // "CT-1" or "CT-2"
-  final String subject;
-  final String studentId;
+  final String title;
+  final bool isDeclared; // 👈 ADD THIS
 
   const ExamCard({
     super.key,
     required this.title,
-    required this.examKey,
-    required this.subject,
-    required this.studentId,
+    required this.isDeclared, // 👈 ADD THIS
   });
 
   @override
   Widget build(BuildContext context) {
-    final studentReport = mockStudentReports[studentId];
-    final subjectMarks = studentReport?["marks"]?[subject];
-    final examData = subjectMarks?[examKey];
-
-    final bool isDeclared = examData != null;
+    
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
