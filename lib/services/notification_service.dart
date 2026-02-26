@@ -1,5 +1,5 @@
 import '../mock/mock_student_data.dart';
-import  '../screens/student/models/notification_model.dart';
+import '../screens/student/models/notification_model.dart';
 
 class NotificationService {
   static Future<List<NotificationModel>> fetchNotifications(
