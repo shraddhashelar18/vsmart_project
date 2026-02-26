@@ -11,7 +11,7 @@ import '../teacher/teacher_home.dart';
 import '../hod/hod_dashboard.dart';
 import '../principal/principal_dashboard.dart';
 import '../student/student_home.dart';
-import '../parent/parent_dasboard.dart';
+import '../parent/parent_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

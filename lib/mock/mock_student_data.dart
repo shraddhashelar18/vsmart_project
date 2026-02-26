@@ -7,7 +7,9 @@ final Map<String, Map<String, dynamic>> mockStudents = {
     "phone": "9999999999",
     "parentPhone": "8888888888",
     "class": "IF6KA",
-    "roll": "001"
+    "roll": "001",
+    "attendance": 0.94,
+    "avg": "92%"
   },
   "22002": {
     "name": "Ananya Patel",
@@ -15,7 +17,9 @@ final Map<String, Map<String, dynamic>> mockStudents = {
     "phone": "7777777777",
     "parentPhone": "6666666666",
     "class": "IF6KA",
-    "roll": "002"
+    "roll": "002",
+    "attendance": 0.38,
+    "avg": "85%"
   }
 };
 

@@ -14,7 +14,14 @@ class StudentNewService {
 
   Future<Map<String, dynamic>?> getStudentByEnrollment(
       String enrollment) async {
-    return mockStudents[enrollment];
+    final data = mockStudents[enrollment];
+
+    if (data == null) return null;
+
+    return {
+      "enrollment": enrollment, // ✅ ADD THIS
+      ...data,
+    };
   }
 
   Future<void> addStudent({
@@ -55,5 +62,16 @@ class StudentNewService {
 
   Future<void> deleteStudent(String enrollment) async {
     mockStudents.remove(enrollment);
+  }
+
+  Future<List<Map<String, dynamic>>> getStudentsByParentPhone(
+      String parentPhone) async {
+    return mockStudents.entries
+        .where((e) => e.value["parentPhone"] == parentPhone)
+        .map((entry) => {
+              "enrollment": entry.key,
+              ...entry.value,
+            })
+        .toList();
   }
 }

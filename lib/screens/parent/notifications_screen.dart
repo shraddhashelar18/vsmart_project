@@ -1,61 +1,41 @@
 import 'package:flutter/material.dart';
 
 class NotificationsScreen extends StatelessWidget {
-  const NotificationsScreen({Key? key}) : super(key: key);
+  final List<Map<String, dynamic>> notifications;
+
+  const NotificationsScreen({
+    Key? key,
+    required this.notifications,
+  }) : super(key: key);
 
   static const green = Color(0xFF009846);
 
   @override
   Widget build(BuildContext context) {
-    print("NOTIFICATION SCREEN OPENED");
-
-    // 🔹 DUMMY DATA (REPLACE WITH BACKEND LATER)
-    final List<Map<String, String>> notifications = [
-      {
-        "title": "Low attendance warning",
-        "desc": "Shrusti's attendance dropped below 90%",
-        "time": "2 hours ago",
-        "type": "warning"
-      },
-      {
-        "title": "Parent-Teacher Meeting",
-        "desc": "Scheduled for Dec 20, 2025 at 3:00 PM",
-        "time": "5 hours ago",
-        "type": "meeting"
-      },
-      {
-        "title": "Exam Schedule Released",
-        "desc": "Final exams start from Jan 10, 2026",
-        "time": "2 days ago",
-        "type": "exam"
-      },
-      {
-        "title": "Holiday Notice",
-        "desc": "College closed on Friday",
-        "time": "4 days ago",
-        "type": "info"
-      },
-    ];
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: green,
-        title: const Text("Notifications"),
+        title: const Text("Notifications",
+            style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: notifications.length,
-        itemBuilder: (_, index) {
-          final n = notifications[index];
-          return _notificationCard(
-            title: n["title"]!,
-            desc: n["desc"]!,
-            time: n["time"]!,
-            type: n["type"]!,
-          );
-        },
-      ),
+      body: notifications.isEmpty
+          ? const Center(
+              child: Text("No notifications available"),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: notifications.length,
+              itemBuilder: (_, index) {
+                final n = notifications[index];
+                return _notificationCard(
+                  title: n["title"] ?? "",
+                  desc: n["message"] ?? "",
+                  time: n["date"] ?? "",
+                  type: n["type"] ?? "info",
+                );
+              },
+            ),
     );
   }
 
@@ -111,7 +91,6 @@ class NotificationsScreen extends StatelessWidget {
             ),
           ],
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 14),
       ),
     );
   }

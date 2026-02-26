@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/user_session.dart';
 import '../admin/admin_bottom_nav.dart';
+import '../parent/parent_bottom_nav.dart';
 import '../principal/principal_bottom_nav.dart';
 import '../teacher/teacher_bottomm_nav.dart';
 import 'change_password_screen.dart';
@@ -69,7 +70,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     )
                   : widget.role == "teacher"
                       ? const TeacherBottomNav(currentIndex: 1)
-                      : null,
+                      : widget.role == "parent"
+                          ? const ParentBottomNav(currentIndex: 1)
+                          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -79,7 +82,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             if (widget.role == "admin" ||
                 widget.role == "principal" ||
                 widget.role == "teacher" ||
-                widget.role == "hod") ...[
+                widget.role == "hod" ||
+                widget.role == "parent") ...[
               _sectionTitle("Profile"),
               _settingsCard([
                 _infoTile(
@@ -98,7 +102,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
 
 // 🔹 ACADEMIC INFO (HOD ONLY)
-            if (widget.role == "principal" ||  widget.role == "teacher" ||widget.role == "hod") ...[
+            if (widget.role == "principal" ||
+                widget.role == "teacher" ||
+                widget.role == "hod") ...[
               _sectionTitle("Academic Information"),
               _settingsCard([
                 _infoTile(Icons.school, "Active Semester", activeSemester),

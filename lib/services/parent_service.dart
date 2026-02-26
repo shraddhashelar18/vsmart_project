@@ -36,4 +36,16 @@ class ParentService {
   Future<Map<String, dynamic>?> getStudent(String enrollment) {
     return _studentService.getStudentByEnrollment(enrollment);
   }
+
+  Map<String, dynamic>? getParentByEmail(String email) {
+    for (var entry in mockParents.entries) {
+      if (entry.value["email"] == email) {
+        return {
+          "phone": entry.key,
+          ...entry.value,
+        };
+      }
+    }
+    return null;
+  }
 }

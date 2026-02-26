@@ -1,7 +1,7 @@
 final Map<String, Map<String, dynamic>> mockParents = {
   "8888888888": {
     "name": "Mr Sharma",
-    "email": "sharma@mail.com",
+    "email": "parent@test.com",
     "children": ["22001"]
   },
   "6666666666": {
