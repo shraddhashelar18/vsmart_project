@@ -45,6 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     resultsPublished = await _settingsService.getResultsStatus();
     attendanceLocked = await _settingsService.getAttendanceLockStatus();
     atktLimit = await _settingsService.getAtktLimit();
+    
 
     setState(() {});
   }
@@ -125,39 +126,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _atktLimitCard(),
               const SizedBox(height: 20),
             ],
-            _sectionTitle("Account"),
-            _settingsTile(
-              Icons.lock,
-              "Change Password",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ChangePasswordScreen(
-                      currentStoredPassword: '123456',
-                    ),
-                  ),
-                );
-              },
-            ),
-            _settingsTile(
-              Icons.info_outline,
-              "About Application",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AboutScreen(),
-                  ),
-                );
-              },
-            ),
-            _settingsTile(
-              Icons.logout,
-              "Logout",
-              isLogout: true,
-              onTap: _confirmLogout,
-            ),
+           if (widget.role == "student") ...[
+  _sectionTitle("Profile"),
+  _settingsCard([
+                _infoTile(
+                    Icons.person, "Name", UserSession.currentUser?.name ?? ""),
+                _infoTile(Icons.badge, "Enrollment",
+                    "${UserSession.currentUser?.user_id ?? ""}"),
+                _infoTile(Icons.school, "Class",
+                    UserSession.currentUser?.className ?? ""),
+                _infoTile(Icons.calendar_today, "Semester",
+                    "${UserSession.currentUser?.semester ?? ""}"),
+                _infoTile(
+                    Icons.email, "Email", UserSession.currentUser?.email ?? ""),
+              ]),
+  const SizedBox(height: 20),
+
+  _settingsTile( Icons.lock, "Change Password", onTap: () { Navigator.push( context, MaterialPageRoute( builder: (_) => const ChangePasswordScreen(), ), ); },
+
+  _sectionTitle("Account"),
+  _settingsTile(
+    Icons.info_outline,
+    "About Application",
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AboutScreen(),
+        ),
+      );
+    },
+  ),
+  _settingsTile(
+    Icons.logout,
+    "Logout",
+    isLogout: true,
+    onTap: _confirmLogout,
+  ),
+],
           ],
         ),
       ),
