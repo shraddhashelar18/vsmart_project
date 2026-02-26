@@ -11,15 +11,14 @@ class StudentDashboard extends StatefulWidget {
 
   @override
   State<StudentDashboard> createState() => _StudentDashboardState();
-  
 }
 
 class _StudentDashboardState extends State<StudentDashboard> {
   // -------- MOCK DATA (REPLACE WITH BACKEND LATER) --------
   static const green = Color(0xFF009846);
 
-final StudentDashboardService _service = StudentDashboardService();
-@override
+  final StudentDashboardService _service = StudentDashboardService();
+  @override
   void initState() {
     super.initState();
     loadDashboard();
@@ -45,14 +44,14 @@ final StudentDashboardService _service = StudentDashboardService();
           .map((s) => {
                 "name": s.name,
                 "marks": s.percent,
-               
               })
           .toList();
 
       loading = false;
     });
   }
-DashboardModel? dashboard;
+
+  DashboardModel? dashboard;
   bool loading = true;
 
 // These will be filled after loading
@@ -72,7 +71,7 @@ DashboardModel? dashboard;
         body: Center(child: CircularProgressIndicator()),
       );
     }
-    
+
     final totalDays = presentDays + absentDays;
     final attendancePercent = presentDays / totalDays;
 
@@ -118,13 +117,11 @@ DashboardModel? dashboard;
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
-             
-              Text("Vsmart",
+              Text("Student Dashboard",
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold)),
-              
             ],
           ),
           const SizedBox(height: 20),
@@ -221,7 +218,7 @@ DashboardModel? dashboard;
             ],
           ),
           const SizedBox(height: 8),
-          Text("Total Days: $totalDays",
+          Text("Total Lectures: $totalDays",
               style: const TextStyle(color: Colors.white70)),
         ],
       ),
@@ -232,7 +229,7 @@ DashboardModel? dashboard;
     return Column(
       children: [
         Text(title, style: const TextStyle(color: Colors.white70)),
-        Text("$value days",
+        Text("$value lectures",
             style: const TextStyle(color: Colors.white, fontSize: 16)),
       ],
     );
@@ -256,8 +253,8 @@ DashboardModel? dashboard;
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 200,
-            child: LineChart(
+              height: 200,
+              child: LineChart(
                 LineChartData(
                   minY: 0,
                   maxY: 100,
@@ -299,7 +296,6 @@ DashboardModel? dashboard;
                         },
                       ),
                     ),
-
                     topTitles:
                         AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     rightTitles:
@@ -332,9 +328,7 @@ DashboardModel? dashboard;
                     ),
                   ],
                 ),
-              )
-
-          ),
+              )),
         ],
       ),
     );
@@ -369,7 +363,6 @@ DashboardModel? dashboard;
             children: [
               Text(s["name"],
                   style: const TextStyle(fontWeight: FontWeight.bold)),
-            
             ],
           ),
           const SizedBox(height: 6),

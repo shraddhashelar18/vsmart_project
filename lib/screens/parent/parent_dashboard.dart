@@ -242,8 +242,11 @@ class _ParentDashboardState extends State<ParentDashboard> {
                   children: [
                     Row(
                       children: const [
-                        Icon(Icons.trending_down,
-                            size: 16, color: Colors.orange),
+                        Icon(
+                          Icons.trending_down,
+                          size: 16,
+                          color: Colors.red,
+                        ),
                         SizedBox(width: 6),
                         Text(
                           "Needs Improvement",

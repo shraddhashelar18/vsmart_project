@@ -16,8 +16,10 @@ class NotificationsScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: green,
-        title: const Text("Notifications",
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Notifications",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: notifications.isEmpty
           ? const Center(
@@ -32,7 +34,6 @@ class NotificationsScreen extends StatelessWidget {
                   title: n["title"] ?? "",
                   desc: n["message"] ?? "",
                   time: n["date"] ?? "",
-                  type: n["type"] ?? "info",
                 );
               },
             ),
@@ -44,36 +45,16 @@ class NotificationsScreen extends StatelessWidget {
     required String title,
     required String desc,
     required String time,
-    required String type,
   }) {
-    IconData icon;
-    Color color;
-
-    switch (type) {
-      case "warning":
-        icon = Icons.warning_amber_rounded;
-        color = Colors.orange;
-        break;
-      case "meeting":
-        icon = Icons.calendar_month;
-        color = Colors.blue;
-        break;
-      case "exam":
-        icon = Icons.school;
-        color = Colors.green;
-        break;
-      default:
-        icon = Icons.notifications;
-        color = Colors.grey;
-    }
-
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.15),
-          child: Icon(icon, color: color),
+          backgroundColor: green.withOpacity(0.15),
+          child: const Icon(Icons.notifications, color: green),
         ),
         title: Text(
           title,

@@ -1,4 +1,4 @@
-import '../mock/mock_notification_data.dart';
+import '../mock/mock_student_data.dart';
 
 class ParentNotificationService {
   static Future<List<Map<String, dynamic>>> fetchParentNotifications(
@@ -8,12 +8,12 @@ class ParentNotificationService {
     List<Map<String, dynamic>> allNotifications = [];
 
     for (var enrollment in enrollments) {
-      final studentNotifs = mockNotificationsData[enrollment] ?? [];
+      final studentNotifs = mockStudentNotifications[enrollment] ?? [];
 
       allNotifications.addAll(studentNotifs);
     }
 
-    // Sort latest first (string date works if yyyy-MM-dd)
+    // Sort latest first
     allNotifications.sort(
       (a, b) => b["date"].compareTo(a["date"]),
     );

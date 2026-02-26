@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
 import '../../services/teacher_dashboard_service.dart';
 import '../teacher/department_selection_screen.dart';
 import '../teacher/teacher_mark_attendance.dart';
@@ -21,7 +20,7 @@ class TeacherDashboard extends StatefulWidget {
     required this.activeDepartment,
     required this.teacherId,
     required this.departments,
-     required this.teacherName, 
+    required this.teacherName,
   }) : super(key: key);
 
   @override
@@ -31,14 +30,13 @@ class TeacherDashboard extends StatefulWidget {
 class _TeacherDashboardState extends State<TeacherDashboard> {
   static const green = Color(0xFF009846);
 
- 
   String selectedClass = "";
   String selectedSubject = "";
 
   List<String> allocatedClasses = [];
   List<String> subjectList = [];
-final TeacherDashboardService _service = TeacherDashboardService();
- @override
+  final TeacherDashboardService _service = TeacherDashboardService();
+  @override
   void initState() {
     super.initState();
     _loadClasses();
@@ -62,6 +60,7 @@ final TeacherDashboardService _service = TeacherDashboardService();
 
     setState(() {});
   }
+
   Future<void> loadSubjects() async {
     subjectList = await _service.getSubjects(widget.teacherId, selectedClass);
 
@@ -77,6 +76,7 @@ final TeacherDashboardService _service = TeacherDashboardService();
 
     setState(() {});
   }
+
   @override
   Widget build(BuildContext context) {
     final String today =
@@ -117,10 +117,11 @@ final TeacherDashboardService _service = TeacherDashboardService();
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 18),
-          const Text("Vsmart",
-              style: TextStyle(color: Colors.white, fontSize: 20)),
-          const Text("Academic Management",
-              style: TextStyle(color: Colors.white70)),
+          const Text("Teacher Dashboard",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(height: 18),
           Text(
             "Good Afternoon, ${widget.teacherName}",
@@ -148,8 +149,8 @@ final TeacherDashboardService _service = TeacherDashboardService();
               MaterialPageRoute(
                 builder: (_) => DepartmentSelectionScreen(
                   departments: widget.departments,
-                  
-                  teacherId: widget.teacherId, teacherName: widget.teacherName,
+                  teacherId: widget.teacherId,
+                  teacherName: widget.teacherName,
                 ),
               ),
             );
