@@ -10,7 +10,7 @@ import 'results/student_results_screen.dart';
 import 'notifications/notifications_screen.dart';
 
 // settings
-import 'settings/settings_screen.dart';
+import '../../screens/settings/settings_screen.dart';
 
 class StudentHome extends StatefulWidget {
   const StudentHome({super.key});
@@ -22,13 +22,12 @@ class StudentHome extends StatefulWidget {
 class _StudentHomeState extends State<StudentHome> {
   int currentIndex = 0;
 
-  final List<Widget> screens =  [
+  final List<Widget> screens = [
     StudentDashboard(),
     StudentResultsScreen(),
     NotificationsScreen(),
-    SettingsScreen(),
+    SettingsScreen(role: "student"), // 👈 IMPORTANT
   ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

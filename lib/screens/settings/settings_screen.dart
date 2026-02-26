@@ -126,9 +126,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _atktLimitCard(),
               const SizedBox(height: 20),
             ],
-           if (widget.role == "student") ...[
-  _sectionTitle("Profile"),
-  _settingsCard([
+           // 🔹 STUDENT SETTINGS
+            if (widget.role == "student") ...[
+              _sectionTitle("Profile"),
+              _settingsCard([
                 _infoTile(
                     Icons.person, "Name", UserSession.currentUser?.name ?? ""),
                 _infoTile(Icons.badge, "Enrollment",
@@ -140,9 +141,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _infoTile(
                     Icons.email, "Email", UserSession.currentUser?.email ?? ""),
               ]),
-  const SizedBox(height: 20),
-
- _settingsTile(
+              const SizedBox(height: 20),
+              _sectionTitle("Account"),
+              _settingsTile(
                 Icons.lock,
                 "Change Password",
                 onTap: () {
@@ -156,27 +157,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                 },
               ),
-
-  _sectionTitle("Account"),
-  _settingsTile(
-    Icons.info_outline,
-    "About Application",
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const AboutScreen(),
-        ),
-      );
-    },
-  ),
-  _settingsTile(
-    Icons.logout,
-    "Logout",
-    isLogout: true,
-    onTap: _confirmLogout,
-  ),
-],
+              _settingsTile(
+                Icons.info_outline,
+                "About Application",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AboutScreen(),
+                    ),
+                  );
+                },
+              ),
+              _settingsTile(
+                Icons.logout,
+                "Logout",
+                isLogout: true,
+                onTap: _confirmLogout,
+              ),
+            ],
           ],
         ),
       ),

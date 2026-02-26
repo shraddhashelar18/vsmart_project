@@ -6,6 +6,10 @@ class UserAuth {
   final String status;
   final List<String> departments;
 
+  // ✅ ADD THESE
+  final String? className;
+  final int? semester;
+
   UserAuth({
     required this.user_id,
     required this.name,
@@ -13,11 +17,15 @@ class UserAuth {
     required this.role,
     required this.status,
     List<String>? departments,
+    this.className,
+    this.semester,
   }) : departments = departments ?? [];
 
   UserAuth copyWith({
     String? status,
     List<String>? departments,
+    String? className,
+    int? semester,
   }) {
     return UserAuth(
       user_id: user_id,
@@ -26,6 +34,8 @@ class UserAuth {
       role: role,
       status: status ?? this.status,
       departments: departments ?? this.departments,
+      className: className ?? this.className,
+      semester: semester ?? this.semester,
     );
   }
 
@@ -39,6 +49,8 @@ class UserAuth {
       departments: json['departments'] != null
           ? List<String>.from(json['departments'])
           : [],
+      className: json['className'],
+      semester: json['semester'],
     );
   }
 
@@ -50,6 +62,8 @@ class UserAuth {
       "role": role,
       "status": status,
       "departments": departments,
+      "className": className,
+      "semester": semester,
     };
   }
 }

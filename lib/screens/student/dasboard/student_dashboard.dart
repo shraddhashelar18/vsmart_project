@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../../models/user_session.dart';
 import '../../../services/student_dashboard_service.dart';
 
 import '../models/dashboard_model.dart';
@@ -25,8 +26,9 @@ final StudentDashboardService _service = StudentDashboardService();
   }
 
   Future<void> loadDashboard() async {
-    final data = await _service.getDashboard("22001");
-
+    final data = await _service.getDashboard(
+      UserSession.currentUser!.user_id.toString(),
+    );
     setState(() {
       dashboard = data;
 
@@ -34,7 +36,7 @@ final StudentDashboardService _service = StudentDashboardService();
       studentId = data.rollNo;
       className = data.className;
       semester = data.semester;
-      department = "Information Technology";
+      department = data.department;
       presentDays = data.presentDays;
       absentDays = data.absentDays;
       trend = data.performanceTrend;
@@ -43,7 +45,7 @@ final StudentDashboardService _service = StudentDashboardService();
           .map((s) => {
                 "name": s.name,
                 "marks": s.percent,
-                "grade": s.grade,
+               
               })
           .toList();
 
@@ -116,13 +118,13 @@ DashboardModel? dashboard;
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
-              Icon(Icons.menu, color: Colors.white),
+             
               Text("Vsmart",
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold)),
-              Icon(Icons.person_outline, color: Colors.white),
+              
             ],
           ),
           const SizedBox(height: 20),
@@ -367,7 +369,7 @@ DashboardModel? dashboard;
             children: [
               Text(s["name"],
                   style: const TextStyle(fontWeight: FontWeight.bold)),
-              Chip(label: Text(s["grade"])),
+            
             ],
           ),
           const SizedBox(height: 6),

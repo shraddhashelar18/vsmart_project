@@ -33,10 +33,12 @@ List<UserAuth> mockUsers = [
   ),
   UserAuth(
     user_id: 1,
-    name: "emma",
+    name: "Aarav Sharma",
     email: "student@test.com",
     role: "student",
     status: "approved",
+    className: "IF6KA",
+    semester: 6,
   ),
   UserAuth(
     user_id: 10,

@@ -61,17 +61,29 @@ class AppSettingsService {
     _atktLimit = value;
   }
   Future<int> getActiveSemesterNumber(int currentStudentSemester) async {
-    final cycle = await getActiveSemester();
+  final cycle = await getActiveSemester();
 
-    if (cycle == "EVEN") {
-      // if student in 6 → 6, if in 5 → 6 not allowed
-      return currentStudentSemester.isEven
-          ? currentStudentSemester
-          : currentStudentSemester + 1;
-    } else {
-      return currentStudentSemester.isOdd
-          ? currentStudentSemester
-          : currentStudentSemester - 1;
-    }
+  if (cycle == "EVEN") {
+    return currentStudentSemester.isEven
+        ? currentStudentSemester
+        : currentStudentSemester + 1;
+  } else {
+    return currentStudentSemester.isOdd
+        ? currentStudentSemester
+        : currentStudentSemester - 1;
   }
 }
+  // ================= STUDENT SETTINGS =================
+
+  static const _darkModeKey = "studentDarkMode";
+
+  Future<bool> getStudentDarkMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_darkModeKey) ?? false;
+  }
+
+  Future<void> setStudentDarkMode(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_darkModeKey, value);
+  }
+  }
