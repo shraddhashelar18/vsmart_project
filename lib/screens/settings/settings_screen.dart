@@ -142,7 +142,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ]),
   const SizedBox(height: 20),
 
-  _settingsTile( Icons.lock, "Change Password", onTap: () { Navigator.push( context, MaterialPageRoute( builder: (_) => const ChangePasswordScreen(), ), ); },
+ _settingsTile(
+                Icons.lock,
+                "Change Password",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ChangePasswordScreen(
+                        currentStoredPassword: '123456',
+                      ),
+                    ),
+                  );
+                },
+              ),
 
   _sectionTitle("Account"),
   _settingsTile(
