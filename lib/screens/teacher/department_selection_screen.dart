@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'teacher_dashboard.dart';
+import 'teacher_home.dart';
 
 class DepartmentSelectionScreen extends StatefulWidget {
   final List<String> departments;
@@ -58,13 +58,12 @@ class _DepartmentSelectionScreenState extends State<DepartmentSelectionScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => TeacherDashboard(
-  activeDepartment: selectedDepartment!,
-  teacherId: widget.teacherId,
-  
-  departments: widget.departments, teacherName: widget.teacherName, // ✅ ADD THIS
-),
-
+                          builder: (_) => TeacherHome(
+                            teacherId: widget.teacherId,
+                            teacherName: widget.teacherName,
+                            department: selectedDepartment!,
+                            departments: widget.departments,
+                          ),
                         ),
                       );
                     },

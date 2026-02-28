@@ -45,7 +45,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   Future<void> _loadClasses() async {
     final allClasses = await _service.getAllocatedClasses(widget.teacherId);
 
-    // 🔥 FILTER BY ACTIVE DEPARTMENT
+    if (!mounted) return;
+
     allocatedClasses = allClasses
         .where((cls) => cls.startsWith(widget.activeDepartment))
         .toList();
@@ -58,11 +59,17 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
       selectedSubject = "";
     }
 
+    if (!mounted) return;
     setState(() {});
   }
 
   Future<void> loadSubjects() async {
-    subjectList = await _service.getSubjects(widget.teacherId, selectedClass);
+    final subjects =
+        await _service.getSubjects(widget.teacherId, selectedClass);
+
+    if (!mounted) return;
+
+    subjectList = subjects;
 
     if (subjectList.isEmpty) {
       selectedSubject = "";
@@ -82,7 +89,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
     final String today =
         DateFormat("EEEE, MMMM d, yyyy").format(DateTime.now());
 
-    return Container(
+    return Material(
       color: Colors.grey.shade100,
       child: SingleChildScrollView(
         child: Column(
@@ -93,7 +100,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
             const SizedBox(height: 10),
             _classSelector(),
             const SizedBox(height: 10),
-            _subjectSelector(), // Always show subject block if class selected
+            _subjectSelector(),
             const SizedBox(height: 20),
             _quickActions(),
           ],
@@ -180,9 +187,15 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                 .map((cls) => DropdownMenuItem(value: cls, child: Text(cls)))
                 .toList(),
             decoration: _dropdownDeco(),
-            onChanged: (v) {
-              selectedClass = v!;
-              loadSubjects();
+            onChanged: (v) async {
+              if (v == null) return;
+
+              setState(() {
+                selectedClass = v;
+                selectedSubject = ""; // reset subject immediately
+              });
+
+              await loadSubjects();
             },
           ),
         ],
