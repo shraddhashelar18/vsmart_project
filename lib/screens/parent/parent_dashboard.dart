@@ -51,11 +51,10 @@ class _ParentDashboardState extends State<ParentDashboard> {
       children = students;
       isLoading = false;
     });
-    List<String> enrollments =
-        students.map((s) => s["enrollment"].toString()).toList();
+    final parentPhone = parent["phone"];
 
     final parentNotifs =
-        await ParentNotificationService.fetchParentNotifications(enrollments);
+        await ParentNotificationService.fetchParentNotifications(parentPhone);
 
     setState(() {
       parentData = parent;

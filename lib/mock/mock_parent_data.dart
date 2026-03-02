@@ -6,7 +6,8 @@ final Map<String, Map<String, dynamic>> mockParents = {
   },
   "6666666666": {
     "name": "Mrs Patel",
-    "email": "patel@mail.com",
+    "email": "parent2@test.com",
     "children": ["22002"]
   },
 };
+final Map<String, List<Map<String, dynamic>>> mockParentNotifications = {};

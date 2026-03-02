@@ -3,7 +3,7 @@
 final Map<String, Map<String, dynamic>> mockStudents = {
   "22001": {
     "name": "Aarav Sharma",
-    "email": "aarav@mail.com",
+    "email": "student@test.com",
     "phone": "9999999999",
     "parentPhone": "8888888888",
     "class": "IF6KA",
@@ -13,7 +13,7 @@ final Map<String, Map<String, dynamic>> mockStudents = {
   },
   "22002": {
     "name": "Ananya Patel",
-    "email": "ananya@mail.com",
+    "email": "student2@test.com",
     "phone": "7777777777",
     "parentPhone": "6666666666",
     "class": "IF6KA",

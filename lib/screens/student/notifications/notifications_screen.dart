@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../services/auth_service.dart';
+import '../../../models/user_session.dart';
 import '../../../services/notification_service.dart';
 import '../models/notification_model.dart';
 
@@ -21,9 +21,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   void loadNotifications() async {
-    final studentId = AuthService.currentUserId;
-
-    final data = await NotificationService.fetchNotifications(studentId);
+    final email = UserSession.currentUser!.email;
+    final data = await NotificationService.fetchNotificationsByEmail(email);
 
     setState(() {
       notifications = data;

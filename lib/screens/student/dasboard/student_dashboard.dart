@@ -25,12 +25,12 @@ class _StudentDashboardState extends State<StudentDashboard> {
   }
 
   Future<void> loadDashboard() async {
-    final data = await _service.getDashboard(
-      UserSession.currentUser!.user_id.toString(),
-    );
+    final email = UserSession.currentUser!.email;
+
+    final data = await _service.getDashboard(email);
+
     setState(() {
       dashboard = data;
-
       studentName = data.studentName;
       studentId = data.rollNo;
       className = data.className;
