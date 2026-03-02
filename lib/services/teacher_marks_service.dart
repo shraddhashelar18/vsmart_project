@@ -34,7 +34,7 @@ class TeacherMarksService {
     final students = getStudentsByClass(className);
 
     for (var s in students) {
-      final sid = s["enrollment"];
+      final sid = s["enrollment"].toString();
       final score = int.tryParse(controllers[sid]!.text) ?? 0;
 
       mockStudentReports[sid] ??= {

@@ -1,0 +1,103 @@
+[33m9eeefd2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull origin main: Fast-forward
+[33mf578f5f[m HEAD@{1}: commit: 98th commit
+[33ma5325b1[m HEAD@{2}: commit: 97th commit
+[33mfeae7ff[m HEAD@{3}: commit: 96th commit
+[33m94f66e1[m HEAD@{4}: commit: 95th commit
+[33m38b3844[m HEAD@{5}: pull origin main: Fast-forward
+[33m8431d45[m HEAD@{6}: commit: 91th commit
+[33m9441964[m HEAD@{7}: pull origin main: Fast-forward
+[33mfc65625[m HEAD@{8}: pull origin main: Fast-forward
+[33m6e9cdbe[m HEAD@{9}: commit: 88th commit
+[33me20cc46[m HEAD@{10}: pull origin main: Fast-forward
+[33m36f99e8[m HEAD@{11}: reset: moving to HEAD
+[33m36f99e8[m HEAD@{12}: commit: 85th commit
+[33m0699dc9[m HEAD@{13}: commit: 84th commit
+[33mf624d74[m HEAD@{14}: pull origin main: Fast-forward
+[33m0951bde[m HEAD@{15}: commit: 82th commit
+[33m66b1aa0[m HEAD@{16}: pull origin main: Merge made by the 'ort' strategy.
+[33mf901f57[m HEAD@{17}: commit: 80th commit
+[33m6f2a4a1[m HEAD@{18}: commit: 77th commit
+[33mc6339bb[m HEAD@{19}: commit: 76th commit
+[33ma645ce7[m HEAD@{20}: commit: 75th commit
+[33m48ac231[m HEAD@{21}: pull origin main: Fast-forward
+[33mb312d98[m HEAD@{22}: commit: 73rd commit
+[33m740be11[m HEAD@{23}: pull origin main: Fast-forward
+[33m08685ee[m HEAD@{24}: reset: moving to HEAD
+[33m08685ee[m HEAD@{25}: commit: 71th commit
+[33m6f1630a[m HEAD@{26}: commit: 70th commit
+[33m5ecb366[m HEAD@{27}: pull origin main: Fast-forward
+[33mc538414[m HEAD@{28}: pull origin main: Fast-forward
+[33m4bbabb3[m HEAD@{29}: commit: 67th commit
+[33mc430889[m HEAD@{30}: pull origin main: Fast-forward
+[33macb8878[m HEAD@{31}: commit: 65th commit
+[33m456fcb1[m HEAD@{32}: pull origin main --rebase (finish): returning to refs/heads/main
+[33m456fcb1[m HEAD@{33}: pull origin main --rebase (pick): 64th commit
+[33m8b5eac4[m HEAD@{34}: pull origin main --rebase (start): checkout 8b5eac4cc637fded98a03d4c3f652fd7acd78052
+[33m8247b8d[m HEAD@{35}: commit: 64th commit
+[33mf96c356[m HEAD@{36}: pull origin main: Fast-forward
+[33mcacf42d[m HEAD@{37}: pull origin main: Fast-forward
+[33m202ede3[m HEAD@{38}: pull origin main: Fast-forward
+[33m147a0cc[m HEAD@{39}: pull origin main: Fast-forward
+[33mfb0c60f[m HEAD@{40}: commit: 58th commit
+[33m8e01efe[m HEAD@{41}: pull origin main: Fast-forward
+[33m264eb47[m HEAD@{42}: pull origin main: Fast-forward
+[33m21b758b[m HEAD@{43}: commit: 56th commit
+[33mb794693[m HEAD@{44}: pull origin main: Fast-forward
+[33mdd0fdf5[m HEAD@{45}: commit: 54th commit
+[33m8df989b[m HEAD@{46}: pull origin main: Fast-forward
+[33m90bcb64[m HEAD@{47}: pull origin main: Fast-forward
+[33md39f1ff[m HEAD@{48}: commit: 54th commit
+[33m1edba69[m HEAD@{49}: pull origin main: Fast-forward
+[33m7604305[m HEAD@{50}: commit: 51th commit
+[33m1c7bb65[m HEAD@{51}: commit: 50th commit
+[33m1170e70[m HEAD@{52}: pull origin main: Fast-forward
+[33m79c4270[m HEAD@{53}: pull origin main: Fast-forward
+[33m92e5148[m HEAD@{54}: commit: 47th commit
+[33mf3f9e94[m HEAD@{55}: pull origin main: Fast-forward
+[33me6add97[m HEAD@{56}: pull origin main: Fast-forward
+[33mf74ac4a[m HEAD@{57}: commit: 44th commit
+[33mb497c58[m HEAD@{58}: pull origin main: Fast-forward
+[33mf8beee5[m HEAD@{59}: commit: 42th commit
+[33m45360e1[m HEAD@{60}: pull origin main: Fast-forward
+[33m9721c8f[m HEAD@{61}: commit: 40th commit
+[33m303181a[m HEAD@{62}: commit: 39th commit
+[33m2d9a348[m HEAD@{63}: commit: 38th commit
+[33m4561191[m HEAD@{64}: pull origin main: Fast-forward
+[33m1dfdc4b[m HEAD@{65}: pull origin main: Fast-forward
+[33md14451f[m HEAD@{66}: commit: 35th commit
+[33mae1f165[m HEAD@{67}: pull origin main: Fast-forward
+[33mb686d3b[m HEAD@{68}: pull origin main: Fast-forward
+[33mee3a968[m HEAD@{69}: commit: 33rd commit
+[33ma075611[m HEAD@{70}: pull origin main: Fast-forward
+[33m46e3245[m HEAD@{71}: commit: 31th commit
+[33m9aec4c6[m HEAD@{72}: commit: 30th commit
+[33mebc908b[m HEAD@{73}: pull origin main: Fast-forward
+[33m6572534[m HEAD@{74}: commit: 29th commit
+[33m143fdfa[m HEAD@{75}: commit: 28th commit
+[33meec80f7[m HEAD@{76}: commit: 27th commit
+[33m7c1c449[m HEAD@{77}: commit: 26th commit
+[33m7e28b0d[m HEAD@{78}: commit: 25th commit
+[33mc78f2ea[m HEAD@{79}: pull origin main: Fast-forward
+[33m1622a35[m HEAD@{80}: commit: 23rd commit
+[33m9353898[m HEAD@{81}: commit: 22th commit
+[33m1250aa4[m HEAD@{82}: pull origin main: Fast-forward
+[33m614fdac[m HEAD@{83}: pull origin main: Fast-forward
+[33m396881a[m HEAD@{84}: commit: 19th commit
+[33m285443d[m HEAD@{85}: pull origin main: Fast-forward
+[33m504a9ca[m HEAD@{86}: commit: 17th commit
+[33mdc706c9[m HEAD@{87}: commit: 16th commit
+[33m2a4ffcb[m HEAD@{88}: pull origin main: Fast-forward
+[33m7c84c8a[m HEAD@{89}: pull origin main: Fast-forward
+[33mceea786[m HEAD@{90}: pull origin main: Fast-forward
+[33m3906f17[m HEAD@{91}: commit: 12th commit
+[33m576daaa[m HEAD@{92}: commit: 11th commit
+[33m2601a79[m HEAD@{93}: pull origin main: Fast-forward
+[33m357f034[m HEAD@{94}: commit: 9th commit
+[33m58d08cd[m HEAD@{95}: pull origin main: Fast-forward
+[33m52182f3[m HEAD@{96}: pull origin main: Fast-forward
+[33m754f5f3[m HEAD@{97}: commit: fifth commit
+[33m148537e[m HEAD@{98}: pull origin main: Fast-forward
+[33m43ec7db[m HEAD@{99}: pull origin main: Fast-forward
+[33m7238637[m HEAD@{100}: commit: fourth commit
+[33m8d999a9[m HEAD@{101}: pull origin main: Fast-forward
+[33m92c4b26[m HEAD@{102}: clone: from https://github.com/shraddhashelar18/vsmart_project.git

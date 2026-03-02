@@ -1,3 +1,4 @@
+import '../mock/mock_previous_sem_data.dart';
 import '../mock/mock_student_data.dart';
 
 class TeacherReportService {
@@ -13,6 +14,19 @@ class TeacherReportService {
   }
 
   Future<Map<String, dynamic>?> getStudentReport(String studentId) async {
-    return mockStudentReports[studentId];
+    final studentBasic = mockStudents[studentId];
+    final report = mockStudentReports[studentId];
+
+    if (studentBasic == null) return null;
+
+    return {
+      ...studentBasic,
+      if (report != null) ...report,
+    };
+  }
+
+  // 🔥 ADD THIS METHOD
+  Future<Map<String, dynamic>?> getPreviousSemesters(String studentId) async {
+    return mockPreviousSemReports[studentId];
   }
 }

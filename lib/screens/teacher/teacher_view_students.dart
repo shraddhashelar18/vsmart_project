@@ -64,21 +64,8 @@ class _TeacherViewStudentsState extends State<TeacherViewStudents> {
                     ],
                   ),
                   child: InkWell(
-                    onTap: () async {
-                      final studentId = s['enrollment'];
-
-                      final report = await _service.getStudentReport(studentId);
-
-                      if (report == null ||
-                          report["marks"] == null ||
-                          (report["marks"] as Map).isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("No report found for this student"),
-                          ),
-                        );
-                        return;
-                      }
+                    onTap: () {
+                      final studentId = s['enrollment'].toString();
 
                       Navigator.push(
                         context,
