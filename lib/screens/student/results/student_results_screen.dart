@@ -103,17 +103,14 @@ if (loading || result == null) {
                     context,
                     MaterialPageRoute(
                       builder: (_) => DownloadAcademicReportScreen(
-                        activeSemester: 6,
+                        
                       ),
                     ),
                   );
                 },
-                icon: const Icon(
-                  Icons.download,
-                  color: Colors.white,
-                ),
+                
                 label: const Text(
-                  "Download Full Academic Report (PDF)",
+                  "Previous Semester data",
                   style: TextStyle(color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
