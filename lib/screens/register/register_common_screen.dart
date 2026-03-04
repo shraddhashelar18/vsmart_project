@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import '../../mock/mock_registration_requests.dart';
-import '../../models/registration_request_model.dart';
+import '../../services/auth_service.dart';
 
 class RegisterCommonScreen extends StatefulWidget {
   const RegisterCommonScreen({Key? key}) : super(key: key);
@@ -20,6 +18,7 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
   String password = "";
   String selectedRole = "";
   bool isPasswordVisible = false;
+  bool isLoading = false;
 
   // ---------- STUDENT ----------
   String rollNo = "";
@@ -27,7 +26,6 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
   String studentMobile = "";
   String parentMobile = "";
   String studentEnrollmentNo = "";
-
 
   // ---------- TEACHER ----------
   String employeeId = "";
@@ -37,26 +35,26 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
   String enrollmentNo = "";
   String parentOwnMobile = "";
 
-  final List<String> classList = [
-    "IF1KA",
-    "IF2KA",
-    "IF3KA",
-    "IF4KA",
-    "IF5KA",
-    "IF6KA",
-    "CO1KA",
-    "CO2KA",
-    "CO3KA",
-    "CO4KA",
-    "CO5KA",
-    "CO6KA",
-    "EJ1KA",
-    "EJ2KA",
-    "EJ3KA",
-    "EJ4KA",
-    "EJ5KA",
-    "EJ6KA",
-  ];
+  List<String> classList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchClasses();
+  }
+
+  void fetchClasses() async {
+    try {
+      final classes = await AuthService.getClasses();
+
+      setState(() {
+        classList = classes;
+        print(classList);
+      });
+    } catch (e) {
+      print("Error loading classes: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +81,6 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                 hint: "Email Address",
                 icon: Icons.email,
                 onChanged: (v) => email = v,
-                
               ),
 
               _passwordField(),
@@ -107,7 +104,7 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
               const SizedBox(height: 10),
 
               // ================= STUDENT =================
-             if (selectedRole == "student") ...[
+              if (selectedRole == "student") ...[
                 _requiredField(
                   hint: "Enrollment No",
                   icon: Icons.confirmation_number,
@@ -123,17 +120,24 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                   validator: (value) =>
                       value == null ? "Please select class" : null,
                   items: classList
-                      .map((cls) =>
-                          DropdownMenuItem(value: cls, child: Text(cls)))
+                      .map((cls) => DropdownMenuItem(
+                            value: cls,
+                            child: Text(cls),
+                          ))
                       .toList(),
-                  onChanged: (value) => studentClass = value!,
+                  onChanged: (value) {
+                    setState(() {
+                      studentClass = value!;
+                    });
+                  },
+                  hint: classList.isEmpty
+                      ? const Text("Loading classes...")
+                      : const Text("Select Class"),
                 ),
                 const SizedBox(height: 12),
-
                 phoneField("Mobile Number", (v) => studentMobile = v),
                 phoneField("Parent Mobile Number", (v) => parentMobile = v),
               ],
-
 
               // ================= TEACHER =================
               if (selectedRole == "teacher") ...[
@@ -172,52 +176,72 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    Map<String, dynamic> extraData = {};
+                onPressed: () async {
+                  if (!_formKey.currentState!.validate()) return;
 
-                    if (selectedRole == "student") {
-                      extraData = {
-                        "Enrollment No": studentEnrollmentNo,
-                        "Roll No": rollNo,
-                        "Class": studentClass,
-                        "Student Mobile": studentMobile,
-                        "Parent Mobile": parentMobile,
-                      };
-                    } else if (selectedRole == "teacher") {
-                      extraData = {
-                        "Employee ID": employeeId,
-                        "Mobile": teacherMobile,
-                      };
-                    } else if (selectedRole == "parent") {
-                      extraData = {
-                        "Enrollment No": enrollmentNo,
-                        "Mobile": parentOwnMobile,
-                      };
-                    }
-
-                    final newRequest = RegistrationRequest(
-                      requestId: DateTime.now().millisecondsSinceEpoch,
-                      fullName: fullName,
-                      email: email,
-                      role: selectedRole,
-                      extraData: extraData,
-                    );
-
-                    mockRegistrationRequests.add(newRequest);
-
+                  if (selectedRole == "student" && studentClass.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Registration request sent to admin"),
-                      ),
+                      const SnackBar(content: Text("Please select class")),
                     );
+                    return;
                   }
-                },
+                  setState(() {
+                    isLoading = true;
+                  });
 
-                child: const Text(
-                  "Register",
-                  style: TextStyle(color: Colors.white),
-                ),
+                  Map<String, dynamic> body = {
+                    "fullName": fullName,
+                    "email": email,
+                    "password": password,
+                    "selectedRole": selectedRole,
+                  };
+
+                  if (selectedRole == "student") {
+                    body.addAll({
+                      "studentEnrollmentNo": studentEnrollmentNo,
+                      "rollNo": rollNo,
+                      "studentClass": studentClass,
+                      "studentMobile": studentMobile,
+                      "parentMobile": parentMobile
+                    });
+                  }
+
+                  if (selectedRole == "teacher") {
+                    body.addAll({
+                      "employeeId": employeeId,
+                      "teacherMobile": teacherMobile
+                    });
+                  }
+
+                  if (selectedRole == "parent") {
+                    body.addAll({
+                      "enrollmentNo": enrollmentNo,
+                      "parentOwnMobile": parentOwnMobile
+                    });
+                  }
+
+                  final result = await AuthService.register(body);
+
+                  setState(() {
+                    isLoading = false;
+                  });
+
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(result["message"])));
+                },
+                child: isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        "Register",
+                        style: TextStyle(color: Colors.white),
+                      ),
               ),
 
               const SizedBox(height: 12),
@@ -270,29 +294,72 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
-        decoration: _decoration(hint, icon),
-        onChanged: onChanged,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return "$hint is required";
-          }
-
-          // Full Name validation: no numbers
-          if (hint == "Full Name" && RegExp(r'[0-9]').hasMatch(value)) {
-            return "Name cannot contain numbers";
-          }
-
-          // Email validation: proper format
-          if (hint == "Email Address") {
-            final emailReg = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-            if (!emailReg.hasMatch(value)) {
-              return "Enter valid email";
+          decoration: _decoration(hint, icon).copyWith(counterText: ""),
+          maxLength: hint == "Enrollment No"
+              ? 11
+              : hint == "Roll No"
+                  ? 10
+                  : hint == "Employee ID"
+                      ? 10
+                      : null,
+          inputFormatters: hint == "Enrollment No"
+              ? [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(11),
+                ]
+              : hint == "Roll No"
+                  ? [
+                      FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+                      LengthLimitingTextInputFormatter(10),
+                    ]
+                  : hint == "Employee ID"
+                      ? [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'[A-Za-z0-9]')),
+                          LengthLimitingTextInputFormatter(10),
+                        ]
+                      : [],
+          onChanged: onChanged,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "$hint is required";
             }
-          }
 
-          return null;
-        },
-      ),
+            // Full Name validation
+            if (hint == "Full Name" && RegExp(r'[0-9]').hasMatch(value)) {
+              return "Name cannot contain numbers";
+            }
+
+            // Email validation
+            if (hint == "Email Address") {
+              final emailReg = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+              if (!emailReg.hasMatch(value)) {
+                return "Enter valid email";
+              }
+            }
+
+            // Enrollment validation (11 digits)
+            if (hint == "Enrollment No") {
+              if (!RegExp(r'^[0-9]{11}$').hasMatch(value)) {
+                return "Enrollment must be 11 digits";
+              }
+            }
+
+            // Roll number validation (10 alphanumeric)
+            if (hint == "Roll No") {
+              if (!RegExp(r'^[A-Za-z0-9]{10}$').hasMatch(value)) {
+                return "Roll No must be 10 characters";
+              }
+            }
+            // Employee ID validation(10 alphanumeric)
+            if (hint == "Employee ID") {
+              if (!RegExp(r'^[A-Za-z0-9]{10}$').hasMatch(value)) {
+                return "Employee ID must be 10 characters";
+              }
+            }
+
+            return null;
+          }),
     );
   }
 

@@ -11,7 +11,6 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.1.5
-  http: ^1.1.0
   intl: ^0.18.1
   file_picker: ^8.0.0
   percent_indicator: ^4.2.3
@@ -23,6 +22,7 @@ dependencies:
   excel: ^2.1.0
   file_saver: ^0.2.8
   media_store_plus: ^0.1.2
+  http: ^1.2.0
 
 
 dev_dependencies:
