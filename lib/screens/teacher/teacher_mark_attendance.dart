@@ -159,19 +159,19 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
                       borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () async {
-  final dateKey = DateFormat("yyyy-MM-dd").format(selectedDate);
+                  final dateKey = DateFormat("yyyy-MM-dd").format(selectedDate);
 
-  await _service.submitAttendance(
-    className: widget.className,
-    subject: widget.subject,
-    dateKey: dateKey,
-    students: students,
-  );
+                  await _service.submitAttendance(
+                    className: widget.className,
+                    subject: widget.subject,
+                    dateKey: dateKey,
+                    students: students,
+                  );
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Attendance Submitted!")),
-  );
-},
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Attendance Submitted!")),
+                  );
+                },
                 child: const Text("Submit Attendance",
                     style: TextStyle(color: Colors.white)),
               ),
@@ -248,4 +248,3 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
     );
   }
 }
-

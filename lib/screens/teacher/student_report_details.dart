@@ -144,12 +144,19 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
                       final examName = examEntry.key;
                       final data = examEntry.value;
 
-                      if (data["status"] != "published")
-                        return const SizedBox();
+                      if (data["status"] == "draft") return const SizedBox();
+
+                      String displayText;
+
+                      if (data["status"] == "AB") {
+                        displayText = "AB";
+                      } else {
+                        displayText = "${data["score"]} / ${data["max"]}";
+                      }
 
                       return _buildMarkTile(
                         examName,
-                        "${data["score"]} / ${data["max"]}",
+                        displayText,
                       );
                     }).toList(),
                     const SizedBox(height: 18),

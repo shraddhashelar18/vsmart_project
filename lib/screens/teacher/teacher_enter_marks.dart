@@ -1,5 +1,10 @@
+import 'dart:typed_data';
+import 'package:media_store_plus/media_store_plus.dart';
 import 'package:flutter/material.dart';
 import '../../services/teacher_marks_service.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:excel/excel.dart';
+import 'dart:io';
 
 class EnterMarksScreen extends StatefulWidget {
   final int teacherId;
@@ -19,7 +24,7 @@ class EnterMarksScreen extends StatefulWidget {
 
 class _EnterMarksScreenState extends State<EnterMarksScreen> {
   static const green = Color(0xFF009846);
-final TeacherMarksService _service = TeacherMarksService();
+  final TeacherMarksService _service = TeacherMarksService();
   final List<String> exams = ["CT-1", "CT-2"];
   String selectedExam = "CT-1";
   int maxMarks = 30;
@@ -33,10 +38,11 @@ final TeacherMarksService _service = TeacherMarksService();
   @override
   void initState() {
     super.initState();
+    MediaStore.ensureInitialized();
     _initControllers();
   }
 
- void _initControllers() {
+  void _initControllers() {
     final students = _service.getStudentsByClass(widget.className);
 
     for (var exam in exams) {
@@ -59,23 +65,24 @@ final TeacherMarksService _service = TeacherMarksService();
   @override
   Widget build(BuildContext context) {
     // 🔥 FIXED STUDENT FETCH
-   final students = _service.getStudentsByClass(widget.className);
+    final students = _service.getStudentsByClass(widget.className);
 
     final ctrls = controllers[selectedExam]!;
-String? examStatus;
+    String? examStatus;
 
-if (students.isNotEmpty) {
-  final firstStudentId = students.first["enrollment"];
+    if (students.isNotEmpty) {
+      final firstStudentId = students.first["enrollment"];
 
-  final examData = _service.getExamData(
-    studentId: firstStudentId,
-    subject: widget.subject,
-    exam: selectedExam,
-  );
+      final examData = _service.getExamData(
+        studentId: firstStudentId,
+        subject: widget.subject,
+        exam: selectedExam,
+      );
 
-  examStatus = examData?["status"];
-}
-final bool isPublished = examStatus == "published";
+      examStatus = examData?["status"];
+    }
+    final bool isPublished = examStatus == "published";
+
     /// ✅ Stats PER EXAM
     final values = ctrls.values
         .map((c) => int.tryParse(c.text) ?? 0)
@@ -124,7 +131,34 @@ final bool isPublished = examStatus == "published";
             _statBox("$completed/${students.length}", "Completed"),
             _statBox(avg.toStringAsFixed(1), "Average"),
           ]),
-
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _downloadTemplate,
+                  child: const Text(
+                    "Download Template",
+                    style: TextStyle(color: Colors.green),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: isPublished ? null : _uploadExcel,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: green,
+                    disabledBackgroundColor: Colors.grey.shade400,
+                  ),
+                  child: const Text(
+                    "Upload Excel",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 18),
           _label("Students (${students.length})"),
           const SizedBox(height: 10),
@@ -195,7 +229,7 @@ final bool isPublished = examStatus == "published";
               child: const Text("Save Draft"),
             ),
             const SizedBox(height: 10),
-           ElevatedButton(
+            ElevatedButton(
               onPressed: isPublished ? null : () => _confirmPublish(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: green,
@@ -213,29 +247,30 @@ final bool isPublished = examStatus == "published";
     );
   }
 
-void _saveMarks({required bool isDraft}) {
-  _service.saveMarks(
-    className: widget.className,
-    subject: widget.subject,
-    exam: selectedExam,
-    maxMarks: maxMarks,
-    isDraft: isDraft,
-    controllers: controllers[selectedExam]!,
-  );
+  void _saveMarks({required bool isDraft}) {
+    _service.saveMarks(
+      className: widget.className,
+      subject: widget.subject,
+      exam: selectedExam,
+      maxMarks: maxMarks,
+      isDraft: isDraft,
+      controllers: controllers[selectedExam]!,
+    );
 
-  setState(() {});
+    setState(() {});
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(
-        isDraft
-            ? "$selectedExam saved as draft"
-            : "$selectedExam published successfully!",
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isDraft
+              ? "$selectedExam saved as draft"
+              : "$selectedExam published successfully!",
+        ),
       ),
-    ),
-  );
-}
-Future<void> _confirmPublish() async {
+    );
+  }
+
+  Future<void> _confirmPublish() async {
     final students = _service.getStudentsByClass(widget.className);
 
     final ctrls = controllers[selectedExam]!;
@@ -303,6 +338,7 @@ Future<void> _confirmPublish() async {
       _saveMarks(isDraft: false);
     }
   }
+
   Widget _label(String t) =>
       Text(t, style: const TextStyle(fontWeight: FontWeight.w600));
 
@@ -325,4 +361,121 @@ Future<void> _confirmPublish() async {
                     const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             Text(s, style: TextStyle(color: Colors.grey.shade600)),
           ])));
+
+  Future<void> _downloadTemplate() async {
+    try {
+      final excel = Excel.createExcel();
+      final sheet = excel['Sheet1'];
+
+      sheet.appendRow(["Roll No", "Marks"]);
+
+      final students = _service.getStudentsByClass(widget.className);
+
+      for (var s in students) {
+        sheet.appendRow([s["roll"], ""]);
+      }
+
+      final bytes = excel.encode();
+      if (bytes == null) return;
+
+      final fileName =
+          "${widget.className}_${widget.subject}_${selectedExam}_Marks_Template.xlsx";
+
+      final downloadsDir = Directory('/storage/emulated/0/Download');
+
+      final file = File('${downloadsDir.path}/$fileName');
+
+      await file.writeAsBytes(bytes);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Template saved to Downloads/$fileName")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error saving file: $e")),
+      );
+    }
+  }
+
+  Future<void> _uploadExcel() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result == null) return;
+
+    final file = File(result.files.single.path!);
+    final bytes = file.readAsBytesSync();
+    final excel = Excel.decodeBytes(bytes);
+
+    final sheet = excel.tables.values.first;
+
+    if (sheet == null) return;
+
+    if (sheet.rows.length <= 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Excel file has no data")),
+      );
+      return;
+    }
+
+    final students = _service.getStudentsByClass(widget.className);
+
+    List<String> invalidRolls = [];
+
+    for (int i = 1; i < sheet.rows.length; i++) {
+      final row = sheet.rows[i];
+
+      final rollCell = row[0]?.value;
+      final marksCell = row[1]?.value;
+
+      final roll = rollCell == null
+          ? ""
+          : rollCell.toString().replaceAll(".0", "").trim();
+
+      final marks = marksCell == null
+          ? ""
+          : marksCell.toString().replaceAll(".0", "").trim();
+
+      // ✅ Skip blank rows
+      if (roll.isEmpty || marks.isEmpty) continue;
+
+      final student = students.firstWhere(
+        (s) => s["roll"] == roll,
+        orElse: () => {},
+      );
+
+      if (student.isEmpty) {
+        invalidRolls.add(roll);
+        continue;
+      }
+
+      final score = int.tryParse(marks);
+
+      if (score == null || score < 0 || score > maxMarks) {
+        invalidRolls.add(roll);
+        continue;
+      }
+
+      final sid = student["enrollment"];
+      controllers[selectedExam]![sid]!.text = score.toString();
+    }
+
+    setState(() {});
+
+    if (invalidRolls.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Invalid data for roll: ${invalidRolls.join(", ")}",
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Excel uploaded successfully")),
+      );
+    }
+  }
 }

@@ -22,7 +22,6 @@ class TeacherMarksService {
     return mockStudentReports[studentId]?["marks"]?[subject]?[exam];
   }
 
-  /// Save marks (draft or publish)
   void saveMarks({
     required String className,
     required String subject,
@@ -35,7 +34,18 @@ class TeacherMarksService {
 
     for (var s in students) {
       final sid = s["enrollment"].toString();
-      final score = int.tryParse(controllers[sid]!.text) ?? 0;
+      final text = controllers[sid]!.text.trim();
+
+      int score = 0;
+      String status;
+
+      if (text.isEmpty) {
+        score = 0;
+        status = isDraft ? "draft" : "AB"; // 🔥 AB on publish
+      } else {
+        score = int.tryParse(text) ?? 0;
+        status = isDraft ? "draft" : "published";
+      }
 
       mockStudentReports[sid] ??= {
         "name": s["name"],
@@ -49,7 +59,7 @@ class TeacherMarksService {
       marks[subject][exam] = {
         "score": score,
         "max": maxMarks,
-        "status": isDraft ? "draft" : "published",
+        "status": status,
       };
     }
   }
