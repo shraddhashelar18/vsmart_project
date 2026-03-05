@@ -44,13 +44,16 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
   }
 
   void fetchClasses() async {
+    print("FETCH CLASSES CALLED");
+
     try {
       final classes = await AuthService.getClasses();
 
       setState(() {
         classList = classes;
-        print(classList);
       });
+
+      print("CLASSES: $classes");
     } catch (e) {
       print("Error loading classes: $e");
     }

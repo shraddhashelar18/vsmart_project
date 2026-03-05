@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 // mock + models
-import '../../mock/mock_users.dart';
-import '../../models/user_auth_model.dart';
 
+import '../../models/user_auth_model.dart';
+import '../../core/session_manager.dart';
 // dashboards / homes
 import '../../models/user_session.dart';
+import '../../services/auth_service.dart';
 import '../admin/admin_dashboard.dart';
 import '../teacher/teacher_home.dart';
 import '../hod/hod_dashboard.dart';
@@ -79,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 onPressed: () {
                   if (_loginFormKey.currentState!.validate()) {
-                    _mockLogin();
+                    _realLogin();
                   }
                 },
                 child: const Text(
@@ -94,28 +95,33 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _mockLogin() {
-    final UserAuth user = mockUsers.firstWhere(
-      (u) => u.email == email,
-      orElse: () => UserAuth(
-        user_id: -1,
-        name: "",
-        email: "",
-        role: "",
-        status: "",
-      ),
+  void _realLogin() async {
+   final result = await AuthService.login(email, password);
+
+    if (result["status"] == false) {
+      _showMessage(result["message"]);
+      return;
+    }
+
+    SessionManager.token = result["token"];
+    final user = result["user"];
+
+    UserAuth loggedUser = UserAuth(
+      user_id: user["user_id"],
+      name: "",
+      email: user["email"],
+      role: user["role"],
+      status: user["status"],
+      departments: List<String>.from(user["departments"] ?? []),
+      className: user["className"],
+      semester: user["semester"],
     );
 
-    if (user.user_id == -1) {
-      _showMessage("User not found");
-      return;
-    }
+    UserSession.setUser(loggedUser);
 
-    if (user.status != "approved") {
-      _showMessage("Waiting for admin approval");
-      return;
-    }
-    UserSession.currentUser = user;
+    _navigateUser(loggedUser);
+  }
+  void _navigateUser(UserAuth user) {
     if (user.role == "admin") {
       Navigator.pushReplacement(
         context,
@@ -154,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(
           builder: (_) => TeacherHome(
             teacherId: user.user_id,
-            teacherName: user.name,
+            teacherName: user.email,
             department: user.departments.first,
             departments: user.departments,
           ),
@@ -163,7 +169,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // ✅ STUDENT FIX
     if (user.role == "student") {
       Navigator.pushReplacement(
         context,
@@ -177,10 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
         MaterialPageRoute(builder: (_) => const ParentDashboard()),
       );
-      return;
     }
-
-    _showMessage("Dashboard coming soon for ${user.role}");
   }
 
   void _showMessage(String msg) {

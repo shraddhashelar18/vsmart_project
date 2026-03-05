@@ -1,26 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:vsmart_app/screens/admin/class_departments.dart';
-import 'package:vsmart_app/screens/admin/parent_department_screen.dart';
-import 'package:vsmart_app/screens/admin/student_departments.dart';
-import 'manage_teachers.dart';
-import 'manage_students.dart';
-import 'manage_parents.dart';
-import 'manage_classes.dart';
+import '../../services/admin_dashboard_service.dart';
 import 'admin_bottom_nav.dart';
 import 'teacher_departments.dart';
+import 'student_departments.dart';
+import 'parent_department_screen.dart';
+import 'class_departments.dart';
 
-
-class AdminDashboard extends StatelessWidget {
+class AdminDashboard extends StatefulWidget {
   const AdminDashboard({Key? key}) : super(key: key);
 
-  // 🔐 FAKE ADMIN DATA (WILL COME FROM BACKEND LATER)
-  final String admin_name = "Administrator";
+  @override
+  State<AdminDashboard> createState() => _AdminDashboardState();
+}
 
-  final int total_teachers = 45;
-  final int total_students = 850;
-  final int total_parents = 720;
-  final int total_classes = 24;
+class _AdminDashboardState extends State<AdminDashboard> {
+  final AdminDashboardService _service = AdminDashboardService();
 
+  String admin_name = "Admin";
+
+  int total_teachers = 0;
+  int total_students = 0;
+  int total_parents = 0;
+  int total_classes = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboard();
+  }
+
+  Future<void> _loadDashboard() async {
+    final data = await _service.getDashboardStats();
+
+    if (data["status"] == true) {
+      setState(() {
+        admin_name = data["admin_name"];
+
+        total_teachers = data["total_teachers"];
+        total_students = data["total_students"];
+        total_parents = data["total_parents"];
+        total_classes = data["total_classes"];
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
