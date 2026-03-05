@@ -45,9 +45,7 @@ class _AddClassState extends State<AddClass> {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> teacherList = _selectedDepartment == null
-        ? <String>[]
-        : _teacherService.getTeacherNamesByDepartment(_selectedDepartment!);
+    List<String> teacherList = [];
 
     return Scaffold(
       resizeToAvoidBottomInset: true,

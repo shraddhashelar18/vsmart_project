@@ -22,14 +22,12 @@ class _ManageTeachersState extends State<ManageTeachers> {
     _loadTeachers();
   }
 
-  Future<void> _loadTeachers() async {
-    final allTeachers = await _teacherService.getAllTeachers();
+ Future<void> _loadTeachers() async {
+    final allTeachers = await _teacherService.getTeachers(widget.department);
 
-    teachers = allTeachers
-        .where((t) => (t["departments"] as List).contains(widget.department))
-        .toList();
-
-    setState(() {});
+    setState(() {
+      teachers = allTeachers;
+    });
   }
 
   Future<void> _deleteTeacher(int teacherId, String name) async {

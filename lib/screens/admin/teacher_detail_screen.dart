@@ -15,52 +15,60 @@ class TeacherDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final classes = _teacherService.getTeacherClasses(teacherId);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(name),
         backgroundColor: const Color(0xFF009846),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView.builder(
-          itemCount: classes.length,
-          itemBuilder: (context, index) {
-            final className = classes[index];
-            final subjects =
-                _teacherService.getSubjectsForClass(teacherId, className);
+      body: FutureBuilder(
+        future: _teacherService.getTeacherDetail(teacherId),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      className,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+          final teacher = snapshot.data as Map<String, dynamic>;
+
+          final classes = teacher["classes"] ?? [];
+          final subjects = teacher["subjects"] ?? {};
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: classes.length,
+            itemBuilder: (context, index) {
+              final className = classes[index];
+              final classSubjects = subjects[className] ?? [];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        className,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    ...subjects.map(
-                      (sub) => Row(
-                        children: [
-                          const Icon(Icons.book, size: 16, color: Colors.grey),
-                          const SizedBox(width: 6),
-                          Text(sub),
-                        ],
-                      ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      ...classSubjects.map<Widget>((sub) => Row(
+                            children: [
+                              const Icon(Icons.book,
+                                  size: 16, color: Colors.grey),
+                              const SizedBox(width: 6),
+                              Text(sub),
+                            ],
+                          )),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }

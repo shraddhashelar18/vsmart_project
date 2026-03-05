@@ -1,161 +1,134 @@
-import '../mock/mock_teacher_data.dart';
-import '../mock/mock_teacher_classes.dart';
-import '../mock/mock_teacher_departments.dart';
-import '../mock/mock_teacher_subjects.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/session_manager.dart';
 
-class TeacherNewService{
-  // ===============================
-  // GET ALL TEACHERS
-  // ===============================
-  Future<List<Map<String, dynamic>>> getAllTeachers() async {
-    return mockTeachers.entries.map((entry) {
-      final id = entry.key;
-      final data = entry.value;
-
-      return {
-        "id": id,
-        "name": data["name"],
-        "email": data["email"],
-        "phone": data["phone"],
-        "departments": mockTeacherDepartments[id] ?? [],
-        "classes": mockTeacherClasses[id] ?? [],
-        "subjects": mockTeacherSubjects[id] ?? {},
+class TeacherNewService {
+ static const String classBase =
+      "http://192.168.0.103:8080/vsmart_backend/api/admin/";
+  Map<String, String> get headers => {
+        "Content-Type": "application/json",
+        "x-api-key": "VSMART_API_2026",
+        "Authorization": "Bearer ${SessionManager.token}",
       };
-    }).toList();
-  }
 
-  // ===============================
-  // GET SINGLE TEACHER
-  // ===============================
-  Future<Map<String, dynamic>?> getTeacherById(int id) async {
-    if (!mockTeachers.containsKey(id)) return null;
+  /// ===============================
+  /// GET TEACHERS BY DEPARTMENT
+  /// ===============================
 
-    return {
-      "id": id,
-      "name": mockTeachers[id]!["name"],
-      "email": mockTeachers[id]!["email"],
-      "phone": mockTeachers[id]!["phone"],
-      "departments": mockTeacherDepartments[id] ?? [],
-      "classes": mockTeacherClasses[id] ?? [],
-      "subjects": mockTeacherSubjects[id] ?? {},
-    };
-  }
+  Future<List<Map<String, dynamic>>> getTeachers(String department) async {
+    final response = await http.post(
+      Uri.parse("$classBase/teachers/get_teachers.php"),
+      headers: headers,
+      body: jsonEncode({"department": department}),
+    );
 
-  List<String> getTeacherNamesByDepartment(String dept) {
-    return mockTeacherDepartments.entries
-        .where((e) => e.value.contains(dept))
-        .map((e) {
-          final teacherId = e.key;
-          return mockTeachers[teacherId]?["name"] ?? "";
-        })
-        .where((name) => name.isNotEmpty)
-        .toList();
-  }
+    final data = jsonDecode(response.body);
 
-  // ===============================
-  // ADD TEACHER
-  // ===============================
-  Future<void> addTeacher({
-    required String name,
-    required String email,
-    required String phone,
-    required List<String> departments,
-    required List<String> classes,
-  }) async {
-    final newId = mockTeachers.isEmpty ? 1 : mockTeachers.keys.last + 1;
-
-    mockTeachers[newId] = {
-      "name": name,
-      "email": email,
-      "phone": phone,
-    };
-
-    mockTeacherDepartments[newId] = departments;
-    mockTeacherClasses[newId] = classes;
-    mockTeacherSubjects[newId] = {};
-  }
-
-  // ===============================
-  // UPDATE TEACHER
-  // ===============================
-  Future<void> updateTeacher({
-    required int id,
-    required String name,
-    required String phone,
-    required List<String> departments,
-    required List<String> classes,
-  }) async {
-    if (!mockTeachers.containsKey(id)) return;
-
-    mockTeachers[id]!["name"] = name;
-    mockTeachers[id]!["phone"] = phone;
-
-    mockTeacherDepartments[id] = departments;
-    mockTeacherClasses[id] = classes;
-  }
-
-  // ===============================
-  // DELETE TEACHER
-  // ===============================
-  Future<void> deleteTeacher(int id) async {
-    mockTeachers.remove(id);
-    mockTeacherDepartments.remove(id);
-    mockTeacherClasses.remove(id);
-    mockTeacherSubjects.remove(id);
-  }
-
-  // ===============================
-  // UPDATE SUBJECTS FOR CLASS
-  // ===============================
-  Future<void> updateTeacherSubjects({
-    required int teacherId,
-    required String className,
-    required List<String> subjects,
-  }) async {
-    mockTeacherSubjects[teacherId] ??= {};
-    mockTeacherSubjects[teacherId]![className] = subjects;
-  }
-
-  List<String> getTeacherClasses(int teacherId) {
-    return mockTeacherClasses[teacherId] ?? [];
-  }
-
-  List<String> getSubjectsForClass(int teacherId, String className) {
-    return mockTeacherSubjects[teacherId]?[className] ?? [];
-  }
-
-  // ===============================
-// SAVE ALL SUBJECTS FOR TEACHER
-// ===============================
-  Future<void> saveTeacherSubjects({
-    required int teacherId,
-    required Map<String, List<String>> subjectsPerClass,
-  }) async {
-    mockTeacherSubjects[teacherId] = subjectsPerClass;
-  }
-
-  bool isSubjectAlreadyAssigned({
-    required String className,
-    required String subject,
-    int? excludeTeacherId,
-  }) {
-    for (var entry in mockTeacherSubjects.entries) {
-      final teacherId = entry.key;
-
-      // Skip current teacher in edit mode
-      if (excludeTeacherId != null && teacherId == excludeTeacherId) {
-        continue;
-      }
-
-      final subjectsPerClass = entry.value;
-
-      if (subjectsPerClass.containsKey(className)) {
-        if (subjectsPerClass[className]!.contains(subject)) {
-          return true;
-        }
-      }
+    if (data["status"]) {
+      return List<Map<String, dynamic>>.from(data["teachers"]);
     }
 
-    return false;
+    return [];
+  }
+
+  /// ===============================
+  /// GET TEACHER DETAILS
+  /// ===============================
+
+  Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
+    final response = await http.post(
+      Uri.parse("$classBase/teachers/get_teacher_detail.php"),
+      headers: headers,
+      body: jsonEncode({"id": id}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"]) {
+      return data;
+    }
+
+    return null;
+  }
+Future<List<String>> getClasses(String department) async {
+    final response = await http.post(
+     Uri.parse("$classBase/classes/get_classes_by_departments.php"),
+      headers: headers,
+      body: jsonEncode({"department": department}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"]) {
+      return List<String>.from(data["classes"]);
+    }
+
+    return [];
+  }
+  /// ===============================
+  /// ADD TEACHER
+  /// ===============================
+
+  Future<bool> addTeacher({
+    required String name,
+    required String email,
+    required String password,
+    required String phone,
+    required Map<String, List<String>> subjects,
+  }) async {
+    final response = await http.post(
+      Uri.parse("$classBase/teachers/add_teacher.php"),
+      headers: headers,
+      body: jsonEncode({
+        "name": name,
+        "email": email,
+        "password": password,
+        "phone": phone,
+        "subjects": subjects
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+    return data["status"] ?? false;
+  }
+
+  /// ===============================
+  /// UPDATE TEACHER
+  /// ===============================
+
+  Future<bool> updateTeacher({
+    required int userId,
+    required String name,
+    required String phone,
+    required Map<String, Map<String, List<String>>> subjects,
+  }) async {
+    final response = await http.post(
+      Uri.parse("$classBase/teachers/update_teacher.php"),
+      headers: headers,
+      body: jsonEncode({
+        "user_id": userId,
+        "full_name": name,
+        "mobile_no": phone,
+        "subjects": subjects
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+    return data["status"] ?? false;
+  }
+
+  /// ===============================
+  /// DELETE TEACHER
+  /// ===============================
+
+  Future<bool> deleteTeacher(int id) async {
+    final response = await http.post(
+      Uri.parse("$classBase/teachers/delete_teacher.php"),
+      headers: headers,
+      body: jsonEncode({"id": id}),
+    );
+
+    final data = jsonDecode(response.body);
+    return data["status"] ?? false;
   }
 }

@@ -59,7 +59,7 @@ class _AddTeacherState extends State<AddTeacher> {
     activeSemester = await _settingsService.getActiveSemester();
 
     if (isEdit) {
-      final teacher = await _teacherService.getTeacherById(widget.teacherId!);
+     final teacher = await _teacherService.getTeacherDetail(widget.teacherId!);
 
       if (teacher != null) {
         _nameCtrl.text = teacher["name"];
@@ -262,11 +262,7 @@ class _AddTeacherState extends State<AddTeacher> {
                   Wrap(
                     spacing: 8,
                     children: subjects.map((sub) {
-                      final isTaken = _teacherService.isSubjectAlreadyAssigned(
-                        className: cls,
-                        subject: sub,
-                        excludeTeacherId: widget.teacherId,
-                      );
+                      final isTaken = false;
 
                       return FilterChip(
                         label: Text(sub),
@@ -306,31 +302,25 @@ class _AddTeacherState extends State<AddTeacher> {
                   teacherId = widget.teacherId!;
 
                   await _teacherService.updateTeacher(
-                    id: teacherId,
+                    userId: teacherId,
                     name: _nameCtrl.text,
                     phone: "0000000000",
-                    departments: selectedDepartments,
-                    classes: selectedClasses,
+                    subjects: {},
                   );
                 } else {
                   await _teacherService.addTeacher(
                     name: _nameCtrl.text,
                     email: _emailCtrl.text,
+                    password: _passwordCtrl.text,
                     phone: "0000000000",
-                    departments: selectedDepartments,
-                    classes: selectedClasses,
+                    subjects: selectedSubjectsPerClass,
                   );
 
-                  final teachers = await _teacherService.getAllTeachers();
-                  teacherId = teachers.last["id"];
+                  teacherId = 0;
                 }
 
                 /// 🔥 Save Subjects Through Service
-                await _teacherService.saveTeacherSubjects(
-                  teacherId: teacherId,
-                  subjectsPerClass: selectedSubjectsPerClass,
-                );
-
+               
                 Navigator.pop(context);
               },
               child: Text(isEdit ? "Update Teacher" : "Save Teacher"),
