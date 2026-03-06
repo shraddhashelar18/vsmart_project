@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
 
 class AuthService {
-  static const String base = "http://192.168.0.103:8080/vsmart_backend/api";
+ static const String base = ApiConfig.baseUrl;
 
   /* ======================
       REGISTER USER

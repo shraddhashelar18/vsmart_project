@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
 import '../core/session_manager.dart';
 
 class TeacherNewService {
- static const String classBase =
-      "http://192.168.0.103:8080/vsmart_backend/api/admin/";
+ static const String base = "${ApiConfig.baseUrl}/admin";
   Map<String, String> get headers => {
         "Content-Type": "application/json",
         "x-api-key": "VSMART_API_2026",
@@ -17,14 +17,22 @@ class TeacherNewService {
 
   Future<List<Map<String, dynamic>>> getTeachers(String department) async {
     final response = await http.post(
-      Uri.parse("$classBase/teachers/get_teachers.php"),
+      Uri.parse("$base/teachers/get_teachers.php"),
       headers: headers,
       body: jsonEncode({"department": department}),
     );
 
+    print("STATUS CODE: ${response.statusCode}");
+    print("RAW RESPONSE: ${response.body}");
+
+    if (response.statusCode != 200 || response.body.isEmpty) {
+      print("API error while fetching teachers");
+      return [];
+    }
+
     final data = jsonDecode(response.body);
 
-    if (data["status"]) {
+    if (data["status"] == true) {
       return List<Map<String, dynamic>>.from(data["teachers"]);
     }
 
@@ -37,7 +45,7 @@ class TeacherNewService {
 
   Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
     final response = await http.post(
-      Uri.parse("$classBase/teachers/get_teacher_detail.php"),
+      Uri.parse("$base/teachers/get_teacher_detail.php"),
       headers: headers,
       body: jsonEncode({"id": id}),
     );
@@ -52,15 +60,32 @@ class TeacherNewService {
   }
 Future<List<String>> getClasses(String department) async {
     final response = await http.post(
-     Uri.parse("$classBase/classes/get_classes_by_departments.php"),
+      Uri.parse("$base/classes/get_classes_by_department.php"),
       headers: headers,
       body: jsonEncode({"department": department}),
+    );
+
+    print("CLASS API RESPONSE: ${response.body}");
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == true) {
+      return List<String>.from(data["classes"]);
+    }
+
+    return [];
+  }
+  Future<List<String>> getSubjects(String className) async {
+    final response = await http.post(
+      Uri.parse("$base/subject/get_subjects_by_class.php"),
+      headers: headers,
+      body: jsonEncode({"class_name": className}),
     );
 
     final data = jsonDecode(response.body);
 
     if (data["status"]) {
-      return List<String>.from(data["classes"]);
+      return List<String>.from(data["subjects"]);
     }
 
     return [];
@@ -74,10 +99,10 @@ Future<List<String>> getClasses(String department) async {
     required String email,
     required String password,
     required String phone,
-    required Map<String, List<String>> subjects,
+    required Map<String, Map<String, List<String>>> subjects,
   }) async {
     final response = await http.post(
-      Uri.parse("$classBase/teachers/add_teacher.php"),
+      Uri.parse("$base/teachers/add_teacher.php"),
       headers: headers,
       body: jsonEncode({
         "name": name,
@@ -103,7 +128,7 @@ Future<List<String>> getClasses(String department) async {
     required Map<String, Map<String, List<String>>> subjects,
   }) async {
     final response = await http.post(
-      Uri.parse("$classBase/teachers/update_teacher.php"),
+      Uri.parse("$base/teachers/update_teacher.php"),
       headers: headers,
       body: jsonEncode({
         "user_id": userId,
@@ -121,12 +146,19 @@ Future<List<String>> getClasses(String department) async {
   /// DELETE TEACHER
   /// ===============================
 
-  Future<bool> deleteTeacher(int id) async {
+ Future<bool> deleteTeacher(int id) async {
     final response = await http.post(
-      Uri.parse("$classBase/teachers/delete_teacher.php"),
+      Uri.parse("$base/teachers/delete_teacher.php"),
       headers: headers,
       body: jsonEncode({"id": id}),
     );
+
+    print("DELETE STATUS: ${response.statusCode}");
+    print("DELETE RESPONSE: ${response.body}");
+
+    if (response.statusCode != 200 || response.body.isEmpty) {
+      return false;
+    }
 
     final data = jsonDecode(response.body);
     return data["status"] ?? false;

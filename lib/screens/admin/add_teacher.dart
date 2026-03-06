@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/app_settings_service.dart';
 import '../../services/teacher_new_service.dart';
 import '../../services/attendance_service.dart';
-import '../../mock/mock_academics.dart';
+import 'package:flutter/services.dart';
 
 class AddTeacher extends StatefulWidget {
   final String department;
@@ -21,13 +21,14 @@ class AddTeacher extends StatefulWidget {
 class _AddTeacherState extends State<AddTeacher> {
   final AppSettingsService _settingsService = AppSettingsService();
   final TeacherNewService _teacherService = TeacherNewService();
-  final AttendanceService _attendanceService = AttendanceService();
+ 
 
   String activeSemester = "EVEN";
 
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+final _phoneCtrl = TextEditingController();
 
   List<String> selectedDepartments = [];
   List<String> selectedClasses = [];
@@ -35,19 +36,11 @@ class _AddTeacherState extends State<AddTeacher> {
 
   /// 🔥 Subjects stored locally (NO MOCK ACCESS)
   Map<String, List<String>> selectedSubjectsPerClass = {};
-
+Map<String, List<String>> subjectCache = {};
   bool get isEdit => widget.teacherId != null;
 
   /// Example Subject Mapping
-  final Map<String, List<String>> semesterSubjects = {
-    "IF1K": ["Maths1", "Physics"],
-    "IF2K": ["C", "Maths2"],
-    "IF3K": ["DBMS"],
-    "IF4K": ["Java"],
-    "IF5K": ["OS"],
-    "IF6K": ["Networking", "JAVA"],
-    "CO4K": ["SOM"],
-  };
+  
 
   @override
   void initState() {
@@ -59,17 +52,24 @@ class _AddTeacherState extends State<AddTeacher> {
     activeSemester = await _settingsService.getActiveSemester();
 
     if (isEdit) {
-     final teacher = await _teacherService.getTeacherDetail(widget.teacherId!);
+      final teacher = await _teacherService.getTeacherDetail(widget.teacherId!);
 
       if (teacher != null) {
         _nameCtrl.text = teacher["name"];
         _emailCtrl.text = teacher["email"];
-        selectedDepartments = List<String>.from(teacher["departments"]);
-        selectedClasses = List<String>.from(teacher["classes"]);
+_phoneCtrl.text = teacher["phone"] ?? "";
+        selectedDepartments = List<String>.from(teacher["departments"] ?? []);
 
-        /// 🔥 Load existing subjects
-        selectedSubjectsPerClass =
-            Map<String, List<String>>.from(teacher["subjects"]);
+        selectedClasses = List<String>.from(teacher["classes"] ?? []);
+
+        /// FIX SUBJECT MAP CONVERSION
+        final subjects = teacher["subjects"] ?? {};
+
+        selectedSubjectsPerClass = {};
+
+        subjects.forEach((className, subs) {
+          selectedSubjectsPerClass[className] = List<String>.from(subs);
+        });
       }
     } else {
       selectedDepartments = [widget.department];
@@ -83,19 +83,8 @@ class _AddTeacherState extends State<AddTeacher> {
     List<String> result = [];
 
     for (String dept in selectedDepartments) {
-      if (isEdit) {
-        /// EDIT → show ALL classes
-        final years = mockAcademics[dept] ?? {};
-        years.forEach((year, sems) {
-          sems.forEach((semName, classList) {
-            result.addAll(classList);
-          });
-        });
-      } else {
-        /// ADD → only active semester
-        final deptClasses = await _attendanceService.getClasses(dept);
-        result.addAll(deptClasses);
-      }
+      final deptClasses = await _teacherService.getClasses(dept);
+      result.addAll(deptClasses);
     }
 
     visibleClasses = result;
@@ -104,7 +93,17 @@ class _AddTeacherState extends State<AddTeacher> {
   String _baseClass(String cls) {
     return cls.substring(0, cls.length - 1);
   }
+Future<List<String>> _getSubjects(String className) async {
+    if (subjectCache.containsKey(className)) {
+      return subjectCache[className]!;
+    }
 
+    final subjects = await _teacherService.getSubjects(className);
+
+    subjectCache[className] = subjects;
+
+    return subjects;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,7 +126,27 @@ class _AddTeacherState extends State<AddTeacher> {
             _label("Email"),
             _field(_emailCtrl, Icons.email, "teacher@email.com",
                 enabled: !isEdit),
-
+const SizedBox(height: 12),
+            _label("Phone"),
+            TextField(
+              controller: _phoneCtrl,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              maxLength: 10,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.phone),
+                hintText: "Enter phone number",
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            
             if (!isEdit) ...[
               const SizedBox(height: 12),
               _label("Password"),
@@ -224,6 +243,7 @@ class _AddTeacherState extends State<AddTeacher> {
                               if (val) {
                                 selectedClasses.add(cls);
                                 selectedSubjectsPerClass[cls] ??= [];
+                                _getSubjects(cls);
                               } else {
                                 selectedClasses.remove(cls);
                                 selectedSubjectsPerClass.remove(cls);
@@ -246,38 +266,48 @@ class _AddTeacherState extends State<AddTeacher> {
             /// =========================
             /// SUBJECTS PER CLASS
             /// =========================
-            _label("Subjects"),
+           _label("Subjects"),
             ...selectedClasses.map((cls) {
-              final base = _baseClass(cls);
-              final subjects = semesterSubjects[base] ?? [];
-
               selectedSubjectsPerClass[cls] ??= [];
-              final selectedSubs = selectedSubjectsPerClass[cls]!;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(cls,
                       style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Wrap(
-                    spacing: 8,
-                    children: subjects.map((sub) {
-                      final isTaken = false;
+                  const SizedBox(height: 6),
+                  FutureBuilder<List<String>>(
+                    future: _getSubjects(cls),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: CircularProgressIndicator(),
+                        );
+                      }
 
-                      return FilterChip(
-                        label: Text(sub),
-                        selected: selectedSubs.contains(sub),
-                        onSelected: isTaken
-                            ? null // 🔒 disables chip
-                            : (val) {
-                                setState(() {
-                                  val
-                                      ? selectedSubs.add(sub)
-                                      : selectedSubs.remove(sub);
-                                });
-                              },
+                      final subjects = snapshot.data!;
+                      final selectedSubs = selectedSubjectsPerClass[cls]!;
+
+                      return Wrap(
+                        spacing: 8,
+                        children: subjects.map((sub) {
+                          return FilterChip(
+                            label: Text(sub),
+                            selected: selectedSubs.contains(sub),
+                            onSelected: (val) {
+                              setState(() {
+                                if (val) {
+                                  selectedSubs.add(sub);
+                                } else {
+                                  selectedSubs.remove(sub);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
                       );
-                    }).toList(),
+                    },
                   ),
                   const SizedBox(height: 10),
                 ],
@@ -295,7 +325,36 @@ class _AddTeacherState extends State<AddTeacher> {
                 foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 48),
               ),
+              
               onPressed: () async {
+                if (_nameCtrl.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Enter teacher name")),
+                  );
+                  return;
+                }
+                if (_emailCtrl.text.isEmpty || !_emailCtrl.text.contains("@")) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Enter valid email")),
+                  );
+                  return;
+                }
+                if (_phoneCtrl.text.length != 10) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Enter valid 10 digit phone number")),
+                  );
+                  return;
+                  
+                }
+                if (!isEdit && _passwordCtrl.text.length < 6) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text("Password must be at least 6 characters")),
+                  );
+                  return;
+                }
                 int teacherId;
 
                 if (isEdit) {
@@ -304,16 +363,16 @@ class _AddTeacherState extends State<AddTeacher> {
                   await _teacherService.updateTeacher(
                     userId: teacherId,
                     name: _nameCtrl.text,
-                    phone: "0000000000",
-                    subjects: {},
+                    phone: _phoneCtrl.text,
+                    subjects: _formatSubjectsForUpdate(),
                   );
                 } else {
                   await _teacherService.addTeacher(
                     name: _nameCtrl.text,
                     email: _emailCtrl.text,
                     password: _passwordCtrl.text,
-                    phone: "0000000000",
-                    subjects: selectedSubjectsPerClass,
+                    phone: _phoneCtrl.text,
+                    subjects: _formatSubjectsForUpdate(),
                   );
 
                   teacherId = 0;
@@ -350,5 +409,18 @@ class _AddTeacherState extends State<AddTeacher> {
         ),
       ),
     );
+  }
+  
+  Map<String, Map<String, List<String>>> _formatSubjectsForUpdate() {
+    Map<String, Map<String, List<String>>> result = {};
+
+    selectedSubjectsPerClass.forEach((className, subjects) {
+      String dept = className.substring(0, 2); // IF, CO, EJ
+
+      result.putIfAbsent(dept, () => {});
+      result[dept]![className] = subjects;
+    });
+
+    return result;
   }
 }

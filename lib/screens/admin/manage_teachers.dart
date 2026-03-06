@@ -30,14 +30,42 @@ class _ManageTeachersState extends State<ManageTeachers> {
     });
   }
 
-  Future<void> _deleteTeacher(int teacherId, String name) async {
-    await _teacherService.deleteTeacher(teacherId);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("$name deleted")),
+  void _deleteTeacher(int id, String name) async {
+    bool? confirm = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Delete Teacher"),
+          content: Text("Are you sure you want to delete $name?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text("Delete"),
+            ),
+          ],
+        );
+      },
     );
 
-    _loadTeachers();
+    if (confirm == true) {
+      await _teacherService.deleteTeacher(id);
+      _loadTeachers();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Teacher deleted")),
+      );
+    }
   }
 
   @override
