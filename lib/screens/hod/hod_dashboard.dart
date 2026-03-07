@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vsmart_app/screens/hod/hod_promoted_students.dart';
-import 'package:vsmart_app/screens/hod/hod_promoted_with_kt_students.dart';
 import '../../services/department_service.dart';
 import '../../models/department_summary.dart';
 import '../../widgets/summary_card.dart';

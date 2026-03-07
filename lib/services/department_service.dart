@@ -1,52 +1,35 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
+import '../core/session_manager.dart';
 import '../models/department_summary.dart';
-import 'student_service.dart';
-import 'promotion_service.dart';
 
 class DepartmentService {
-  final StudentService _studentService = StudentService();
-  final PromotionService _promotionService = PromotionService();
-
+  static const String base = ApiConfig.baseUrl;
   Future<DepartmentSummary> getSummary(String department) async {
-    final classes = _getClassesForDepartment(department);
+    final url = Uri.parse("$base/hod/get_hod_dashboard.php");
 
-    int totalStudents = 0;
-    int promoted = 0;
-    int promotedWithBacklog = 0;
-    int detained = 0;
-
-    for (var className in classes) {
-      final students = await _studentService.getStudentsByClass(className);
-
-      final evaluated = await _promotionService.evaluatePromotion(students);
-
-      totalStudents += evaluated.length;
-
-      for (var s in evaluated) {
-        if (s.promotionStatus == "PROMOTED") promoted++;
-        if (s.promotionStatus == "PROMOTED_WITH_ATKT") promotedWithBacklog++;
-        if (s.promotionStatus == "DETAINED") detained++;
-      }
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"department": department}),
+    );
+    print("HOD DASHBOARD RESPONSE: ${response.body}");
+    if (response.statusCode != 200) {
+      throw Exception("Failed to load dashboard");
     }
+
+    final data = jsonDecode(response.body);
 
     return DepartmentSummary(
-      totalStudents: totalStudents,
-      totalTeachers: 18, // mock for now
-      promoted: promoted,
-      promotedWithBacklog: promotedWithBacklog,
-      detained: detained,
+      totalStudents: data["totalStudents"] ?? 0,
+      totalTeachers: data["totalTeachers"] ?? 0,
+      promoted: data["promoted"] ?? 0,
+      detained: data["detained"] ?? 0,
+      promotedWithBacklog: data["promotedWithBacklog"] ?? 0,
     );
-  }
-
-  List<String> _getClassesForDepartment(String dept) {
-    switch (dept) {
-      case "IF":
-        return ["IF1KA", "IF3KA"];
-      case "CO":
-        return ["CO1KA", "CO3KA"];
-      case "EJ":
-        return ["EJ1KA", "EJ3KA"];
-      default:
-        return [];
-    }
   }
 }

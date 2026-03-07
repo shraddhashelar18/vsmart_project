@@ -75,28 +75,45 @@ class StudentDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // 🔹 CT1 Section
             _infoCard(
-              title: "CT1 - Subject Wise Marks(Out of 30)",
+              title: "Promotion Status",
               children: [
-                _subjectMarkRow("Mathematics", "18"),
-                _subjectMarkRow("Physics", "Absent"),
-                _subjectMarkRow("Programming", "20"),
+                _infoRow("Status", student.promotionStatus ?? "-"),
+                _infoRow("Backlogs", student.backlogCount.toString()),
               ],
             ),
 
             const SizedBox(height: 16),
-
-// 🔹 CT2 Section
+            // 🔹 CT1 Section
             _infoCard(
-              title: "CT2 - Subject Wise Marks(Out of 30)",
-              children: [
-                _subjectMarkRow("Mathematics", "20"),
-                _subjectMarkRow("Physics", "19"),
-                _subjectMarkRow("Programming", "Absent"),
-              ],
+              title: "CT1 - Subject Wise Marks (Out of 30)",
+              children: student.ct1Marks.isEmpty
+                  ? [
+                      const Text(
+                        "Marks not declared yet",
+                        style: TextStyle(color: Colors.grey),
+                      )
+                    ]
+                  : student.ct1Marks.entries.map((entry) {
+                      return _subjectMarkRow(entry.key, entry.value);
+                    }).toList(),
             ),
-            
+
+            const SizedBox(height: 16),
+            // 🔹 CT2 Section
+            _infoCard(
+              title: "CT2 - Subject Wise Marks (Out of 30)",
+              children: student.ct2Marks.isEmpty
+                  ? [
+                      const Text(
+                        "Marks not declared yet",
+                        style: TextStyle(color: Colors.grey),
+                      )
+                    ]
+                  : student.ct2Marks.entries.map((entry) {
+                      return _subjectMarkRow(entry.key, entry.value);
+                    }).toList(),
+            ),
           ],
         ),
       ),
@@ -171,6 +188,7 @@ class StudentDetailScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _subjectMarkRow(String subject, String mark) {
     final isAbsent = mark.toLowerCase() == "absent";
 

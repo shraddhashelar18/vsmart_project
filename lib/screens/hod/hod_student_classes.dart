@@ -100,27 +100,23 @@ class _HodStudentClassesState extends State<HodStudentClasses> {
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        s.name,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
+                                    child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      s.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        "Roll No: ${s.rollNo}",
-                                        style: const TextStyle(
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text("Roll No: ${s.rollNo}"),
+                                    const SizedBox(height: 4),
+                                    Text("Backlogs: ${s.backlogCount}"),
+                                    Text("Status: ${s.promotionStatus ?? "-"}"),
+                                  ],
+                                )),
                                 const Icon(
                                   Icons.arrow_forward_ios,
                                   size: 16,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'hod_select_class_screen.dart';
-import 'hod_bottom_nav.dart';
 
 class HodStudents extends StatelessWidget {
   final String department;
@@ -14,7 +13,6 @@ class HodStudents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   return HodSelectClassScreen(department: department);
-
+    return HodSelectClassScreen(department: department);
   }
 }

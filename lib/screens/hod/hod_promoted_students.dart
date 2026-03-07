@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/student.dart';
 import '../../services/student_service.dart';
-import '../../services/promotion_service.dart';
 
 class HodPromotedStudents extends StatefulWidget {
   final String department;
@@ -19,31 +18,47 @@ class HodPromotedStudents extends StatefulWidget {
 
 class _HodPromotedStudentsState extends State<HodPromotedStudents> {
   final StudentService _studentService = StudentService();
-  final PromotionService _promotionService = PromotionService();
-
-  late Future<List<Student>> _future;
 
   static const green = Color(0xFF009846);
+
+  late Future<List<Student>> _future;
 
   @override
   void initState() {
     super.initState();
-    _future = _loadPromotedStudents();
+    _future = _studentService.getPromotedStudents(widget.className);
   }
 
-  Future<List<Student>> _loadPromotedStudents() async {
-    final students = await _studentService.getStudentsByClass(widget.className);
-
-    final evaluated = await _promotionService.evaluatePromotion(students);
-
-    return evaluated.where((s) => s.promotionStatus == "PROMOTED").toList();
+  String formatStatus(String? status) {
+    if (status == "PROMOTED_WITH_ATKT") return "Promoted with ATKT";
+    if (status == "PROMOTED") return "Promoted";
+    if (status == "DETAINED") return "Detained";
+    if (status == "COMPLETED") return "Completed";
+    return status ?? "-";
   }
+
+  Color statusColor(String? status) {
+    if (status == "PROMOTED") return Colors.green;
+    if (status == "PROMOTED_WITH_ATKT") return Colors.orange;
+    if (status == "DETAINED") return Colors.red;
+    if (status == "COMPLETED") return Colors.blue;
+    return Colors.grey;
+  }
+
+  Color statusBgColor(String? status) {
+    if (status == "PROMOTED") return Colors.green.shade100;
+    if (status == "PROMOTED_WITH_ATKT") return Colors.orange.shade100;
+    if (status == "DETAINED") return Colors.red.shade100;
+    if (status == "COMPLETED") return Colors.blue.shade100;
+    return Colors.grey.shade200;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: green,
-        title: Text("${widget.className} - Promoted"),
+        title: Text("Promoted to ${widget.className}"),
       ),
       body: FutureBuilder<List<Student>>(
         future: _future,
@@ -76,12 +91,51 @@ class _HodPromotedStudentsState extends State<HodPromotedStudents> {
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFFEAF7F1),
+                    child: Icon(Icons.person, color: green),
+                  ),
                   title: Text(
                     s.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
                   ),
-                  subtitle: Text(
-                    "Backlogs: ${s.backlogCount} | Status: ${s.promotionStatus}",
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      if (s.oldClass != null && s.newClass != null)
+                        Text(
+                          s.promotionStatus == "COMPLETED"
+                              ? "${s.oldClass} → Completed"
+                              : "${s.oldClass} → ${s.newClass}",
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      Text("Backlogs: ${s.backlogCount}"),
+                      if (s.percentage != null)
+                        Text("Percentage: ${s.percentage}%"),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusBgColor(s.promotionStatus),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          formatStatus(s.promotionStatus),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: statusColor(s.promotionStatus),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );

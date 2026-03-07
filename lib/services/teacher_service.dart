@@ -1,65 +1,59 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
 import '../models/teacher.dart';
+import '../core/session_manager.dart';
 
 class TeacherService {
-  final List<Teacher> _allTeachers = [
-    Teacher(
-      id: "1",
-      name: "Prof Sunil Dodake",
-      email: "sunil@college.com",
-      mobile: "9876543210",
-      department: "IF",
-      isClassTeacher: true,
-      classTeacherOf: "IF6KA",
-      assignments: [
-        TeachingAssignment(
-          className: "IF6KA",
-          subject: "PIC",
-        ),
-        TeachingAssignment(
-          className: "IF6KA",
-          subject: "DAN",
-        ),
-        TeachingAssignment(
-          className: "IF4KB",
-          subject: "Database",
-        ),
-      ],
-    ),
-    Teacher(
-      id: "2",
-      name: "Mrs Gauri Bobade",
-      email: "gauri@college.com",
-      mobile: "9876543222",
-      department: "IF",
-      isClassTeacher: false,
-      classTeacherOf: null,
-      assignments: [
-        TeachingAssignment(
-          className: "IF2KA",
-          subject: "English",
-        ),
-      ],
-    ),
-    Teacher(
-      id: "3",
-      name: "Mrs Sushma Pawar",
-      email: "sushma@college.com",
-      mobile: "9876543333",
-      department: "IF",
-      isClassTeacher: false,
-      classTeacherOf: null,
-      assignments: [
-        TeachingAssignment(
-          className: "IF3KA",
-          subject: "Mathematics",
-        ),
-      ],
-    ),
-  ];
-
+  static const String base = ApiConfig.baseUrl;
   Future<List<Teacher>> getTeachersByDepartment(String department) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    final url = Uri.parse("$base/hod/get_teachers.php");
 
-    return _allTeachers.where((t) => t.department == department).toList();
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"department": department}),
+    );
+
+    print("TEACHERS RESPONSE: ${response.body}");
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == false) {
+      throw Exception(data["message"]);
+    }
+
+    List<Teacher> teachers = [];
+
+    for (var t in data["teachers"]) {
+      List<TeachingAssignment> assignments = [];
+
+      for (var a in t["assignments"]) {
+        assignments.add(
+          TeachingAssignment(
+            className: a["className"],
+            subject: a["subject"],
+          ),
+        );
+      }
+
+      teachers.add(
+        Teacher(
+          id: t["id"],
+          name: t["name"],
+          email: t["email"],
+          mobile: t["mobile"],
+          department: t["department"],
+          isClassTeacher: t["isClassTeacher"],
+          classTeacherOf: t["classTeacherOf"],
+          assignments: assignments,
+        ),
+      );
+    }
+
+    return teachers;
   }
 }

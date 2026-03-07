@@ -3,32 +3,31 @@ import 'package:http/http.dart' as http;
 import '../core/api_config.dart';
 
 class AuthService {
- static const String base = ApiConfig.baseUrl;
+  static const String base = ApiConfig.baseUrl;
 
   /* ======================
       REGISTER USER
   ====================== */
 
   static Future<Map<String, dynamic>> register(
-    Map<String, dynamic> data) async {
+      Map<String, dynamic> data) async {
+    print("REGISTER BODY: ${jsonEncode(data)}");
 
-  print("REGISTER BODY: ${jsonEncode(data)}");
+    final response = await http.post(
+      Uri.parse("$base/auth/register.php"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(data),
+    );
 
-  final response = await http.post(
-    Uri.parse("$base/auth/register.php"),
-    headers: {"Content-Type": "application/json"},
-    body: jsonEncode(data),
-  );
+    print("STATUS: ${response.statusCode}");
+    print("RESPONSE: ${response.body}");
 
-  print("STATUS: ${response.statusCode}");
-  print("RESPONSE: ${response.body}");
-
-  if (response.statusCode == 200) {
-    return jsonDecode(response.body);
-  } else {
-    return {"status": false, "message": "Server error"};
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      return {"status": false, "message": "Server error"};
+    }
   }
-}
 
   /* ======================
         GET CLASSES
@@ -54,6 +53,7 @@ class AuthService {
 
     return [];
   }
+
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
     final response = await http.post(
