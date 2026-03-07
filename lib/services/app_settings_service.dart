@@ -1,21 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
 import '../core/session_manager.dart';
-import '../models/user_session.dart';
 
 class AppSettingsService {
-  final String baseUrl =
-      "http://192.168.0.102:8080/vsmart_backend/api/setting/setting.php";
+  static const String base = ApiConfig.baseUrl;
 
   /* ================= GET ALL SETTINGS ================= */
 
   Future<Map<String, dynamic>> getSettings() async {
     final response = await http.post(
-      Uri.parse(baseUrl),
+      Uri.parse("$base/setting/setting.php"),
       headers: {
-  "Content-Type": "application/json",
-  "Authorization": "Bearer ${SessionManager.token}"
-},
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
       body: jsonEncode({"action": "settings"}),
     );
 
@@ -60,7 +59,7 @@ class AppSettingsService {
     required int atktLimit,
   }) async {
     final response = await http.post(
-      Uri.parse(baseUrl),
+      Uri.parse("$base/setting/setting.php"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer ${SessionManager.token}"
@@ -76,9 +75,6 @@ class AppSettingsService {
 
     print("Settings update response: ${response.body}");
   }
-
-  /* ================= ACTIVE SEMESTER NUMBER ================= */
-
   Future<int> getActiveSemesterNumber(int currentStudentSemester) async {
     final cycle = await getActiveSemester();
 
