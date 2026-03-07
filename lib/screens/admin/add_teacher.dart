@@ -86,24 +86,35 @@ _phoneCtrl.text = teacher["phone"] ?? "";
       final deptClasses = await _teacherService.getClasses(dept);
 
       for (var cls in deptClasses) {
-        int sem = int.parse(cls.substring(2, 3)); // IF3KA -> 3
+        int sem = int.parse(cls.substring(2, 3));
 
         if (!isEdit) {
+          // ADD screen → only current semester
           if (activeSemester == "ODD" && sem.isOdd) {
             result.add(cls);
           } else if (activeSemester == "EVEN" && sem.isEven) {
             result.add(cls);
           }
         } else {
-          // Edit screen shows ALL classes
-          result.add(cls);
+          // EDIT screen → current semester classes
+          if (activeSemester == "ODD" && sem.isOdd) {
+            result.add(cls);
+          } else if (activeSemester == "EVEN" && sem.isEven) {
+            result.add(cls);
+          }
         }
+      }
+    }
+
+    /// 🔥 IMPORTANT: also include previously assigned classes
+    for (var cls in selectedClasses) {
+      if (!result.contains(cls)) {
+        result.add(cls);
       }
     }
 
     visibleClasses = result;
   }
-
   String _baseClass(String cls) {
     return cls.substring(0, cls.length - 1);
   }

@@ -88,4 +88,33 @@ class AppSettingsService {
           : currentStudentSemester - 1;
     }
   }
+  Future<void> logout() async {
+    await http.post(
+      Uri.parse("$base/setting/setting.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"action": "logout"}),
+    );
+  }
+  Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final response = await http.post(
+      Uri.parse("$base/setting/setting.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({
+        "action": "change_password",
+        "currentPassword": currentPassword,
+        "newPassword": newPassword
+      }),
+    );
+
+    return jsonDecode(response.body);
+  }
 }

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../core/session_manager.dart';
+import '../../services/app_settings_service.dart';
+
 class ChangePasswordScreen extends StatefulWidget {
-  final String currentStoredPassword; // 🔥 pass from login
+ 
 
   const ChangePasswordScreen({
     Key? key,
-    required this.currentStoredPassword,
+   
   }) : super(key: key);
 
   @override
@@ -52,26 +55,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
   }
 
-  void _updatePassword() {
+  void _updatePassword() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // 🔒 Step 1: Verify current password
-    if (currentPassword != widget.currentStoredPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Current password is incorrect")),
-      );
-      return;
-    }
-
-    // 🔒 Step 2: Check new != old
-    if (newPassword == widget.currentStoredPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("New password must be different")),
-      );
-      return;
-    }
-
-    // 🔒 Step 3: Confirm match
     if (newPassword != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Passwords do not match")),
@@ -79,13 +65,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Password changed successfully")),
+    final result = await AppSettingsService().changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
     );
 
-    Navigator.pop(context);
-  }
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(result["message"])));
 
+    if (result["status"] == true) {
+      SessionManager.clear();
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/login',
+        (route) => false,
+      );
+    }
+  }
   Widget _passwordField(String label, Function(String) onChanged) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),

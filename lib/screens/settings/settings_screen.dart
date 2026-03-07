@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/session_manager.dart';
 import '../../models/user_session.dart';
 import '../admin/admin_bottom_nav.dart';
 import '../parent/parent_bottom_nav.dart';
@@ -147,16 +148,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
             const SizedBox(height: 20),
             _sectionTitle("Account"),
-            _settingsTile(
+           _settingsTile(
               Icons.lock,
               "Change Password",
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const ChangePasswordScreen(
-                      currentStoredPassword: '123456',
-                    ),
+                    builder: (_) => const ChangePasswordScreen(),
                   ),
                 );
               },
@@ -435,7 +434,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               "Logout",
               style: TextStyle(color: Colors.red),
             ),
-            onPressed: () {
+            onPressed: () async {
+              await _settingsService.logout();
+
+              SessionManager.clear();
+
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/login',
