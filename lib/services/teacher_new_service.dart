@@ -4,7 +4,7 @@ import '../core/api_config.dart';
 import '../core/session_manager.dart';
 
 class TeacherNewService {
- static const String base = "${ApiConfig.baseUrl}/admin";
+  static const String base = "${ApiConfig.baseUrl}/admin";
   Map<String, String> get headers => {
         "Content-Type": "application/json",
         "x-api-key": "VSMART_API_2026",
@@ -58,7 +58,8 @@ class TeacherNewService {
 
     return null;
   }
-Future<List<String>> getClasses(String department) async {
+
+  Future<List<String>> getClasses(String department) async {
     final response = await http.post(
       Uri.parse("$base/classes/get_classes_by_department.php"),
       headers: headers,
@@ -75,6 +76,7 @@ Future<List<String>> getClasses(String department) async {
 
     return [];
   }
+
   Future<List<String>> getSubjects(String className) async {
     final response = await http.post(
       Uri.parse("$base/subject/get_subjects_by_class.php"),
@@ -90,6 +92,7 @@ Future<List<String>> getClasses(String department) async {
 
     return [];
   }
+
   /// ===============================
   /// ADD TEACHER
   /// ===============================
@@ -146,7 +149,7 @@ Future<List<String>> getClasses(String department) async {
   /// DELETE TEACHER
   /// ===============================
 
- Future<bool> deleteTeacher(int id) async {
+  Future<bool> deleteTeacher(int id) async {
     final response = await http.post(
       Uri.parse("$base/teachers/delete_teacher.php"),
       headers: headers,

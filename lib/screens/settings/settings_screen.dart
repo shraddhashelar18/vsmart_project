@@ -40,15 +40,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadSettings() async {
-    activeSemester = await _settingsService.getActiveSemester();
-    registrationOpen = await _settingsService.getRegistrationStatus();
-    resultsPublished = await _settingsService.getResultsStatus();
-    attendanceLocked = await _settingsService.getAttendanceLockStatus();
-    atktLimit = await _settingsService.getAtktLimit();
+    final data = await _settingsService.getSettings();
+
+    activeSemester = data["activeSemester"];
+    registrationOpen = data["registrationOpen"];
+    attendanceLocked = data["attendanceLocked"];
+    atktLimit = data["atktLimit"];
 
     setState(() {});
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,7 +191,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       value: activeSemester == "EVEN",
       onChanged: (value) async {
         activeSemester = value ? "EVEN" : "ODD";
-        await _settingsService.setActiveSemester(activeSemester);
+        await _settingsService.updateAcademic(
+            semester: activeSemester,
+            registrationOpen: registrationOpen,
+            attendanceLocked: attendanceLocked,
+            atktLimit: atktLimit);
         setState(() {});
       },
     );
@@ -204,7 +208,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       value: registrationOpen,
       onChanged: (value) async {
         registrationOpen = value;
-        await _settingsService.setRegistrationStatus(value);
+
+        await _settingsService.updateAcademic(
+          semester: activeSemester,
+          registrationOpen: registrationOpen,
+          attendanceLocked: attendanceLocked,
+          atktLimit: atktLimit,
+        );
+
         setState(() {});
       },
     );
@@ -217,7 +228,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       value: attendanceLocked,
       onChanged: (value) async {
         attendanceLocked = value;
-        await _settingsService.setAttendanceLockStatus(value);
+
+        await _settingsService.updateAcademic(
+          semester: activeSemester,
+          registrationOpen: registrationOpen,
+          attendanceLocked: attendanceLocked,
+          atktLimit: atktLimit,
+        );
+
         setState(() {});
       },
     );
@@ -247,7 +265,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: atktLimit > 0
                   ? () async {
                       atktLimit--;
-                      await _settingsService.setAtktLimit(atktLimit);
+                      await _settingsService.updateAcademic(
+                        semester: activeSemester,
+                        registrationOpen: registrationOpen,
+                        attendanceLocked: attendanceLocked,
+                        atktLimit: atktLimit,
+                      );
                       setState(() {});
                     }
                   : null,
@@ -256,7 +279,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: const Icon(Icons.add),
               onPressed: () async {
                 atktLimit++;
-                await _settingsService.setAtktLimit(atktLimit);
+                await _settingsService.updateAcademic(
+                  semester: activeSemester,
+                  registrationOpen: registrationOpen,
+                  attendanceLocked: attendanceLocked,
+                  atktLimit: atktLimit,
+                );
                 setState(() {});
               },
             ),

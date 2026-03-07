@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     UserAuth loggedUser = UserAuth(
       user_id: user["user_id"],
-      name: "",
+      name: user["name"] ?? "",
       email: user["email"],
       role: user["role"],
       status: user["status"],

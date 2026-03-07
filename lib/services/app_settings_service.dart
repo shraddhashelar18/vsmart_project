@@ -1,89 +1,95 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/session_manager.dart';
+import '../models/user_session.dart';
 
 class AppSettingsService {
-  static const _semesterKey = "activeSemester";
-  static const _registrationKey = "registrationOpen";
-  static const _resultsKey = "resultsPublished";
-  static const _attendanceKey = "attendanceLocked";
+  final String baseUrl =
+      "http://192.168.0.102:8080/vsmart_backend/api/setting/setting.php";
 
-  // ================= GETTERS =================
+  /* ================= GET ALL SETTINGS ================= */
+
+  Future<Map<String, dynamic>> getSettings() async {
+    final response = await http.post(
+      Uri.parse(baseUrl),
+      headers: {
+  "Content-Type": "application/json",
+  "Authorization": "Bearer ${SessionManager.token}"
+},
+      body: jsonEncode({"action": "settings"}),
+    );
+
+    final data = jsonDecode(response.body);
+    return data;
+  }
+
+  /* ================= ACTIVE SEMESTER ================= */
 
   Future<String> getActiveSemester() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_semesterKey) ?? "EVEN";
+    final data = await getSettings();
+    return data["activeSemester"];
   }
+
+  /* ================= REGISTRATION ================= */
 
   Future<bool> getRegistrationStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_registrationKey) ?? true;
+    final data = await getSettings();
+    return data["registrationOpen"];
   }
 
-  Future<bool> getResultsStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_resultsKey) ?? false;
-  }
+  /* ================= ATTENDANCE LOCK ================= */
 
   Future<bool> getAttendanceLockStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_attendanceKey) ?? false;
+    final data = await getSettings();
+    return data["attendanceLocked"];
   }
 
-  // ================= SETTERS =================
-
-  Future<void> setActiveSemester(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_semesterKey, value);
-  }
-
-  Future<void> setRegistrationStatus(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_registrationKey, value);
-  }
-
-  Future<void> setResultsStatus(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_resultsKey, value);
-  }
-
-  Future<void> setAttendanceLockStatus(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_attendanceKey, value);
-  }
-  int _atktLimit = 2; // default
+  /* ================= ATKT LIMIT ================= */
 
   Future<int> getAtktLimit() async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    return _atktLimit;
+    final data = await getSettings();
+    return data["atktLimit"];
   }
 
-  Future<void> setAtktLimit(int value) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _atktLimit = value;
+  /* ================= UPDATE SETTINGS ================= */
+
+  Future<void> updateAcademic({
+    required String semester,
+    required bool registrationOpen,
+    required bool attendanceLocked,
+    required int atktLimit,
+  }) async {
+    final response = await http.post(
+      Uri.parse(baseUrl),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({
+        "action": "update_academic",
+        "activeSemester": semester,
+        "registrationOpen": registrationOpen ? 1 : 0,
+        "attendanceLocked": attendanceLocked ? 1 : 0,
+        "atktLimit": atktLimit
+      }),
+    );
+
+    print("Settings update response: ${response.body}");
   }
+
+  /* ================= ACTIVE SEMESTER NUMBER ================= */
+
   Future<int> getActiveSemesterNumber(int currentStudentSemester) async {
-  final cycle = await getActiveSemester();
+    final cycle = await getActiveSemester();
 
-  if (cycle == "EVEN") {
-    return currentStudentSemester.isEven
-        ? currentStudentSemester
-        : currentStudentSemester + 1;
-  } else {
-    return currentStudentSemester.isOdd
-        ? currentStudentSemester
-        : currentStudentSemester - 1;
+    if (cycle == "EVEN") {
+      return currentStudentSemester.isEven
+          ? currentStudentSemester
+          : currentStudentSemester + 1;
+    } else {
+      return currentStudentSemester.isOdd
+          ? currentStudentSemester
+          : currentStudentSemester - 1;
+    }
   }
 }
-  // ================= STUDENT SETTINGS =================
-
-  static const _darkModeKey = "studentDarkMode";
-
-  Future<bool> getStudentDarkMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_darkModeKey) ?? false;
-  }
-
-  Future<void> setStudentDarkMode(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_darkModeKey, value);
-  }
-  }

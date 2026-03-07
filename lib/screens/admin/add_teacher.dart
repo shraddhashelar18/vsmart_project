@@ -84,7 +84,21 @@ _phoneCtrl.text = teacher["phone"] ?? "";
 
     for (String dept in selectedDepartments) {
       final deptClasses = await _teacherService.getClasses(dept);
-      result.addAll(deptClasses);
+
+      for (var cls in deptClasses) {
+        int sem = int.parse(cls.substring(2, 3)); // IF3KA -> 3
+
+        if (!isEdit) {
+          if (activeSemester == "ODD" && sem.isOdd) {
+            result.add(cls);
+          } else if (activeSemester == "EVEN" && sem.isEven) {
+            result.add(cls);
+          }
+        } else {
+          // Edit screen shows ALL classes
+          result.add(cls);
+        }
+      }
     }
 
     visibleClasses = result;

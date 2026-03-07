@@ -1,3 +1,3 @@
 class ApiConfig {
-  static const String baseUrl = "http://172.16.227.149/vsmart_backend/api";
+  static const String baseUrl = "http://192.168.0.103:8080/vsmart_backend/api";
 }
