@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/student.dart';
 import '../../services/student_service.dart';
-import '../../services/promotion_service.dart';
 
 class HodDetainedStudents extends StatefulWidget {
   final String department;
@@ -19,31 +18,24 @@ class HodDetainedStudents extends StatefulWidget {
 
 class _HodDetainedStudentsState extends State<HodDetainedStudents> {
   final StudentService _studentService = StudentService();
-  final PromotionService _promotionService = PromotionService();
 
   late Future<List<Student>> _future;
-
-  static const red = Colors.red;
 
   @override
   void initState() {
     super.initState();
-    _future = _loadStudents();
+    _future = _studentService.getDetainedStudents(widget.className);
   }
 
-  Future<List<Student>> _loadStudents() async {
-    final students = await _studentService.getStudentsByClass(widget.className);
-
-    final evaluated = await _promotionService.evaluatePromotion(students);
-
-    return evaluated.where((s) => s.promotionStatus == "DETAINED").toList();
+  List<String> _getKTSubjects(Student student) {
+    return student.ktSubjects;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor:Color (0xFF009846),
+        backgroundColor: const Color(0xFF009846),
         title: Text("${widget.className} - Detained"),
       ),
       body: FutureBuilder<List<Student>>(
@@ -82,7 +74,7 @@ class _HodDetainedStudentsState extends State<HodDetainedStudents> {
                       Text("Backlogs: ${s.backlogCount}"),
                       const SizedBox(height: 4),
                       Text(
-                        "KT Subjects: ${_getKTSubjects(s).join(", ")}",
+                        "KT Subjects: ${s.ktSubjects.join(", ")}",
                         style: const TextStyle(color: Colors.red),
                       ),
                     ],
@@ -94,16 +86,5 @@ class _HodDetainedStudentsState extends State<HodDetainedStudents> {
         },
       ),
     );
-  }
-  List<String> _getKTSubjects(Student student) {
-    List<String> ktSubjects = [];
-
-    student.finalResults.forEach((subject, result) {
-      if (result == "FAIL" || result == "ABSENT") {
-        ktSubjects.add(subject);
-      }
-    });
-
-    return ktSubjects;
   }
 }

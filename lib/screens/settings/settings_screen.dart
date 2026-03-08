@@ -26,9 +26,8 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final AppSettingsService _settingsService = AppSettingsService();
 
-  String activeSemester = "EVEN";
+  String? activeSemester;
   bool registrationOpen = true;
-  bool resultsPublished = false;
   bool attendanceLocked = false;
   int atktLimit = 2;
 
@@ -54,6 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       print("Settings load error: $e");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,7 +112,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 widget.role == "hod") ...[
               _sectionTitle("Academic Information"),
               _settingsCard([
-                _infoTile(Icons.school, "Active Semester", activeSemester),
+                _infoTile(
+                    Icons.school, "Active Semester", activeSemester ?? "-"),
                 _infoTile(Icons.rule, "ATKT Limit", atktLimit.toString()),
                 _infoTile(
                   Icons.how_to_reg,
@@ -148,7 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
             const SizedBox(height: 20),
             _sectionTitle("Account"),
-           _settingsTile(
+            _settingsTile(
               Icons.lock,
               "Change Password",
               onTap: () {
@@ -188,63 +189,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _semesterSwitch() {
     return _switchCard(
-      icon: Icons.school,
-      title: "Active Semester",
-      subtitle: activeSemester,
-      value: activeSemester == "EVEN",
-      onChanged: (value) async {
+        icon: Icons.school,
+        title: "Active Semester",
+        subtitle: activeSemester ?? "-",
+        value: activeSemester == "EVEN",
+        onChanged: (value) async {
           setState(() {
             activeSemester = value ? "EVEN" : "ODD";
           });
 
           await _settingsService.updateAcademic(
-            semester: activeSemester,
+            semester: activeSemester ?? "EVEN",
             registrationOpen: registrationOpen,
             attendanceLocked: attendanceLocked,
             atktLimit: atktLimit,
           );
-        }
-    );
+        });
   }
 
   Widget _registrationSwitch() {
     return _switchCard(
-      icon: Icons.how_to_reg,
-      title: "Registration Open",
-      value: registrationOpen,
-      onChanged: (value) async {
+        icon: Icons.how_to_reg,
+        title: "Registration Open",
+        value: registrationOpen,
+        onChanged: (value) async {
           setState(() {
             registrationOpen = value;
           });
 
           await _settingsService.updateAcademic(
-            semester: activeSemester,
+            semester: activeSemester ?? "EVEN",
             registrationOpen: registrationOpen,
             attendanceLocked: attendanceLocked,
             atktLimit: atktLimit,
           );
-        }
-    );
+        });
   }
 
   Widget _attendanceSwitch() {
     return _switchCard(
-      icon: Icons.lock,
-      title: "Lock Attendance",
-      value: attendanceLocked,
-      onChanged: (value) async {
+        icon: Icons.lock,
+        title: "Lock Attendance",
+        value: attendanceLocked,
+        onChanged: (value) async {
           setState(() {
             attendanceLocked = value;
           });
 
           await _settingsService.updateAcademic(
-            semester: activeSemester,
+            semester: activeSemester ?? "EVEN",
             registrationOpen: registrationOpen,
             attendanceLocked: attendanceLocked,
             atktLimit: atktLimit,
           );
-        }
-    );
+        });
   }
 
   Widget _atktLimitCard() {
@@ -275,7 +273,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       });
 
                       await _settingsService.updateAcademic(
-                        semester: activeSemester,
+                        semester: activeSemester ?? "EVEN",
                         registrationOpen: registrationOpen,
                         attendanceLocked: attendanceLocked,
                         atktLimit: atktLimit,
@@ -291,7 +289,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
 
                 await _settingsService.updateAcademic(
-                  semester: activeSemester,
+                  semester: activeSemester ?? "EVEN",
                   registrationOpen: registrationOpen,
                   attendanceLocked: attendanceLocked,
                   atktLimit: atktLimit,

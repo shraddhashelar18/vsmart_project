@@ -37,6 +37,7 @@ class HodBottomNav extends StatelessWidget {
               MaterialPageRoute(
                 builder: (_) => SettingsScreen(
                   role: UserSession.currentUser!.role,
+                  department: department,
                 ),
               ),
             );

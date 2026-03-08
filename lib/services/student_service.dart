@@ -107,4 +107,94 @@ class StudentService {
 
     return students;
   }
+
+  Future<List<Student>> getAtktStudents(String className) async {
+    final url = Uri.parse("$base/get_atkt_students.php");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"class": className}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == false) {
+      throw Exception(data["message"]);
+    }
+
+    List<Student> students = [];
+
+    for (var s in data["students"]) {
+      students.add(
+        Student(
+          id: "",
+          name: s["name"] ?? "",
+          rollNo: "",
+          enrollmentNo: "",
+          email: "",
+          phone: "",
+          parentMobile: "",
+          backlogCount: s["backlogCount"] ?? 0,
+          promotionStatus: s["promotionStatus"] ?? "",
+          ct1Marks: {},
+          ct2Marks: {},
+          finalResults: {},
+          percentage: null,
+          ktSubjects:
+              s["ktSubjects"] != null ? List<String>.from(s["ktSubjects"]) : [],
+        ),
+      );
+    }
+
+    return students;
+  }
+
+  Future<List<Student>> getDetainedStudents(String className) async {
+    final url = Uri.parse("$base/get_detained_students.php");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"class": className}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == false) {
+      throw Exception(data["message"]);
+    }
+
+    List<Student> students = [];
+
+    for (var s in data["students"]) {
+      students.add(
+        Student(
+          id: "",
+          name: s["name"] ?? "",
+          rollNo: "",
+          enrollmentNo: "",
+          email: "",
+          phone: "",
+          parentMobile: "",
+          backlogCount: s["backlogCount"] ?? 0,
+          promotionStatus: s["promotionStatus"] ?? "",
+          ct1Marks: {},
+          ct2Marks: {},
+          finalResults: {},
+          percentage: null,
+          ktSubjects:
+              s["ktSubjects"] != null ? List<String>.from(s["ktSubjects"]) : [],
+        ),
+      );
+    }
+
+    return students;
+  }
 }

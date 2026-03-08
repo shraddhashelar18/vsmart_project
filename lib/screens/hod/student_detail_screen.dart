@@ -114,6 +114,7 @@ class StudentDetailScreen extends StatelessWidget {
                       return _subjectMarkRow(entry.key, entry.value);
                     }).toList(),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -159,30 +160,6 @@ class StudentDetailScreen extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _marksBox(String title, int? marks) {
-    return Container(
-      width: 120,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Text(title),
-          const SizedBox(height: 6),
-          Text(
-            marks?.toString() ?? "--",
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
           ),
         ],
       ),

@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import '../../models/student.dart';
 import '../../services/student_service.dart';
-import '../../services/promotion_service.dart';
 
-class HodPromotedWithKTStudents extends StatefulWidget {
+class HodPromotedWithATKTStudents extends StatefulWidget {
   final String department;
   final String className;
 
-  const HodPromotedWithKTStudents({
+  const HodPromotedWithATKTStudents({
     super.key,
     required this.department,
     required this.className,
   });
 
   @override
-  State<HodPromotedWithKTStudents> createState() =>
+  State<HodPromotedWithATKTStudents> createState() =>
       _HodPromotedWithKTStudentsState();
 }
 
-class _HodPromotedWithKTStudentsState extends State<HodPromotedWithKTStudents> {
+class _HodPromotedWithKTStudentsState
+    extends State<HodPromotedWithATKTStudents> {
   final StudentService _studentService = StudentService();
-  final PromotionService _promotionService = PromotionService();
 
   late Future<List<Student>> _future;
 
@@ -33,15 +32,10 @@ class _HodPromotedWithKTStudentsState extends State<HodPromotedWithKTStudents> {
   }
 
   Future<List<Student>> _loadStudents() async {
-    final students = await _studentService.getStudentsByClass(widget.className);
-
-    final evaluated = await _promotionService.evaluatePromotion(students);
-
-    return evaluated
-        .where((s) => s.promotionStatus == "PROMOTED_WITH_ATKT")
-        .toList();
+    return await _studentService.getAtktStudents(widget.className);
   }
-List<String> _getKTSubjects(Student student) {
+
+  List<String> _getKTSubjects(Student student) {
     List<String> ktSubjects = [];
 
     student.finalResults.forEach((subject, result) {
@@ -52,12 +46,13 @@ List<String> _getKTSubjects(Student student) {
 
     return ktSubjects;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: green,
-        title: Text("${widget.className} - Promoted With KT"),
+        title: Text("Promoted with KT to ${widget.className}"),
       ),
       body: FutureBuilder<List<Student>>(
         future: _future,
@@ -81,14 +76,14 @@ List<String> _getKTSubjects(Student student) {
               return Card(
                 child: ListTile(
                   title: Text(s.name),
-                 subtitle: Column(
+                  subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("Backlogs: ${s.backlogCount}"),
                       const SizedBox(height: 4),
                       Text(
-                        "KT Subjects: ${_getKTSubjects(s).join(", ")}",
-                        style: const TextStyle(color: Colors.orange),
+                        "KT Subjects: ${s.ktSubjects.join(", ")}",
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ],
                   ),
