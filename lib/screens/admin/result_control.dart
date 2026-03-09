@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'admin_bottom_nav.dart';
-
+import '../../services/result_service.dart';
+import 'upload_status_screen.dart';
 class ResultControlScreen extends StatefulWidget {
   const ResultControlScreen({Key? key}) : super(key: key);
 
   @override
   State<ResultControlScreen> createState() => _ResultControlScreenState();
+
+  
 }
 
 class _ResultControlScreenState extends State<ResultControlScreen> {
+
+  final ResultService service = ResultService();
   bool allowMarksheetUpload = false;
-  bool allowReUpload = false; // 🔥 NEW
+  bool publishFinalResult = false;
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -72,10 +78,9 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
                       onChanged: (value) {
                         setState(() {
                           allowMarksheetUpload = value;
-                          if (!value) allowReUpload = false; // 🔒 safety
                         });
                       },
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -97,7 +102,7 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
                     const SizedBox(width: 14),
                     const Expanded(
                       child: Text(
-                        "Allow Marksheet Re-Upload",
+                        "Publish Final Result",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -106,15 +111,15 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
                     ),
                     Switch(
                       activeColor: const Color(0xFF009846),
-                      value: allowReUpload,
+                      value: publishFinalResult,
                       onChanged: allowMarksheetUpload
                           ? (value) {
                               setState(() {
-                                allowReUpload = value;
+                                publishFinalResult = value;
                               });
                             }
-                          : null, // 🔒 disabled if upload off
-                    ),
+                          : null,
+                    )
                   ],
                 ),
               ),
@@ -140,22 +145,46 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
-                      allowMarksheetUpload
-                          ? allowReUpload
-                              ? "Students can upload & re-upload marksheets."
-                              : "Students can upload marksheets once."
-                          : "Marksheet upload is disabled.",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: allowMarksheetUpload ? Colors.green : Colors.red,
-                      ),
-                    ),
+                    child:Text(
+  allowMarksheetUpload
+      ? "Students can upload marksheets."
+      : "Marksheet upload is disabled.",
+  style: TextStyle(
+    fontWeight: FontWeight.w600,
+    color: allowMarksheetUpload ? Colors.green : Colors.red,
+  ),
+),
                   ),
                 ],
               ),
             ),
 
+if (allowMarksheetUpload) ...[
+  const SizedBox(height: 20),
+
+  ElevatedButton.icon(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF009846),
+      minimumSize: const Size(double.infinity, 45),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+    icon: const Icon(Icons.visibility, color: Colors.white),
+    label: const Text(
+      "View Upload Status",
+      style: TextStyle(color: Colors.white),
+    ),
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const UploadStatusScreen(),
+        ),
+      );
+    },
+  ),
+],
             const SizedBox(height: 25),
 
             // -------- NOTE --------
@@ -192,15 +221,16 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Result settings saved"),
-                  ),
-                );
+              onPressed: () async {
 
-                // SEND allowMarksheetUpload + allowReUpload to backend
-              },
+  await ResultService.updateSettings(
+                    allowMarksheetUpload, publishFinalResult);
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Result settings saved")),
+  );
+
+},
               child: const Text(
                 "Save Settings",
                 style: TextStyle(color: Colors.white),
@@ -211,4 +241,19 @@ class _ResultControlScreenState extends State<ResultControlScreen> {
       ),
     );
   }
-}
+  @override
+  void initState() {
+    super.initState();
+    loadSettings();
+  }
+
+  Future loadSettings() async {
+    final data = await ResultService.getSettings();
+
+    setState(() {
+      allowMarksheetUpload = data["allow_marksheet_upload"] == 1;
+
+      publishFinalResult = data["final_published"] == 1;
+    });
+  }
+} 

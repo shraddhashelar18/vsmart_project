@@ -1,4 +1,8 @@
-import '../mock/mock_academics.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
+import '../core/session_manager.dart';
 import 'app_settings_service.dart';
 
 class AttendanceService {
@@ -8,45 +12,120 @@ class AttendanceService {
     return await _settingsService.getActiveSemester();
   }
 
-  List<String> getDepartments() {
-    return mockAcademics.keys.toList();
+  /* ===============================
+     FETCH DEPARTMENTS FROM BACKEND
+  =============================== */
+
+  Future<List<String>> getDepartments() async {
+    final response = await http.post(
+      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"action": "departments"}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == true) {
+      return List<String>.from(data["departments"]);
+    }
+
+    return [];
   }
+
+  /* ===============================
+     FETCH CLASSES FROM BACKEND
+  =============================== */
 
   Future<List<String>> getClasses(String department) async {
-    final activeSemester = await _getActiveSemester();
+    final response = await http.post(
+      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"action": "classes", "department": department}),
+    );
 
-    final years = mockAcademics[department] ?? {};
-    List<String> result = [];
+    final data = jsonDecode(response.body);
 
-    years.forEach((year, sems) {
-      sems.forEach((semName, classList) {
-        final semNumber = int.parse(semName.replaceAll(RegExp(r'[^0-9]'), ''));
+    if (data["status"] == true) {
+      return List<String>.from(data["classes"]);
+    }
 
-        if (activeSemester == "EVEN" && semNumber % 2 == 0) {
-          result.addAll(classList);
-        } else if (activeSemester == "ODD" && semNumber % 2 != 0) {
-          result.addAll(classList);
-        }
-      });
-    });
-
-    return result;
+    return [];
   }
+
+  /* ===============================
+     FETCH MONTHS FROM BACKEND
+  =============================== */
 
   Future<List<String>> getMonths() async {
-    final activeSemester = await _getActiveSemester();
-    return activeSemester == "EVEN" ? evenMonths : oddMonths;
+    final response = await http.post(
+      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"action": "months"}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == true) {
+      return List<String>.from(data["months"]);
+    }
+
+    return [];
   }
 
-  Future<bool> isMonthEnabled(String month) async {
-    final activeSemester = await _getActiveSemester();
-    final allowed = activeSemester == "EVEN" ? evenMonths : oddMonths;
+  /* ===============================
+     ATTENDANCE REPORT
+  =============================== */
 
-    final current = getCurrentMonth();
+  Future<List<dynamic>> getAttendanceReport({
+    required String className,
+    required int month,
+  }) async {
+    final response = await http.post(
+      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body:
+          jsonEncode({"action": "report", "class": className, "month": month}),
+    );
 
-    if (!allowed.contains(month)) return false;
-    if (!allowed.contains(current)) return true;
+    print("Attendance API response:");
+    print(response.body);
 
-    return allowed.indexOf(month) < allowed.indexOf(current);
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == true) {
+      return data["students"];
+    }
+
+    return [];
+  }
+  Future<bool> isMonthEnabled(int monthNumber) async {
+    final response = await http.post(
+      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"action": "check_month", "month": monthNumber}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == true) {
+      return data["enabled"];
+    }
+
+    return false;
   }
 }

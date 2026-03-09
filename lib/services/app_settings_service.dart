@@ -18,6 +18,14 @@ class AppSettingsService {
       body: jsonEncode({"action": "settings"}),
     );
 
+    print("SETTINGS STATUS: ${response.statusCode}");
+    print("SETTINGS RAW BODY: ${response.body}");
+
+    if (response.body.isEmpty || !response.body.trim().startsWith("{")) {
+      print("Invalid JSON response from settings API");
+      return {};
+    }
+
     final data = jsonDecode(response.body);
     return data;
   }

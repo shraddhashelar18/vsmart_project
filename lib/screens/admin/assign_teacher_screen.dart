@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 // contains UserAuth
+import '../../services/app_settings_service.dart';
 import '../../services/user_service.dart';
 import '../../models/registration_request_model.dart';
+import '../../services/teacher_assignment_service.dart';
 
 class AssignTeacherScreen extends StatefulWidget {
   final RegistrationRequest request;
@@ -20,29 +22,62 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
   String? selectedClass;
   List<String> selectedSubjects = [];
 
-  final UserService _service = UserService();
+  final AppSettingsService _settingsService = AppSettingsService();
+  String activeSemester = "EVEN";
 
-  // 🔹 Mock Department → Classes
-  final Map<String, List<String>> deptClasses = {
-    "IF": ["IF6KA", "IF6KB"],
-    "CO": ["CO6KA", "CO6KB"],
-    "EJ": ["EJ6KA"],
-  };
+final TeacherAssignmentService _service = TeacherAssignmentService();
 
-  // 🔹 Mock Class → Subjects
-  final Map<String, List<String>> classSubjects = {
-    "IF6KA": ["Java", "DBMS", "Python"],
-    "IF6KB": ["Java", "DBMS", "Python"],
-    "CO6KA": ["OS", "CN", "Java"],
-    "CO6KB": ["OS", "CN", "Java"],
-    "EJ6KA": ["Microprocessor", "Electronics"],
-  };
+ List<String> departments = ["IF", "CO", "EJ"];
 
-  // 🔹 Mock Allocated Subjects (Per Class)
-  final Map<String, List<String>> allocatedSubjects = {
-    "IF6KA": ["Java"], // already allocated
-  };
+  List<String> classes = [];
+  List<String> subjects = [];
+  List<String> allocatedSubjects = [];
+  Future<void> loadClasses(String dept) async {
+    final data = await _service.getClasses(dept);
 
+    // filter using active semester
+    List<String> filtered = data.where((cls) {
+      int sem = int.parse(cls.substring(2, 3));
+
+      if (activeSemester == "EVEN") {
+        return sem.isEven;
+      } else {
+        return sem.isOdd;
+      }
+    }).toList();
+
+    setState(() {
+      classes = filtered;
+      selectedClass = null;
+      subjects.clear();
+    });
+  }
+  Future<void> loadSubjects(String className) async {
+    final subjectList = await _service.getSubjects(className);
+    final allocated = await _service.getAllocated(className);
+
+    print("SUBJECTS: $subjectList");
+    print("ALLOCATED: $allocated");
+
+    setState(() {
+      subjects = subjectList;
+      allocatedSubjects = allocated;
+      selectedSubjects.clear();
+    });
+  }
+@override
+  void initState() {
+    super.initState();
+    loadSemester();
+  }
+
+  Future<void> loadSemester() async {
+    final sem = await _settingsService.getActiveSemester();
+
+    setState(() {
+      activeSemester = sem;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,23 +111,26 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
                 labelText: "Department",
                 border: OutlineInputBorder(),
               ),
-              items: deptClasses.keys
+              items: departments
                   .map((dept) => DropdownMenuItem(
                         value: dept,
                         child: Text(dept),
                       ))
                   .toList(),
-              onChanged: (value) {
+              onChanged: (value) async {
                 setState(() {
                   selectedDept = value;
-                  selectedClass = null;
-                  selectedSubjects.clear();
                 });
+
+                if (value != null) {
+                  await loadClasses(value);
+                }
               },
             ),
 
             const SizedBox(height: 16),
 
+            // 🔹 Class Dropdown (only after dept selected)
             // 🔹 Class Dropdown (only after dept selected)
             if (selectedDept != null)
               DropdownButtonFormField<String>(
@@ -101,20 +139,22 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
                   labelText: "Class",
                   border: OutlineInputBorder(),
                 ),
-                items: deptClasses[selectedDept]!
-                    .map((cls) => DropdownMenuItem(
+                items: classes
+                    .map((cls) => DropdownMenuItem<String>(
                           value: cls,
                           child: Text(cls),
                         ))
                     .toList(),
-                onChanged: (value) {
+                onChanged: (value) async {
                   setState(() {
                     selectedClass = value;
-                    selectedSubjects.clear();
                   });
+
+                  if (value != null) {
+                    await loadSubjects(value);
+                  }
                 },
               ),
-
             const SizedBox(height: 20),
 
             // 🔹 Subjects (only after class selected)
@@ -122,10 +162,8 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
               ListView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                children: classSubjects[selectedClass]!.map((subject) {
-                  bool isAllocated =
-                      allocatedSubjects[selectedClass]?.contains(subject) ??
-                          false;
+                children: subjects.map((subject) {
+                 bool isAllocated = allocatedSubjects.contains(subject);
 
                   return CheckboxListTile(
                     value: selectedSubjects.contains(subject),
@@ -162,7 +200,12 @@ class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
                     : () async {
                         // Later you will save dept/class/subjects here
 
-                        await _service.approveRequest(widget.request);
+                       await _service.assignTeacher(
+                          widget.request.requestId,
+                          selectedDept!,
+                          selectedClass!,
+                          selectedSubjects,
+                        );
 
                         Navigator.popUntil(context, (route) => route.isFirst);
                       },
