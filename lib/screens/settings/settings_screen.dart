@@ -100,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _infoTile(
                     Icons.school,
                     "Department",
-                    UserSession.currentUser!.departments!.join(", "),
+                    UserSession.currentUser?.departments?.join(", ") ?? "",
                   ),
               ]),
               const SizedBox(height: 20),

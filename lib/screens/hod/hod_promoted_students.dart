@@ -33,7 +33,7 @@ class _HodPromotedStudentsState extends State<HodPromotedStudents> {
     if (status == "PROMOTED_WITH_ATKT") return "Promoted with ATKT";
     if (status == "PROMOTED") return "Promoted";
     if (status == "DETAINED") return "Detained";
-    if (status == "COMPLETED") return "Completed";
+    if (status == "PASSED_OUT") return "Passed Out"; // ✅ changed
     return status ?? "-";
   }
 
@@ -41,7 +41,7 @@ class _HodPromotedStudentsState extends State<HodPromotedStudents> {
     if (status == "PROMOTED") return Colors.green;
     if (status == "PROMOTED_WITH_ATKT") return Colors.orange;
     if (status == "DETAINED") return Colors.red;
-    if (status == "COMPLETED") return Colors.blue;
+    if (status == "PASSED_OUT") return Colors.blue; // ✅ changed
     return Colors.grey;
   }
 
@@ -49,7 +49,7 @@ class _HodPromotedStudentsState extends State<HodPromotedStudents> {
     if (status == "PROMOTED") return Colors.green.shade100;
     if (status == "PROMOTED_WITH_ATKT") return Colors.orange.shade100;
     if (status == "DETAINED") return Colors.red.shade100;
-    if (status == "COMPLETED") return Colors.blue.shade100;
+    if (status == "PASSED_OUT") return Colors.blue.shade100; // ✅ changed
     return Colors.grey.shade200;
   }
 
@@ -71,7 +71,11 @@ class _HodPromotedStudentsState extends State<HodPromotedStudents> {
             return const Center(child: Text("Error loading students"));
           }
 
-          final students = snapshot.data ?? [];
+          final students = (snapshot.data ?? [])
+              .where((s) =>
+                  s.promotionStatus == "PROMOTED" ||
+                  s.promotionStatus == "PASSED_OUT")
+              .toList();
 
           if (students.isEmpty) {
             return const Center(
@@ -108,8 +112,8 @@ class _HodPromotedStudentsState extends State<HodPromotedStudents> {
                       const SizedBox(height: 4),
                       if (s.oldClass != null && s.newClass != null)
                         Text(
-                          s.promotionStatus == "COMPLETED"
-                              ? "${s.oldClass} → Completed"
+                          s.promotionStatus == "PASSED_OUT"
+                              ? "${s.newClass} → Passed Out"
                               : "${s.oldClass} → ${s.newClass}",
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),

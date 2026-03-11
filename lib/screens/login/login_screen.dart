@@ -96,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _realLogin() async {
-   final result = await AuthService.login(email, password);
+    final result = await AuthService.login(email, password);
 
     if (result["status"] == false) {
       _showMessage(result["message"]);
@@ -118,9 +118,10 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     UserSession.setUser(loggedUser);
-
+    print("ROLE FROM LOGIN: ${loggedUser.role}");
     _navigateUser(loggedUser);
   }
+
   void _navigateUser(UserAuth user) {
     if (user.role == "admin") {
       Navigator.pushReplacement(
@@ -143,6 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (user.role == "hod") {
+      print("Navigating to HOD Dashboard");
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -160,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(
           builder: (_) => TeacherHome(
             teacherId: user.user_id,
-            teacherName: user.email,
+            teacherName: user.name,
             department: user.departments.first,
             departments: user.departments,
           ),

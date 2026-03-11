@@ -6,7 +6,6 @@ import '../teacher/department_selection_screen.dart';
 import '../teacher/teacher_mark_attendance.dart';
 import '../teacher/teacher_enter_marks.dart';
 import '../teacher/teacher_view_students.dart';
-import '../teacher/teacher_attendance_settings.dart';
 import '../teacher/teacher_send_notifications.dart';
 
 class TeacherDashboard extends StatefulWidget {
@@ -43,8 +42,9 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   }
 
   Future<void> _loadClasses() async {
+    print("Department: ${widget.activeDepartment}");
     final allClasses = await _service.getAllocatedClasses(widget.teacherId);
-
+    print("Classes: $allClasses");
     if (!mounted) return;
 
     allocatedClasses = allClasses
@@ -82,6 +82,18 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
     }
 
     setState(() {});
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+
+    if (hour < 12) {
+      return "Good Morning";
+    } else if (hour < 17) {
+      return "Good Afternoon";
+    } else {
+      return "Good Evening";
+    }
   }
 
   @override
@@ -131,7 +143,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                   fontWeight: FontWeight.bold)),
           const SizedBox(height: 18),
           Text(
-            "Good Afternoon, ${widget.teacherName}",
+            "${_getGreeting()}, ${widget.teacherName}",
             style: const TextStyle(
                 color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
           ),

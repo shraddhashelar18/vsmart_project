@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/summary_card.dart';
 import '../hod/hod_students.dart';
 import '../hod/hod_teachers.dart';
 import '../hod/hod_promoted_classes.dart';
@@ -35,19 +36,6 @@ class _PrincipalDepartmentViewState extends State<PrincipalDepartmentView> {
     _summaryFuture = _service.getSummary(widget.department);
   }
 
-  List<String> _getClassesForDepartment(String dept) {
-    switch (dept) {
-      case "IF":
-        return ["IF1KA", "IF3KA"];
-      case "CO":
-        return ["CO1KA", "CO3KA"];
-      case "EJ":
-        return ["EJ1KA", "EJ3KA"];
-      default:
-        return [];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,9 +70,23 @@ class _PrincipalDepartmentViewState extends State<PrincipalDepartmentView> {
 
                 Row(
                   children: [
-                    _summaryCard("Students", data.totalStudents.toString()),
-                    const SizedBox(width: 10),
-                    _summaryCard("Teachers", data.totalTeachers.toString()),
+                    Expanded(
+                      child: SummaryCard(
+                        icon: Icons.school,
+                        title: "Students",
+                        value: data.totalStudents.toString(),
+                        color: green,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SummaryCard(
+                        icon: Icons.person,
+                        title: "Teachers",
+                        value: data.totalTeachers.toString(),
+                        color: green,
+                      ),
+                    ),
                   ],
                 ),
 
@@ -92,11 +94,32 @@ class _PrincipalDepartmentViewState extends State<PrincipalDepartmentView> {
 
                 Row(
                   children: [
-                    _summaryCard("Promoted", data.promoted.toString()),
-                    const SizedBox(width: 10),
-                    _summaryCard("ATKT", data.promotedWithBacklog.toString()),
-                    const SizedBox(width: 10),
-                    _summaryCard("Detained", data.detained.toString()),
+                    Expanded(
+                      child: SummaryCard(
+                        icon: Icons.arrow_upward,
+                        title: "Promoted",
+                        value: data.promoted.toString(),
+                        color: green,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SummaryCard(
+                        icon: Icons.trending_up,
+                        title: "ATKT",
+                        value: data.promotedWithBacklog.toString(),
+                        color: Colors.orange,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SummaryCard(
+                        icon: Icons.warning,
+                        title: "Detained",
+                        value: data.detained.toString(),
+                        color: Colors.red,
+                      ),
+                    ),
                   ],
                 ),
 
@@ -157,28 +180,6 @@ class _PrincipalDepartmentViewState extends State<PrincipalDepartmentView> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _summaryCard(String title, String value) {
-    return Expanded(
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              Text(
-                value,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(title),
-            ],
-          ),
-        ),
       ),
     );
   }

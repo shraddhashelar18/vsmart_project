@@ -24,10 +24,12 @@ class HodBottomNav extends StatelessWidget {
         if (i == currentIndex) return;
         switch (i) {
           case 0:
-            Navigator.pushReplacement(
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                  builder: (_) => HodDashboard(department: department)),
+                builder: (_) => HodDashboard(department: department),
+              ),
+              (route) => false,
             );
             break;
 

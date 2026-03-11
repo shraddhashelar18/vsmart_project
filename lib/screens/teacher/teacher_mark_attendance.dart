@@ -19,6 +19,7 @@ class TeacherMarkAttendance extends StatefulWidget {
 class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
   static const green = Color(0xFF009846);
 
+  bool loading = true;
   DateTime selectedDate = DateTime.now();
 
   List<Map<String, dynamic>> students = [];
@@ -36,7 +37,9 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
 
   Future<void> _loadStudents() async {
     students = await _service.getStudentsByClass(widget.className);
-    setState(() {});
+    setState(() {
+      loading = false;
+    });
   }
 
   void setStatus(int index, String status) {
@@ -105,49 +108,57 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView.builder(
-                itemCount: students.length,
-                itemBuilder: (_, i) {
-                  final s = students[i];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
-                        )
-                      ],
+              child: loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: students.length,
+                      itemBuilder: (_, i) {
+                        final s = students[i];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.06),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              )
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(s['name'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14)),
+                              Text("Roll No: ${s['roll']}",
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600)),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  _statusChip(
+                                      "Present",
+                                      "P",
+                                      s["status"] == "P",
+                                      Colors.green,
+                                      () => setStatus(i, "P")),
+                                  _statusChip("Late", "L", s["status"] == "L",
+                                      Colors.orange, () => setStatus(i, "L")),
+                                  _statusChip("Absent", "A", s["status"] == "A",
+                                      Colors.red, () => setStatus(i, "A")),
+                                ],
+                              )
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(s['name'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 14)),
-                        Text("Roll No: ${s['roll']}",
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey.shade600)),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            _statusChip("Present", "P", s["status"] == "P",
-                                Colors.green, () => setStatus(i, "P")),
-                            _statusChip("Late", "L", s["status"] == "L",
-                                Colors.orange, () => setStatus(i, "L")),
-                            _statusChip("Absent", "A", s["status"] == "A",
-                                Colors.red, () => setStatus(i, "A")),
-                          ],
-                        )
-                      ],
-                    ),
-                  );
-                },
-              ),
             ),
             SizedBox(
               width: double.infinity,
@@ -158,20 +169,33 @@ class _TeacherMarkAttendanceState extends State<TeacherMarkAttendance> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () async {
-                  final dateKey = DateFormat("yyyy-MM-dd").format(selectedDate);
+                onPressed: students.isEmpty
+                    ? null
+                    : () async {
+                        final dateKey =
+                            DateFormat("yyyy-MM-dd").format(selectedDate);
 
-                  await _service.submitAttendance(
-                    className: widget.className,
-                    subject: widget.subject,
-                    dateKey: dateKey,
-                    students: students,
-                  );
+                        if (students.any((s) => s["status"] == null)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    "Please mark attendance for all students")),
+                          );
+                          return;
+                        }
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Attendance Submitted!")),
-                  );
-                },
+                        await _service.submitAttendance(
+                          className: widget.className,
+                          subject: widget.subject,
+                          dateKey: dateKey,
+                          students: students,
+                        );
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text("Attendance Submitted!")),
+                        );
+                      },
                 child: const Text("Submit Attendance",
                     style: TextStyle(color: Colors.white)),
               ),

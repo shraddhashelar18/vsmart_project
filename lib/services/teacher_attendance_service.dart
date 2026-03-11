@@ -1,33 +1,68 @@
-import '../mock/mock_student_data.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
+import '../core/session_manager.dart';
 
 class TeacherAttendanceService {
-  // 🔹 Get students by class
+  static const base = "${ApiConfig.baseUrl}/teacher";
+
+  // GET STUDENTS
   Future<List<Map<String, dynamic>>> getStudentsByClass(
       String className) async {
-    return mockStudents.entries
-        .where((e) => e.value["class"] == className)
-        .map((e) => {
-              "enrollment": e.key,
-              ...e.value,
-              "status": null,
-            })
-        .toList();
+    final response = await http.post(
+      Uri.parse("$base/get_students.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"class": className}),
+    );
+    print(response.body);
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"]) {
+      return List<Map<String, dynamic>>.from(data["students"])
+          .map((s) => {
+                "user_id": s["user_id"],
+                "name": s["full_name"],
+                "roll": s["roll_no"],
+                "status": null
+              })
+          .toList();
+    }
+
+    return [];
   }
 
-  // 🔹 Save attendance
-  Future<void> submitAttendance({
+  // MARK ATTENDANCE
+  Future<bool> submitAttendance({
     required String className,
     required String subject,
     required String dateKey,
     required List<Map<String, dynamic>> students,
   }) async {
-    mockAttendance[className] ??= {};
-    mockAttendance[className]![subject] ??= {};
-    mockAttendance[className]![subject]![dateKey] ??= {};
+    final attendanceList = students
+        .map((s) => {"user_id": s["user_id"], "status": s["status"] ?? "A"})
+        .toList();
 
-    for (var s in students) {
-      mockAttendance[className]![subject]![dateKey]![s["enrollment"]] =
-          s["status"] ?? "A";
-    }
+    final response = await http.post(
+      Uri.parse("$base/mark_attendance.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({
+        "class": className,
+        "subject": subject,
+        "date": dateKey,
+        "attendance": attendanceList
+      }),
+    );
+    print(response.body);
+
+    final data = jsonDecode(response.body);
+
+    return data["status"] ?? false;
   }
 }

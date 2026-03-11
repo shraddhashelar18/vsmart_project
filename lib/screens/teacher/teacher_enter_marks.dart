@@ -24,112 +24,135 @@ class EnterMarksScreen extends StatefulWidget {
 
 class _EnterMarksScreenState extends State<EnterMarksScreen> {
   static const green = Color(0xFF009846);
-  final TeacherMarksService _service = TeacherMarksService();
-  final List<String> exams = ["CT-1", "CT-2"];
-  String selectedExam = "CT-1";
-  int maxMarks = 30;
 
-  /// exam → studentId → controller
+  final TeacherMarksService _service = TeacherMarksService();
+
+  final List<String> exams = ["CT1", "CT2"];
+  String selectedExam = "CT1";
+
+  int maxMarks = 30;
+  int completed = 0;
+  int totalStudents = 0;
+  double average = 0;
+
+  List<Map<String, dynamic>> students = [];
+  bool loading = true;
+
   final Map<String, Map<String, TextEditingController>> controllers = {
-    "CT-1": {},
-    "CT-2": {},
+    "CT1": {},
+    "CT2": {},
   };
 
   @override
   void initState() {
     super.initState();
     MediaStore.ensureInitialized();
+    loadStudents();
+    loadStats();
+  }
+
+  Future<void> loadStudents() async {
+    final data = await _service.getStudents(
+      className: widget.className,
+      subject: widget.subject,
+      examType: selectedExam,
+    );
+
+    students = data;
+
     _initControllers();
+
+    setState(() {
+      loading = false;
+    });
+  }
+
+  Future<void> loadStats() async {
+    final stats = await _service.getMarksStats(
+      className: widget.className,
+      subject: widget.subject,
+      examType: selectedExam,
+    );
+
+    if (stats != null) {
+      setState(() {
+        maxMarks = stats["max_marks"];
+        completed = stats["completed"];
+        totalStudents = stats["total_students"];
+        average = stats["average"].toDouble();
+      });
+    }
   }
 
   void _initControllers() {
-    final students = _service.getStudentsByClass(widget.className);
+    controllers[selectedExam] ??= {};
 
-    for (var exam in exams) {
-      for (var s in students) {
-        final sid = s["enrollment"];
+    for (var s in students) {
+      final sid = s["user_id"].toString();
+      final marks = s["marks"];
 
-        final examData = _service.getExamData(
-          studentId: sid,
-          subject: widget.subject,
-          exam: exam,
-        );
-
-        controllers[exam]![sid] = TextEditingController(
-          text: examData != null ? examData["score"].toString() : "",
-        );
-      }
+      controllers[selectedExam]![sid] =
+          TextEditingController(text: marks == null ? "" : marks.toString());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 🔥 FIXED STUDENT FETCH
-    final students = _service.getStudentsByClass(widget.className);
+    if (loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     final ctrls = controllers[selectedExam]!;
-    String? examStatus;
+
+    bool isPublished = false;
 
     if (students.isNotEmpty) {
-      final firstStudentId = students.first["enrollment"];
-
-      final examData = _service.getExamData(
-        studentId: firstStudentId,
-        subject: widget.subject,
-        exam: selectedExam,
-      );
-
-      examStatus = examData?["status"];
+      isPublished = students.first["status"] == "published";
     }
-    final bool isPublished = examStatus == "published";
-
-    /// ✅ Stats PER EXAM
-    final values = ctrls.values
-        .map((c) => int.tryParse(c.text) ?? 0)
-        .where((v) => v > 0)
-        .toList();
-
-    final completed = values.length;
-
-    final avg = values.isNotEmpty
-        ? values.reduce((a, b) => a + b) / values.length
-        : 0.0;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(backgroundColor: green, title: const Text("Enter Marks")),
+      appBar: AppBar(
+        backgroundColor: green,
+        title: const Text("Enter Marks"),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _card(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _label("Class"),
-              Text(widget.className,
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 12),
-              _label("Subject"),
-              Text(widget.subject,
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 12),
-              _label("Exam Type"),
-              DropdownButtonFormField(
-                value: selectedExam,
-                items: exams
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (v) => setState(() => selectedExam = v!),
-              ),
-            ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _label("Class"),
+                Text(widget.className,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                _label("Subject"),
+                Text(widget.subject,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                _label("Exam Type"),
+                DropdownButtonFormField(
+                    value: selectedExam,
+                    items: exams
+                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .toList(),
+                    onChanged: (v) async {
+                      selectedExam = v!;
+                      await loadStudents();
+                      await loadStats();
+                      setState(() {});
+                    }),
+              ],
+            ),
           ),
-
           const SizedBox(height: 16),
-
-          /// ✅ STATS
           Row(children: [
             _statBox("$maxMarks", "Max Marks"),
-            _statBox("$completed/${students.length}", "Completed"),
-            _statBox(avg.toStringAsFixed(1), "Average"),
+            _statBox("$completed/$totalStudents", "Completed"),
+            _statBox(average.toStringAsFixed(1), "Average"),
           ]),
           const SizedBox(height: 16),
           Row(
@@ -162,9 +185,8 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
           const SizedBox(height: 18),
           _label("Students (${students.length})"),
           const SizedBox(height: 10),
-
           ...students.map((s) {
-            final sid = s["enrollment"];
+            final sid = s["user_id"].toString();
             final controller = ctrls[sid]!;
 
             return Container(
@@ -188,15 +210,13 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
                   width: 85,
                   child: TextField(
                     controller: controller,
-                    enabled: examStatus != "published", // 🔒 lock editing
+                    enabled: !isPublished,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: "0",
                       suffixText: "/$maxMarks",
-                      filled: examStatus == "published",
-                      fillColor: examStatus == "published"
-                          ? Colors.grey.shade200
-                          : null,
+                      filled: isPublished,
+                      fillColor: isPublished ? Colors.grey.shade200 : null,
                     ),
                     onChanged: (v) {
                       final val = int.tryParse(v);
@@ -207,7 +227,6 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
                               content: Text("Marks cannot exceed $maxMarks")),
                         );
                       }
-                      setState(() {});
                     },
                   ),
                 ),
@@ -218,46 +237,61 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            OutlinedButton(
-              onPressed: isPublished ? null : () => _saveMarks(isDraft: true),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: const Text("Save Draft"),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          OutlinedButton(
+            onPressed: isPublished ? null : () => _saveMarks(isDraft: true),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
             ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: isPublished ? null : () => _confirmPublish(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: green,
-                disabledBackgroundColor: Colors.grey.shade400,
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: const Text(
-                "Publish Marks",
-                style: TextStyle(color: Colors.white),
-              ),
+            child: const Text("Save Draft"),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: isPublished ? null : () => _confirmPublish(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: green,
+              disabledBackgroundColor: Colors.grey.shade400,
+              minimumSize: const Size(double.infinity, 50),
             ),
-          ],
-        ),
+            child: const Text(
+              "Publish Marks",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ]),
       ),
     );
   }
 
-  void _saveMarks({required bool isDraft}) {
-    _service.saveMarks(
+  Future<void> _saveMarks({required bool isDraft}) async {
+    List<Map<String, dynamic>> marksList = [];
+
+    controllers[selectedExam]!.forEach((sid, controller) {
+      final text = controller.text.trim();
+
+      final student =
+          students.firstWhere((s) => s["user_id"].toString() == sid);
+
+      marksList.add({
+        "user_id": int.parse(sid),
+        "obtained_marks": text.isEmpty ? null : int.parse(text),
+        "semester": student["current_semester"]
+      });
+    });
+
+    final success = await _service.saveMarks(
       className: widget.className,
       subject: widget.subject,
-      exam: selectedExam,
-      maxMarks: maxMarks,
+      examType: selectedExam,
+      totalMarks: maxMarks,
       isDraft: isDraft,
-      controllers: controllers[selectedExam]!,
+      marks: marksList,
     );
 
-    setState(() {});
+    if (success) {
+      await loadStudents();
+      await loadStats();
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -271,15 +305,12 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
   }
 
   Future<void> _confirmPublish() async {
-    final students = _service.getStudentsByClass(widget.className);
-
     final ctrls = controllers[selectedExam]!;
 
-    // 🔥 Find students with empty marks
     List<String> missingRolls = [];
 
     for (var s in students) {
-      final sid = s["enrollment"];
+      final sid = s["user_id"].toString();
       final roll = s["roll"];
 
       if (ctrls[sid]!.text.trim().isEmpty) {
@@ -287,7 +318,6 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
       }
     }
 
-    // 🔥 If any missing → show warning
     if (missingRolls.isNotEmpty) {
       final proceed = await showDialog<bool>(
         context: context,
@@ -313,7 +343,6 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
       if (proceed != true) return;
     }
 
-    // 🔥 If all marks entered → confirm publish
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -362,120 +391,7 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
             Text(s, style: TextStyle(color: Colors.grey.shade600)),
           ])));
 
-  Future<void> _downloadTemplate() async {
-    try {
-      final excel = Excel.createExcel();
-      final sheet = excel['Sheet1'];
+  Future<void> _downloadTemplate() async {}
 
-      sheet.appendRow(["Roll No", "Marks"]);
-
-      final students = _service.getStudentsByClass(widget.className);
-
-      for (var s in students) {
-        sheet.appendRow([s["roll"], ""]);
-      }
-
-      final bytes = excel.encode();
-      if (bytes == null) return;
-
-      final fileName =
-          "${widget.className}_${widget.subject}_${selectedExam}_Marks_Template.xlsx";
-
-      final downloadsDir = Directory('/storage/emulated/0/Download');
-
-      final file = File('${downloadsDir.path}/$fileName');
-
-      await file.writeAsBytes(bytes);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Template saved to Downloads/$fileName")),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error saving file: $e")),
-      );
-    }
-  }
-
-  Future<void> _uploadExcel() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['xlsx'],
-    );
-
-    if (result == null) return;
-
-    final file = File(result.files.single.path!);
-    final bytes = file.readAsBytesSync();
-    final excel = Excel.decodeBytes(bytes);
-
-    final sheet = excel.tables.values.first;
-
-    if (sheet == null) return;
-
-    if (sheet.rows.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Excel file has no data")),
-      );
-      return;
-    }
-
-    final students = _service.getStudentsByClass(widget.className);
-
-    List<String> invalidRolls = [];
-
-    for (int i = 1; i < sheet.rows.length; i++) {
-      final row = sheet.rows[i];
-
-      final rollCell = row[0]?.value;
-      final marksCell = row[1]?.value;
-
-      final roll = rollCell == null
-          ? ""
-          : rollCell.toString().replaceAll(".0", "").trim();
-
-      final marks = marksCell == null
-          ? ""
-          : marksCell.toString().replaceAll(".0", "").trim();
-
-      // ✅ Skip blank rows
-      if (roll.isEmpty || marks.isEmpty) continue;
-
-      final student = students.firstWhere(
-        (s) => s["roll"] == roll,
-        orElse: () => {},
-      );
-
-      if (student.isEmpty) {
-        invalidRolls.add(roll);
-        continue;
-      }
-
-      final score = int.tryParse(marks);
-
-      if (score == null || score < 0 || score > maxMarks) {
-        invalidRolls.add(roll);
-        continue;
-      }
-
-      final sid = student["enrollment"];
-      controllers[selectedExam]![sid]!.text = score.toString();
-    }
-
-    setState(() {});
-
-    if (invalidRolls.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Invalid data for roll: ${invalidRolls.join(", ")}",
-          ),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Excel uploaded successfully")),
-      );
-    }
-  }
+  Future<void> _uploadExcel() async {}
 }

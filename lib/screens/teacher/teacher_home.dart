@@ -7,7 +7,7 @@ class TeacherHome extends StatefulWidget {
   final String department;
   final String teacherName;
   final List<String> departments;
-const TeacherHome({
+  const TeacherHome({
     Key? key,
     required this.teacherId,
     required this.teacherName,
@@ -20,11 +20,9 @@ const TeacherHome({
 }
 
 class _TeacherHomeState extends State<TeacherHome> {
-  int index = 0;
-
   @override
   Widget build(BuildContext context) {
-   return Scaffold(
+    return Scaffold(
       body: TeacherDashboard(
         teacherId: widget.teacherId,
         activeDepartment: widget.department,

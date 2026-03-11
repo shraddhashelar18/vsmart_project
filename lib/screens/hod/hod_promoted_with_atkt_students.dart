@@ -35,18 +35,6 @@ class _HodPromotedWithKTStudentsState
     return await _studentService.getAtktStudents(widget.className);
   }
 
-  List<String> _getKTSubjects(Student student) {
-    List<String> ktSubjects = [];
-
-    student.finalResults.forEach((subject, result) {
-      if (result == "FAIL" || result == "ABSENT") {
-        ktSubjects.add(subject);
-      }
-    });
-
-    return ktSubjects;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

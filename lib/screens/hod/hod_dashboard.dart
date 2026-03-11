@@ -20,14 +20,21 @@ class HodDashboard extends StatefulWidget {
 
 class _HodDashboardState extends State<HodDashboard> {
   final DepartmentService _service = DepartmentService();
-  late Future<DepartmentSummary> _summaryFuture;
 
   static const green = Color(0xFF009846);
+
+  Future<DepartmentSummary>? _summaryFuture;
 
   @override
   void initState() {
     super.initState();
-    _summaryFuture = _service.getSummary(widget.department);
+    _loadSummary();
+  }
+
+  void _loadSummary() {
+    setState(() {
+      _summaryFuture = _service.getSummary(widget.department);
+    });
   }
 
   @override

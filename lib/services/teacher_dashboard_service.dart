@@ -1,12 +1,46 @@
-import '../../mock/mock_teacher_classes.dart';
-import '../../mock/mock_teacher_subjects.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
+import '../core/session_manager.dart';
 
 class TeacherDashboardService {
+  static const String base = "${ApiConfig.baseUrl}/teacher";
   Future<List<String>> getAllocatedClasses(int teacherId) async {
-    return mockTeacherClasses[teacherId] ?? [];
+    final response = await http.get(
+      Uri.parse("$base/get_classes.php"),
+      headers: {
+        "Authorization": "Bearer ${SessionManager.token}",
+        "Content-Type": "application/json"
+      },
+    );
+
+    if (response.statusCode != 200) {
+      return [];
+    }
+    final data = jsonDecode(response.body);
+
+    if (data["status"]) {
+      return List<String>.from(data["classes"]);
+    }
+
+    return [];
   }
 
   Future<List<String>> getSubjects(int teacherId, String className) async {
-    return mockTeacherSubjects[teacherId]?[className] ?? [];
+    final response = await http.get(
+      Uri.parse("$base/get_subjects.php?class=$className"),
+      headers: {
+        "Authorization": "Bearer ${SessionManager.token}",
+        "Content-Type": "application/json"
+      },
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"]) {
+      return List<String>.from(data["subjects"]);
+    }
+
+    return [];
   }
 }
