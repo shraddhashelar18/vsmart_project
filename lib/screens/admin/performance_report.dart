@@ -15,7 +15,7 @@ class _PerformanceReportState extends State<PerformanceReport> {
 
   List<String> departments = [];
   List<String> classes = [];
-
+List<Map<String, dynamic>> students = [];
   String? selectedDept;
   String? selectedClass;
 
@@ -23,19 +23,27 @@ class _PerformanceReportState extends State<PerformanceReport> {
   bool isCT1Conducted = true;
   bool isCT2Conducted = false;
 
-  List<Map<String, dynamic>> students = [
-    {"name": "Emma Johnson", "ct1_total": 126, "ct2_total": null, "max": 150},
-    {
-      "name": "Liam Smith",
-      "ct1_total": "ABSENT",
-      "ct2_total": null,
-      "max": 150
-    },
-    {"name": "Olivia Brown", "ct1_total": 140, "ct2_total": null, "max": 150},
-  ];
+Future<void> _loadPerformance() async {
+    if (selectedClass == null) return;
 
+    try {
+      students = await _service.getPerformanceReport(
+        className: selectedClass!,
+        exam: selectedExam,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+
+      students = [];
+    }
+
+    setState(() {});
+  }
   @override
   void initState() {
+   
     super.initState();
     _loadData();
   }
@@ -78,11 +86,14 @@ class _PerformanceReportState extends State<PerformanceReport> {
                 setState(() {});
               },
             ),
-            _dropdown(
+           _dropdown(
               "Class",
               selectedClass,
               classes,
-              (v) => setState(() => selectedClass = v),
+              (v) async {
+                selectedClass = v;
+                await _loadPerformance();
+              },
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -109,9 +120,11 @@ class _PerformanceReportState extends State<PerformanceReport> {
                     ),
                   ),
                 ],
-                onChanged: (v) {
+               onChanged: (v) async {
                   if (v == null) return;
-                  setState(() => selectedExam = v);
+
+                  selectedExam = v;
+                  await _loadPerformance();
                 },
               ),
             ),
@@ -158,7 +171,8 @@ class _PerformanceReportState extends State<PerformanceReport> {
 
   Widget _studentCard(Map<String, dynamic> s) {
     dynamic marks = selectedExam == "CT1" ? s["ct1_total"] : s["ct2_total"];
-    int max = s["max"];
+
+    int max = int.tryParse(s["max"].toString()) ?? 0;
 
     String displayText;
     Color color = Colors.green;
@@ -170,14 +184,19 @@ class _PerformanceReportState extends State<PerformanceReport> {
       displayText = "Absent";
       color = Colors.red;
     } else {
-      int percent = ((marks / max) * 100).round();
-      displayText = "$marks / $max   ($percent%)";
+      int obtained = int.tryParse(marks.toString()) ?? 0;
+
+      int percent = max == 0 ? 0 : ((obtained / max) * 100).round();
+
+      displayText = "$obtained / $max   ($percent%)";
       color = percent < 40 ? Colors.red : Colors.green;
     }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: ListTile(
         leading: const CircleAvatar(
           backgroundColor: Color(0xFFEAF7F1),
@@ -189,7 +208,10 @@ class _PerformanceReportState extends State<PerformanceReport> {
         ),
         trailing: Text(
           displayText,
-          style: TextStyle(color: color, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

@@ -3,282 +3,287 @@ import '../../services/teacher_new_service.dart';
 import '../../services/class_service.dart';
 
 class AddClass extends StatefulWidget {
-  final String? className;
-  final String department; // 🔥 ADD THIS
-
-  const AddClass({
-    Key? key,
-    this.className,
-    required this.department,
-  }) : super(key: key);
-
-  @override
-  State<AddClass> createState() => _AddClassState();
+final String? className;
+final String department;
+  final int? teacherId;
+  final String? assignedClass;
+const AddClass({
+  Key? key,
+  this.className,
+  required this.department,
+  this.teacherId,
+  this.assignedClass,
+}) : super(key: key);
+@override
+State<AddClass> createState() => _AddClassState();
 }
 
 class _AddClassState extends State<AddClass> {
-  final TeacherNewService _teacherService = TeacherNewService();
-  final ClassService _classService = ClassService();
-  static const green = Color(0xFF009846);
+final TeacherNewService _teacherService = TeacherNewService();
+final ClassService _classService = ClassService();
 
-  final _formKey = GlobalKey<FormState>();
-  final _classNameCtrl = TextEditingController();
+static const green = Color(0xFF009846);
 
-  String? _selectedDepartment;
-  String? _selectedTeacher;
+final _formKey = GlobalKey<FormState>();
+final _classNameCtrl = TextEditingController();
 
-  bool get isEdit => widget.className != null;
+List<Map<String, dynamic>> _teachers = [];
+bool _loadingTeachers = true;
 
-  @override
+String? _selectedDepartment;
+String? _selectedTeacher;
+
+bool get isEdit => widget.className != null;
+@override
   void initState() {
     super.initState();
 
-    // ALWAYS FROM PREVIOUS SCREEN
     _selectedDepartment = widget.department;
+_selectedTeacher = widget.teacherId?.toString();
+    _loadTeachers();
 
     if (isEdit) {
-      final c = _classService.getClass(widget.className!) ?? {};
       _classNameCtrl.text = widget.className ?? "";
-      _selectedTeacher = c["teacher"];
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    List<String> teacherList = [];
+Future<void> _loadTeachers() async {
+final teachers =
+await _teacherService.getTeachers(_selectedDepartment ?? "");
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: green,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(isEdit ? "Edit Class" : "Add Class"),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(20),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8, left: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                isEdit ? "Update class details" : "Fill in class details",
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
+
+setState(() {
+  _teachers = teachers;
+  _loadingTeachers = false;
+});
+
+}
+
+@override
+Widget build(BuildContext context) {
+return Scaffold(
+resizeToAvoidBottomInset: true,
+backgroundColor: Colors.white,
+appBar: AppBar(
+backgroundColor: green,
+elevation: 0,
+leading: IconButton(
+icon: const Icon(Icons.arrow_back),
+onPressed: () => Navigator.pop(context),
+),
+title: Text(isEdit ? "Edit Class" : "Add Class"),
+bottom: PreferredSize(
+preferredSize: const Size.fromHeight(20),
+child: Padding(
+padding: const EdgeInsets.only(bottom: 8, left: 16),
+child: Align(
+alignment: Alignment.centerLeft,
+child: Text(
+isEdit ? "Update class details" : "Fill in class details",
+style: const TextStyle(color: Colors.white70, fontSize: 13),
+),
+),
+),
+),
+),
+body: SingleChildScrollView(
+padding: const EdgeInsets.all(16),
+child: Form(
+key: _formKey,
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+
+
+          /// CLASS NAME
+          _label("Class Name"),
+          _textField(
+            hint: "Enter class name (e.g. IF6KA)",
+            icon: Icons.class_,
+            controller: _classNameCtrl,
+          ),
+
+          const SizedBox(height: 16),
+
+          /// DEPARTMENT
+          _label("Department"),
+          TextFormField(
+            enabled: false,
+            initialValue: _selectedDepartment ?? "",
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.school),
+              filled: true,
+              fillColor: Colors.grey.shade100,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
               ),
             ),
           ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// CLASS NAME
-              _label("Class Name"),
-              _textField(
-                hint: "Enter class name (e.g. IF6KA)",
-                icon: Icons.class_,
-                controller: _classNameCtrl,
-                enabled: true, // EDITABLE
-              ),
 
-              const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-              /// DEPARTMENT
-              _label("Department"),
+          /// CLASS TEACHER
+          _label("Class Teacher"),
 
-              TextFormField(
-                enabled: false,
-                initialValue: _selectedDepartment ?? "",
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.school),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              /// CLASS TEACHER
-              _label("Class Teacher"),
-
-              DropdownButtonFormField<String>(
-                value: teacherList.contains(_selectedTeacher)
-                    ? _selectedTeacher
-                    : null,
-                decoration: InputDecoration(
-                  hintText: "Select class teacher",
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                items: teacherList.map((teacherName) {
-                  final assignedClass =
-                      _classService.getClassWhereTeacherAssigned(teacherName);
-
-                  final isAssignedElsewhere = assignedClass != null &&
-                      assignedClass != widget.className;
-
-                  return DropdownMenuItem<String>(
-                    value: isAssignedElsewhere ? null : teacherName,
-                    enabled: !isAssignedElsewhere,
-                    child: Text(
-                      isAssignedElsewhere
-                          ? "$teacherName ($assignedClass)"
-                          : teacherName,
-                      style: TextStyle(
-                        color: isAssignedElsewhere ? Colors.grey : Colors.black,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+          _loadingTeachers
+              ? const Center(child: CircularProgressIndicator())
+              : DropdownButtonFormField<int>(
+                  value: int.tryParse(_selectedTeacher ?? ""),
+                  decoration: InputDecoration(
+                    hintText: "Select class teacher",
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value == null) return;
-                  setState(() => _selectedTeacher = value);
-                },
-              ),
-              const SizedBox(height: 16),
+                  ),
+                 items: _teachers.map((teacher) {
+                        final teacherId = teacher["id"];
+                        final teacherName = teacher["name"];
 
-              /// NOTE BOX
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(12),
+                        final isAssigned = teacherId != widget.teacherId &&
+                            teacher["class_name"] != null &&
+                            teacher["class_name"] != "";
+
+                        return DropdownMenuItem<int>(
+                          value: teacherId,
+                          enabled: !isAssigned,
+                          child: Text(
+                            isAssigned
+                                ? "$teacherName (Assigned to ${teacher["class_name"]})"
+                                : teacherName,
+                            style: TextStyle(
+                              color: isAssigned ? Colors.grey : Colors.black,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() => _selectedTeacher = value.toString());
+                  },
                 ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.info_outline, color: green),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        "Students and teachers can be assigned later.",
-                        style: TextStyle(fontSize: 13),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
 
-              const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
-              /// SAVE BUTTON
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: green,
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+          /// INFO BOX
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.info_outline, color: green),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Students and teachers can be assigned later.",
+                    style: TextStyle(fontSize: 13),
                   ),
                 ),
-                onPressed: _saveClass,
-                child: Text(
-                  isEdit ? "Update Class" : "Save Class",
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              /// CANCEL
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
 
-  void _saveClass() {
+          const SizedBox(height: 20),
+
+          /// SAVE BUTTON
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: green,
+              minimumSize: const Size(double.infinity, 48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: _saveClass,
+            child: Text(
+              isEdit ? "Update Class" : "Save Class",
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          /// CANCEL
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+        ],
+      ),
+    ),
+  ),
+);
+
+
+}
+
+Future<void> _saveClass() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedTeacher == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select class teacher")),
+      );
+      return;
+    }
 
     final name = _classNameCtrl.text.trim();
 
-    _classService.saveClass(
-      name: name,
-      department: _selectedDepartment ?? "",
-      teacher: _selectedTeacher ?? "",
-    );
+    if (isEdit) {
+      await _classService.updateClass(
+        className: name,
+        teacherId: int.parse(_selectedTeacher!),
+      );
+    } else {
+      await _classService.addClass(
+        className: name,
+        department: _selectedDepartment!,
+        teacherId: int.parse(_selectedTeacher!),
+      );
+    }
 
     Navigator.pop(context);
   }
+/// UI HELPERS
 
-  // ---------- UI HELPERS (UNCHANGED STYLE) ----------
+Widget _label(String text) => Padding(
+padding: const EdgeInsets.only(bottom: 6),
+child: Text(
+text,
+style: const TextStyle(fontWeight: FontWeight.w600),
+),
+);
 
-  Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
-      );
-
-  Widget _textField({
-    required String hint,
-    required IconData icon,
-    required TextEditingController controller,
-    bool enabled = true,
-  }) {
-    return TextFormField(
-      controller: controller,
-      enabled: enabled,
-      validator: (v) => v == null || v.isEmpty ? "Required" : null,
-      decoration: InputDecoration(
-        hintText: hint,
-        prefixIcon: Icon(icon),
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _dropdown({
-    required String hint,
-    required List<String> items,
-    required Function(String?) onChanged,
-    String? value,
-    bool enabled = true,
-  }) {
-    return DropdownButtonFormField<String>(
-      value: value,
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-      items:
-          items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-      onChanged: enabled ? onChanged : null,
-      validator: (v) => v == null || v.isEmpty ? "Required" : null,
-    );
-  }
+Widget _textField({
+required String hint,
+required IconData icon,
+required TextEditingController controller,
+}) {
+return TextFormField(
+controller: controller,
+validator: (v) => v == null || v.isEmpty ? "Required" : null,
+decoration: InputDecoration(
+hintText: hint,
+prefixIcon: Icon(icon),
+filled: true,
+fillColor: Colors.grey.shade100,
+border: OutlineInputBorder(
+borderRadius: BorderRadius.circular(12),
+borderSide: BorderSide.none,
+),
+),
+);
+}
 }

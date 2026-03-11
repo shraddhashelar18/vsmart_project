@@ -28,18 +28,20 @@ class _AddParentState extends State<AddParent> {
     _loadParent();
   }
 
-  void _loadParent() {
+  Future<void> _loadParent() async {
     if (!isEdit) return;
 
-    final p = _parentService.getParent(widget.parentPhone!);
+    final p = await _parentService.getParent(widget.parentPhone!);
 
     if (p == null) return;
 
-    _nameCtrl.text = p["name"] ?? "";
-    _emailCtrl.text = p["email"] ?? "";
-    _phoneCtrl.text = widget.parentPhone!;
-    _enrollCtrl.text =
-        (p["children"] as List).isNotEmpty ? p["children"][0] : "";
+    setState(() {
+      _nameCtrl.text = p["name"] ?? "";
+      _emailCtrl.text = p["email"] ?? "";
+      _phoneCtrl.text = widget.parentPhone!;
+      _enrollCtrl.text =
+          (p["children"] as List).isNotEmpty ? p["children"][0] : "";
+    });
   }
 
   @override
@@ -73,8 +75,13 @@ class _AddParentState extends State<AddParent> {
                   backgroundColor: const Color(0xFF009846),
                   minimumSize: const Size(double.infinity, 48),
                 ),
-                onPressed: _saveParent,
-                child: Text(isEdit ? "Update Parent" : "Save Parent"),
+                onPressed: () async {
+                  await _saveParent();
+                },
+                child: Text(
+                  isEdit ? "Update Parent" : "Save Parent",
+                  style: const TextStyle(color: Colors.white),
+                ),
               )
             ],
           ),
@@ -83,24 +90,37 @@ class _AddParentState extends State<AddParent> {
     );
   }
 
-  void _saveParent() {
+  Future<void> _saveParent() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final phone = _phoneCtrl.text;
+    bool success = false;
 
-    _parentService.saveParent(
-      phone: phone,
-      data: {
-        "name": _nameCtrl.text,
-        "email": _emailCtrl.text,
-        "password": _passwordCtrl.text,
-        "children": [_enrollCtrl.text],
-      },
-    );
+    if (isEdit) {
+      success = await _parentService.updateParent(
+        name: _nameCtrl.text,
+        phone: _phoneCtrl.text,
+        oldPhone: widget.parentPhone!,
+      );
+    } else {
+      success = await _parentService.addParent(
+        name: _nameCtrl.text,
+        email: _emailCtrl.text,
+        phone: _phoneCtrl.text,
+        children: [_enrollCtrl.text],
+      );
+    }
 
-    Navigator.pop(context);
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(isEdit ? "Parent updated" : "Parent added")),
+      );
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Operation failed")),
+      );
+    }
   }
-
   Widget _field(TextEditingController c, String hint, IconData i,
       {bool enabled = true}) {
     return Padding(
@@ -108,7 +128,32 @@ class _AddParentState extends State<AddParent> {
       child: TextFormField(
         controller: c,
         enabled: enabled,
-        validator: (v) => v == null || v.isEmpty ? "Required" : null,
+        validator: (v) {
+          if (v == null || v.isEmpty) return "Required";
+
+          // Email validation
+          if (hint == "Email") {
+            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v)) {
+              return "Enter valid email";
+            }
+          }
+
+          // Phone validation
+          if (hint == "Phone Number") {
+            if (!RegExp(r'^[0-9]{10}$').hasMatch(v)) {
+              return "Phone must be 10 digits";
+            }
+          }
+
+          // Enrollment validation
+          if (hint == "Student Enrollment") {
+            if (v.length < 5) {
+              return "Invalid enrollment";
+            }
+          }
+
+          return null;
+        },
         decoration: InputDecoration(
           hintText: hint,
           prefixIcon: Icon(i),

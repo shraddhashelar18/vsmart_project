@@ -36,30 +36,10 @@ class _ParentDashboardState extends State<ParentDashboard> {
   }
 
   Future<void> _loadData() async {
-    final email = UserSession.currentUser?.email;
-    if (email == null) return;
-
-    final parent = _parentService.getParentByEmail(email);
-    if (parent == null) return;
-
-    final phone = parent["phone"];
-
-    final students = await _studentService.getStudentsByParentPhone(phone);
-
     setState(() {
-      parentData = parent;
-      children = students;
-      isLoading = false;
-    });
-    final parentPhone = parent["phone"];
-
-    final parentNotifs =
-        await ParentNotificationService.fetchParentNotifications(parentPhone);
-
-    setState(() {
-      parentData = parent;
-      children = students;
-      notifications = parentNotifs;
+      parentData = {"name": "Parent"};
+      children = [];
+      notifications = [];
       isLoading = false;
     });
   }

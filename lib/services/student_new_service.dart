@@ -1,77 +1,214 @@
-import '../mock/mock_student_data.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
+import '../core/session_manager.dart';
 
 class StudentNewService {
-  Future<List<Map<String, dynamic>>> getStudentsByClass(
-      String className) async {
-    return mockStudents.entries
-        .where((e) => e.value["class"] == className)
-        .map((entry) => {
-              "enrollment": entry.key,
-              ...entry.value,
-            })
-        .toList();
-  }
 
-  Future<Map<String, dynamic>?> getStudentByEnrollment(
-      String enrollment) async {
-    final data = mockStudents[enrollment];
+static const String base = "${ApiConfig.baseUrl}/admin/students";
 
-    if (data == null) return null;
+Map<String, String> get headers => {
+"Content-Type": "application/json",
+"x-api-key": "VSMART_API_2026",
+"Authorization": "Bearer ${SessionManager.token}",
+};
 
-    return {
-      "enrollment": enrollment, // ✅ ADD THIS
-      ...data,
-    };
-  }
+/* ===============================
+FETCH STUDENTS BY CLASS
+=============================== */
 
-  Future<void> addStudent({
-    required String enrollment,
-    required String name,
-    required String email,
-    required String password,
-    required String phone,
-    required String parentPhone,
-    required String roll,
-    required String className,
-  }) async {
-    mockStudents[enrollment] = {
-      "name": name,
-      "email": email,
-      "password": password,
-      "phone": phone,
-      "parentPhone": parentPhone,
-      "roll": roll,
-      "class": className,
-    };
-  }
+Future<List<Map<String, dynamic>>> getStudentsByClass(String className) async {
 
-  Future<void> updateStudent({
-    required String enrollment,
-    required String name,
-    required String phone,
-    required String parentPhone,
-    required String roll,
-  }) async {
-    if (!mockStudents.containsKey(enrollment)) return;
 
-    mockStudents[enrollment]!["name"] = name;
-    mockStudents[enrollment]!["phone"] = phone;
-    mockStudents[enrollment]!["parentPhone"] = parentPhone;
-    mockStudents[enrollment]!["roll"] = roll;
-  }
+final response = await http.post(
+  Uri.parse("$base/get_students.php"),
+  headers: headers,
+  body: jsonEncode({
+    "class": className
+  }),
+);
 
-  Future<void> deleteStudent(String enrollment) async {
-    mockStudents.remove(enrollment);
-  }
+print("STUDENTS RESPONSE: ${response.body}");
 
-  Future<List<Map<String, dynamic>>> getStudentsByParentPhone(
-      String parentPhone) async {
-    return mockStudents.entries
-        .where((e) => e.value["parentPhone"] == parentPhone)
-        .map((entry) => {
-              "enrollment": entry.key,
-              ...entry.value,
-            })
-        .toList();
-  }
+if (response.statusCode != 200 || response.body.isEmpty) {
+  return [];
+}
+
+final data = jsonDecode(response.body);
+
+if (data["status"] == true) {
+  return List<Map<String, dynamic>>.from(data["students"]);
+}
+
+return [];
+
+
+}
+
+/* ===============================
+GET STUDENT DETAIL
+=============================== */
+
+Future<Map<String, dynamic>?> getStudentByEnrollment(String enrollment) async {
+
+final response = await http.post(
+  Uri.parse("$base/get_student_detail.php"),
+  headers: headers,
+  body: jsonEncode({
+    "enrollment": enrollment
+  }),
+);
+
+print("STUDENT DETAIL RESPONSE: ${response.body}");
+
+if (response.statusCode != 200 || response.body.isEmpty) {
+  return null;
+}
+
+final data = jsonDecode(response.body);
+
+if (data["status"] == true) {
+  return data;
+}
+
+return null;
+
+
+}
+
+/* ===============================
+ADD STUDENT
+=============================== */
+
+Future<bool> addStudent({
+required String enrollment,
+required String name,
+required String email,
+required String password,
+required String phone,
+required String parentPhone,
+required String roll,
+required String className,
+}) async {
+
+final response = await http.post(
+  Uri.parse("$base/add_students.php"),
+  headers: headers,
+  body: jsonEncode({
+    "enrollment": enrollment,
+    "name": name,
+    "email": email,
+    "password": password,
+    "phone": phone,
+    "parentPhone": parentPhone,
+    "roll": roll,
+    "class": className
+  }),
+);
+
+print("ADD STUDENT RESPONSE: ${response.body}");
+
+if (response.statusCode != 200) {
+  return false;
+}
+
+final data = jsonDecode(response.body);
+return data["status"] ?? false;
+
+}
+
+/* ===============================
+UPDATE STUDENT
+=============================== */
+
+Future<bool> updateStudent({
+required int userId,
+required String name,
+required String phone,
+required String parentPhone,
+required String roll,
+required String enrollment,
+}) async {
+
+
+final response = await http.post(
+  Uri.parse("$base/update_student.php"),
+  headers: headers,
+  body: jsonEncode({
+    "user_id": userId,
+    "name": name,
+    "phone": phone,
+    "parentPhone": parentPhone,
+    "roll": roll,
+    "enrollment": enrollment
+  }),
+);
+
+print("UPDATE STUDENT RESPONSE: ${response.body}");
+
+if (response.statusCode != 200) {
+  return false;
+}
+
+final data = jsonDecode(response.body);
+return data["status"] ?? false;
+
+}
+
+/* ===============================
+DELETE STUDENT
+=============================== */
+
+Future<bool> deleteStudent(int userId) async {
+
+
+final response = await http.post(
+  Uri.parse("$base/delete_student.php"),
+  headers: headers,
+  body: jsonEncode({
+    "user_id": userId
+  }),
+);
+
+print("DELETE STUDENT RESPONSE: ${response.body}");
+
+if (response.statusCode != 200) {
+  return false;
+}
+
+final data = jsonDecode(response.body);
+return data["status"] ?? false;
+
+
+}
+
+/* ===============================
+STUDENTS BY PARENT PHONE
+=============================== */
+
+Future<List<Map<String, dynamic>>> getStudentsByParentPhone(String parentPhone) async {
+
+
+final response = await http.post(
+  Uri.parse("$base/get_students_by_parent.php"),
+  headers: headers,
+  body: jsonEncode({
+    "parentPhone": parentPhone
+  }),
+);
+
+if (response.statusCode != 200 || response.body.isEmpty) {
+  return [];
+}
+
+final data = jsonDecode(response.body);
+
+if (data["status"] == true) {
+  return List<Map<String, dynamic>>.from(data["students"]);
+}
+
+return [];
+
+
+}
 }

@@ -43,17 +43,25 @@ class TeacherNewService {
   /// GET TEACHER DETAILS
   /// ===============================
 
-  Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
+Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
     final response = await http.post(
       Uri.parse("$base/teachers/get_teacher_detail.php"),
       headers: headers,
       body: jsonEncode({"id": id}),
     );
 
+    print("TEACHER DETAIL STATUS: ${response.statusCode}");
+    print("TEACHER DETAIL BODY: ${response.body}");
+
+    if (response.statusCode != 200 || response.body.isEmpty) {
+      print("Teacher detail API error");
+      return null;
+    }
+
     final data = jsonDecode(response.body);
 
-    if (data["status"]) {
-      return data;
+    if (data["status"] == true) {
+      return Map<String, dynamic>.from(data);
     }
 
     return null;
@@ -100,6 +108,7 @@ class TeacherNewService {
   Future<bool> addTeacher({
     required String name,
     required String email,
+      required String employeeId,
     required String password,
     required String phone,
     required Map<String, Map<String, List<String>>> subjects,
@@ -108,6 +117,7 @@ class TeacherNewService {
       Uri.parse("$base/teachers/add_teacher.php"),
       headers: headers,
       body: jsonEncode({
+        "employee_id": employeeId,
         "name": name,
         "email": email,
         "password": password,

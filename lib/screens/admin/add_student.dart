@@ -4,13 +4,14 @@ import '../../services/student_new_service.dart';
 class AddStudent extends StatefulWidget {
   final String? enrollment;
   final String className;
+final int? userId;
 
   const AddStudent({
-    Key? key,
-    this.enrollment,
-    required this.className,
-  }) : super(key: key);
-
+  Key? key,
+  this.enrollment,
+  this.userId,
+  required this.className,
+}) : super(key: key);
   @override
   State<AddStudent> createState() => _AddStudentState();
 }
@@ -112,6 +113,7 @@ class _AddStudentState extends State<AddStudent> {
     if (isEdit) {
       await _studentService.updateStudent(
         enrollment: enrollment,
+          userId: widget.userId!,
         name: _nameCtrl.text,
         phone: _phoneCtrl.text,
         parentPhone: _parentPhoneCtrl.text,

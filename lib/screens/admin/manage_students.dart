@@ -88,8 +88,9 @@ class _ManageStudentsState extends State<ManageStudents> {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => AddStudent(
+                         builder: (_) => AddStudent(
                             enrollment: s["enrollment"],
+                            userId: s["user_id"],
                             className: widget.className,
                           ),
                         ),
@@ -97,7 +98,7 @@ class _ManageStudentsState extends State<ManageStudents> {
                       _loadStudents(); // reload after edit
                     },
                     onDelete: () async {
-                      await _studentService.deleteStudent(s["enrollment"]);
+                      await _studentService.deleteStudent(s["user_id"]);
                       _loadStudents();
                     },
                   );

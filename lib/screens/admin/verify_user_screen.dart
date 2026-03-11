@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/registration_request_model.dart';
 import '../../services/user_service.dart';
+import '../../services/teacher_assignment_service.dart';
 import 'assign_teacher_screen.dart';
 
 class VerifyUserScreen extends StatefulWidget {

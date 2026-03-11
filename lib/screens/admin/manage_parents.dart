@@ -17,12 +17,32 @@ class ManageParents extends StatefulWidget {
 
 class _ManageParentsState extends State<ManageParents> {
   final ParentService _parentService = ParentService();
+  List<Map<String, dynamic>> parents = [];
+String searchQuery = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadParents();
+  }
+
+  Future<void> _loadParents() async {
+    parents = await _parentService.getParentsByClass(widget.className);
+    setState(() {});
+  }
   @override
   Widget build(BuildContext context) {
     // 🔹 FIX 1 — MOVED HERE
-    final filteredParents =
-        _parentService.getParentsFilteredByClass(widget.className);
+    
+final filteredParents = parents.where((p) {
+      final name = (p["name"] ?? "").toLowerCase();
+      final email = (p["email"] ?? "").toLowerCase();
+      final phone = (p["phone"] ?? "").toLowerCase();
 
+      return name.contains(searchQuery) ||
+          email.contains(searchQuery) ||
+          phone.contains(searchQuery);
+    }).toList();
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -71,7 +91,12 @@ class _ManageParentsState extends State<ManageParents> {
         child: Column(
           children: [
             // 🔹 SEARCH BAR
-            TextField(
+           TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
               decoration: InputDecoration(
                 hintText: "Search by name, email, phone or ID...",
                 prefixIcon: const Icon(Icons.search),
@@ -83,13 +108,12 @@ class _ManageParentsState extends State<ManageParents> {
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
 
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "${filteredParents.length} parents found",
+                "${parents.length} parents found",
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
@@ -100,9 +124,8 @@ class _ManageParentsState extends State<ManageParents> {
             Expanded(
               child: ListView(
                 children: filteredParents.map((p) {
-                  final parentPhone = p.key;
-                  final parent = p.value;
-                  final childEnroll = parent["children"][0];
+                 final parentPhone = p["phone"];
+                  final childEnroll = p["studentId"];
 
                   return FutureBuilder<Map<String, dynamic>?>(
                     future: _parentService.getStudent(childEnroll),
@@ -110,9 +133,9 @@ class _ManageParentsState extends State<ManageParents> {
                       final student = snapshot.data;
 
                       return ParentCard(
-                        name: parent["name"],
+                        name: p["name"],
                         parentId: parentPhone,
-                        email: parent["email"] ?? "—",
+                        email: p["email"] ?? "—",
                         phone: parentPhone,
                         studentName: student?["name"] ?? "",
                         studentId: childEnroll,

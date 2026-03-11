@@ -29,6 +29,7 @@ class _AddTeacherState extends State<AddTeacher> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
 final _phoneCtrl = TextEditingController();
+final _employeeCtrl = TextEditingController();
 
   List<String> selectedDepartments = [];
   List<String> selectedClasses = [];
@@ -58,6 +59,7 @@ Map<String, List<String>> subjectCache = {};
         _nameCtrl.text = teacher["name"];
         _emailCtrl.text = teacher["email"];
 _phoneCtrl.text = teacher["phone"] ?? "";
+_employeeCtrl.text = teacher["employee_id"] ?? "";
         selectedDepartments = List<String>.from(teacher["departments"] ?? []);
 
         selectedClasses = List<String>.from(teacher["classes"] ?? []);
@@ -171,7 +173,29 @@ const SizedBox(height: 12),
                 ),
               ),
             ),
-            
+           _label("Employee ID"),
+            TextField(
+              controller: _employeeCtrl,
+              enabled: !isEdit,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              maxLength: 10,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.badge),
+                hintText: "Enter 10 digit employee ID",
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
             if (!isEdit) ...[
               const SizedBox(height: 12),
               _label("Password"),
@@ -380,6 +404,13 @@ const SizedBox(height: 12),
                   );
                   return;
                 }
+                if (_employeeCtrl.text.length != 10) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Employee ID must be 10 digits")),
+                  );
+                  return;
+                }
                 int teacherId;
 
                 if (isEdit) {
@@ -393,6 +424,7 @@ const SizedBox(height: 12),
                   );
                 } else {
                   await _teacherService.addTeacher(
+                    employeeId: _employeeCtrl.text,
                     name: _nameCtrl.text,
                     email: _emailCtrl.text,
                     password: _passwordCtrl.text,
