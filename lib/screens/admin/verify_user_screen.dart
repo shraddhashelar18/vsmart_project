@@ -145,8 +145,10 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                AssignTeacherScreen(request: request),
+                            builder: (_) => AssignTeacherScreen(
+                              request: request,
+                              department: details["department"] ?? "",
+                            ),
                           ),
                         );
                       } else {

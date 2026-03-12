@@ -28,8 +28,7 @@ class _AddStudentState extends State<AddStudent> {
   final _rollCtrl = TextEditingController();
   final _enrollCtrl = TextEditingController();
 
-  bool get isEdit => widget.enrollment != null;
-
+bool get isEdit => widget.userId != null;
   @override
   void initState() {
     super.initState();
@@ -113,7 +112,7 @@ class _AddStudentState extends State<AddStudent> {
     if (isEdit) {
       await _studentService.updateStudent(
         enrollment: enrollment,
-          userId: widget.userId!,
+        userId: widget.userId!,
         name: _nameCtrl.text,
         phone: _phoneCtrl.text,
         parentPhone: _parentPhoneCtrl.text,

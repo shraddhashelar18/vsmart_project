@@ -4,18 +4,20 @@ import '../../services/app_settings_service.dart';
 import '../../services/user_service.dart';
 import '../../models/registration_request_model.dart';
 import '../../services/teacher_assignment_service.dart';
-
 class AssignTeacherScreen extends StatefulWidget {
   final RegistrationRequest request;
+  final String department;
 
   const AssignTeacherScreen({
     Key? key,
     required this.request,
+    required this.department,
   }) : super(key: key);
 
   @override
   State<AssignTeacherScreen> createState() => _AssignTeacherScreenState();
 }
+
 
 class _AssignTeacherScreenState extends State<AssignTeacherScreen> {
   String? selectedDept;
@@ -70,7 +72,6 @@ final TeacherAssignmentService _service = TeacherAssignmentService();
     super.initState();
     loadSemester();
   }
-
   Future<void> loadSemester() async {
     final sem = await _settingsService.getActiveSemester();
 
@@ -105,21 +106,23 @@ final TeacherAssignmentService _service = TeacherAssignmentService();
             const SizedBox(height: 20),
 
             // 🔹 Department Dropdown
-            DropdownButtonFormField<String>(
+          DropdownButtonFormField<String>(
               value: selectedDept,
               decoration: const InputDecoration(
                 labelText: "Department",
                 border: OutlineInputBorder(),
               ),
               items: departments
-                  .map((dept) => DropdownMenuItem(
-                        value: dept,
-                        child: Text(dept),
+                  .map((d) => DropdownMenuItem(
+                        value: d,
+                        child: Text(d),
                       ))
                   .toList(),
               onChanged: (value) async {
                 setState(() {
                   selectedDept = value;
+                  selectedClass = null;
+                  subjects.clear();
                 });
 
                 if (value != null) {
@@ -127,12 +130,8 @@ final TeacherAssignmentService _service = TeacherAssignmentService();
                 }
               },
             ),
-
-            const SizedBox(height: 16),
-
-            // 🔹 Class Dropdown (only after dept selected)
-            // 🔹 Class Dropdown (only after dept selected)
-            if (selectedDept != null)
+            const SizedBox(height: 20),
+if (selectedDept != null)
               DropdownButtonFormField<String>(
                 value: selectedClass,
                 decoration: const InputDecoration(
@@ -140,9 +139,9 @@ final TeacherAssignmentService _service = TeacherAssignmentService();
                   border: OutlineInputBorder(),
                 ),
                 items: classes
-                    .map((cls) => DropdownMenuItem<String>(
-                          value: cls,
-                          child: Text(cls),
+                    .map((c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(c),
                         ))
                     .toList(),
                 onChanged: (value) async {
@@ -155,36 +154,33 @@ final TeacherAssignmentService _service = TeacherAssignmentService();
                   }
                 },
               ),
-            const SizedBox(height: 20),
-
             // 🔹 Subjects (only after class selected)
-            if (selectedClass != null)
-              ListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: subjects.map((subject) {
-                 bool isAllocated = allocatedSubjects.contains(subject);
+          if (selectedClass != null)
+              Expanded(
+                child: ListView(
+                  children: subjects.map((subject) {
+                    bool isAllocated = allocatedSubjects.contains(subject);
 
-                  return CheckboxListTile(
-                    value: selectedSubjects.contains(subject),
-                    onChanged: isAllocated
-                        ? null
-                        : (value) {
-                            setState(() {
-                              if (value == true) {
-                                selectedSubjects.add(subject);
-                              } else {
-                                selectedSubjects.remove(subject);
-                              }
-                            });
-                          },
-                    title: Text(
-                      isAllocated ? "$subject (Allocated)" : subject,
-                    ),
-                  );
-                }).toList(),
+                    return CheckboxListTile(
+                      value: selectedSubjects.contains(subject),
+                      onChanged: isAllocated
+                          ? null
+                          : (value) {
+                              setState(() {
+                                if (value == true) {
+                                  selectedSubjects.add(subject);
+                                } else {
+                                  selectedSubjects.remove(subject);
+                                }
+                              });
+                            },
+                      title: Text(
+                        isAllocated ? "$subject (Allocated)" : subject,
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
-
             const SizedBox(height: 10),
 
             // 🔹 Assign Button

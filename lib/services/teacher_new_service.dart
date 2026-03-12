@@ -79,7 +79,7 @@ Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
     final data = jsonDecode(response.body);
 
     if (data["status"] == true) {
-      return List<String>.from(data["classes"]);
+      return List<String>.from(data["classes"].map((c) => c["class_name"]));
     }
 
     return [];
