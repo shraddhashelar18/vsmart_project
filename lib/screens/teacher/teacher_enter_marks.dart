@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:flutter/material.dart';
 import '../../services/teacher_marks_service.dart';
@@ -47,8 +46,19 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
   void initState() {
     super.initState();
     MediaStore.ensureInitialized();
+    MediaStore.appFolder = "VSmart";
     loadStudents();
     loadStats();
+  }
+
+  @override
+  void dispose() {
+    for (var exam in controllers.values) {
+      for (var controller in exam.values) {
+        controller.dispose();
+      }
+    }
+    super.dispose();
   }
 
   Future<void> loadStudents() async {
@@ -61,8 +71,10 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
     students = data;
 
     _initControllers();
+    _calculateStats();
 
     setState(() {
+      totalStudents = students.length;
       loading = false;
     });
   }
@@ -109,7 +121,7 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
     bool isPublished = false;
 
     if (students.isNotEmpty) {
-      isPublished = students.first["status"] == "published";
+      isPublished = students.any((s) => s["status"] == "published");
     }
 
     return Scaffold(
@@ -227,6 +239,7 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
                               content: Text("Marks cannot exceed $maxMarks")),
                         );
                       }
+                      _calculateStats();
                     },
                   ),
                 ),
@@ -291,17 +304,17 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
     if (success) {
       await loadStudents();
       await loadStats();
-    }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          isDraft
-              ? "$selectedExam saved as draft"
-              : "$selectedExam published successfully!",
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isDraft
+                ? "$selectedExam saved as draft"
+                : "$selectedExam published successfully!",
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Future<void> _confirmPublish() async {
@@ -391,7 +404,108 @@ class _EnterMarksScreenState extends State<EnterMarksScreen> {
             Text(s, style: TextStyle(color: Colors.grey.shade600)),
           ])));
 
-  Future<void> _downloadTemplate() async {}
+  Future<void> _downloadTemplate() async {
+    final excel = Excel.createExcel();
+    final sheet = excel['Sheet1'];
 
-  Future<void> _uploadExcel() async {}
+    sheet.appendRow(["Roll No", "Marks"]);
+
+    for (var s in students) {
+      sheet.appendRow([s["roll"], ""]);
+    }
+
+    final bytes = excel.encode();
+    if (bytes == null) return;
+
+    final fileName =
+        "${widget.className}_${widget.subject.replaceAll(" ", "_")}_${selectedExam}_template.xlsx";
+
+    final mediaStore = MediaStore();
+
+    await mediaStore.saveFile(
+      tempFilePath: await _createTempFile(bytes, fileName),
+      dirType: DirType.download,
+      dirName: DirName.download,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Template saved to Downloads/$fileName")),
+    );
+  }
+
+  Future<String> _createTempFile(List<int> bytes, String name) async {
+    final tempDir = Directory.systemTemp;
+    final file = File("${tempDir.path}/$name");
+    await file.writeAsBytes(bytes);
+    return file.path;
+  }
+
+  Future<void> _uploadExcel() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result == null) return;
+
+    File file = File(result.files.single.path!);
+    var bytes = file.readAsBytesSync();
+
+    var excel = Excel.decodeBytes(bytes);
+
+    var sheet = excel.tables[excel.tables.keys.first];
+
+    if (sheet == null) return;
+
+    for (int i = 1; i < sheet.rows.length; i++) {
+      final rollCell = sheet.rows[i][0]?.value;
+      final marksCell = sheet.rows[i][1]?.value;
+
+      final roll = rollCell == null
+          ? null
+          : rollCell.toString().replaceAll(".0", "").trim();
+
+      final marks = marksCell == null
+          ? null
+          : marksCell.toString().replaceAll(".0", "").trim();
+
+      if (roll == null) continue;
+
+      final student =
+          students.firstWhere((s) => s["roll"] == roll, orElse: () => {});
+
+      if (student.isEmpty) continue;
+
+      final sid = student["user_id"].toString();
+
+      controllers[selectedExam]![sid]?.text = marks ?? "";
+    }
+
+    setState(() {});
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Excel data loaded successfully")),
+    );
+    _calculateStats();
+  }
+
+  void _calculateStats() {
+    int filled = 0;
+    int sum = 0;
+
+    controllers[selectedExam]!.forEach((sid, controller) {
+      final text = controller.text.trim();
+      if (text.isNotEmpty) {
+        final mark = int.tryParse(text);
+        if (mark != null) {
+          filled++;
+          sum += mark;
+        }
+      }
+    });
+
+    setState(() {
+      completed = filled;
+      average = filled == 0 ? 0 : sum / filled;
+    });
+  }
 }

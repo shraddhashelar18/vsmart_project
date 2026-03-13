@@ -4,11 +4,15 @@ import 'previous_semesters_screen.dart';
 
 class StudentReportDetails extends StatefulWidget {
   final String studentId;
+  final String name;
+  final String roll;
   static const green = Color(0xFF009846);
 
   const StudentReportDetails({
     Key? key,
     required this.studentId,
+    required this.name,
+    required this.roll,
   }) : super(key: key);
 
   @override
@@ -27,6 +31,7 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
 
   Future<void> _loadReport() async {
     student = await _service.getStudentReport(widget.studentId);
+    print("REPORT RESPONSE -> $student");
     setState(() {});
   }
 
@@ -43,8 +48,10 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
         ),
       );
     }
+    final marksData = student!["marks"];
+
     final Map<String, dynamic> marks =
-        Map<String, dynamic>.from(student!["marks"] ?? {});
+        marksData is Map ? Map<String, dynamic>.from(marksData) : {};
 
     final subjects = marks.keys.toList();
 
@@ -65,7 +72,7 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
                   radius: 28,
                   backgroundColor: StudentReportDetails.green,
                   child: Text(
-                    student!["name"][0],
+                    widget.name[0],
                     style: const TextStyle(color: Colors.white, fontSize: 22),
                   ),
                 ),
@@ -74,12 +81,12 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      student!["name"],
+                      widget.name,
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      "Roll No: ${student!["roll"]}",
+                      "Roll No: ${widget.roll}",
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                   ],
@@ -148,7 +155,7 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
 
                       String displayText;
 
-                      if (data["status"] == "AB") {
+                      if (data["score"] == null) {
                         displayText = "AB";
                       } else {
                         displayText = "${data["score"]} / ${data["max"]}";

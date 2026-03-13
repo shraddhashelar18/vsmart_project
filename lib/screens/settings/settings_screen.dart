@@ -4,7 +4,7 @@ import '../../models/user_session.dart';
 import '../admin/admin_bottom_nav.dart';
 import '../parent/parent_bottom_nav.dart';
 import '../principal/principal_bottom_nav.dart';
-import '../teacher/teacher_bottomm_nav.dart';
+import '../teacher/teacher_bottom_nav.dart';
 import 'change_password_screen.dart';
 import 'about_screen.dart';
 import '../../services/app_settings_service.dart';
@@ -30,6 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool registrationOpen = true;
   bool attendanceLocked = false;
   int atktLimit = 2;
+  bool loadingSettings = true;
 
   static const Color primaryGreen = Color(0xFF009846);
 
@@ -48,9 +49,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       attendanceLocked = data["attendanceLocked"] ?? false;
       atktLimit = data["atktLimit"] ?? 2;
 
+      loadingSettings = false;
+
       setState(() {});
     } catch (e) {
+      loadingSettings = false;
       print("Settings load error: $e");
+      setState(() {});
     }
   }
 
@@ -78,110 +83,113 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       : widget.role == "parent"
                           ? const ParentBottomNav(currentIndex: 1)
                           : null,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔹 PROFILE (For Admin + HOD)
-            if (widget.role == "admin" ||
-                widget.role == "principal" ||
-                widget.role == "teacher" ||
-                widget.role == "hod" ||
-                widget.role == "parent") ...[
-              _sectionTitle("Profile"),
-              _settingsCard([
-                _infoTile(
-                    Icons.person, "Name", UserSession.currentUser?.name ?? ""),
-                _infoTile(
-                    Icons.email, "Email", UserSession.currentUser?.email ?? ""),
-                if (UserSession.currentUser?.departments != null &&
-                    UserSession.currentUser!.departments!.isNotEmpty)
-                  _infoTile(
-                    Icons.school,
-                    "Department",
-                    UserSession.currentUser?.departments?.join(", ") ?? "",
-                  ),
-              ]),
-              const SizedBox(height: 20),
-            ],
+      body: loadingSettings
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 🔹 PROFILE (For Admin + HOD)
+                  if (widget.role == "admin" ||
+                      widget.role == "principal" ||
+                      widget.role == "teacher" ||
+                      widget.role == "hod" ||
+                      widget.role == "parent") ...[
+                    _sectionTitle("Profile"),
+                    _settingsCard([
+                      _infoTile(Icons.person, "Name",
+                          UserSession.currentUser?.name ?? ""),
+                      _infoTile(Icons.email, "Email",
+                          UserSession.currentUser?.email ?? ""),
+                      if (UserSession.currentUser?.departments != null &&
+                          UserSession.currentUser!.departments!.isNotEmpty)
+                        _infoTile(
+                          Icons.school,
+                          "Department",
+                          UserSession.currentUser?.departments?.join(", ") ??
+                              "",
+                        ),
+                    ]),
+                    const SizedBox(height: 20),
+                  ],
 
 // 🔹 ACADEMIC INFO (HOD ONLY)
-            if (widget.role == "principal" ||
-                widget.role == "teacher" ||
-                widget.role == "hod") ...[
-              _sectionTitle("Academic Information"),
-              _settingsCard([
-                _infoTile(
-                    Icons.school, "Active Semester", activeSemester ?? "-"),
-                _infoTile(Icons.rule, "ATKT Limit", atktLimit.toString()),
-                _infoTile(
-                  Icons.how_to_reg,
-                  "Registration Status",
-                  registrationOpen ? "Open" : "Closed",
-                ),
-              ]),
-              const SizedBox(height: 20),
-            ],
-            if (widget.role == "admin") ...[
-              _sectionTitle("Academic Control"),
-              _semesterSwitch(),
-              _registrationSwitch(),
-              _attendanceSwitch(),
-              _atktLimitCard(),
-              const SizedBox(height: 20),
-            ],
-            // 🔹 STUDENT SETTINGS
-            if (widget.role == "student") ...[
-              _sectionTitle("Profile"),
-              _settingsCard([
-                _infoTile(
-                    Icons.person, "Name", UserSession.currentUser?.name ?? ""),
-                _infoTile(Icons.badge, "Enrollment",
-                    "${UserSession.currentUser?.user_id ?? ""}"),
-                _infoTile(Icons.school, "Class",
-                    UserSession.currentUser?.className ?? ""),
-                _infoTile(Icons.calendar_today, "Semester",
-                    "${UserSession.currentUser?.semester ?? ""}"),
-                _infoTile(
-                    Icons.email, "Email", UserSession.currentUser?.email ?? ""),
-              ]),
-            ],
-            const SizedBox(height: 20),
-            _sectionTitle("Account"),
-            _settingsTile(
-              Icons.lock,
-              "Change Password",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ChangePasswordScreen(),
+                  if (widget.role == "principal" ||
+                      widget.role == "teacher" ||
+                      widget.role == "hod") ...[
+                    _sectionTitle("Academic Information"),
+                    _settingsCard([
+                      _infoTile(Icons.school, "Active Semester",
+                          activeSemester ?? "-"),
+                      _infoTile(Icons.rule, "ATKT Limit", atktLimit.toString()),
+                      _infoTile(
+                        Icons.how_to_reg,
+                        "Registration Status",
+                        registrationOpen ? "Open" : "Closed",
+                      ),
+                    ]),
+                    const SizedBox(height: 20),
+                  ],
+                  if (widget.role == "admin") ...[
+                    _sectionTitle("Academic Control"),
+                    _semesterSwitch(),
+                    _registrationSwitch(),
+                    _attendanceSwitch(),
+                    _atktLimitCard(),
+                    const SizedBox(height: 20),
+                  ],
+                  // 🔹 STUDENT SETTINGS
+                  if (widget.role == "student") ...[
+                    _sectionTitle("Profile"),
+                    _settingsCard([
+                      _infoTile(Icons.person, "Name",
+                          UserSession.currentUser?.name ?? ""),
+                      _infoTile(Icons.badge, "Enrollment",
+                          "${UserSession.currentUser?.user_id ?? ""}"),
+                      _infoTile(Icons.school, "Class",
+                          UserSession.currentUser?.className ?? ""),
+                      _infoTile(Icons.calendar_today, "Semester",
+                          "${UserSession.currentUser?.semester ?? ""}"),
+                      _infoTile(Icons.email, "Email",
+                          UserSession.currentUser?.email ?? ""),
+                    ]),
+                  ],
+                  const SizedBox(height: 20),
+                  _sectionTitle("Account"),
+                  _settingsTile(
+                    Icons.lock,
+                    "Change Password",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ChangePasswordScreen(),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            _settingsTile(
-              Icons.info_outline,
-              "About Application",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AboutScreen(),
+                  _settingsTile(
+                    Icons.info_outline,
+                    "About Application",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AboutScreen(),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                  _settingsTile(
+                    Icons.logout,
+                    "Logout",
+                    isLogout: true,
+                    onTap: _confirmLogout,
+                  ),
+                ],
+              ),
             ),
-            _settingsTile(
-              Icons.logout,
-              "Logout",
-              isLogout: true,
-              onTap: _confirmLogout,
-            ),
-          ],
-        ),
-      ),
     );
   }
 

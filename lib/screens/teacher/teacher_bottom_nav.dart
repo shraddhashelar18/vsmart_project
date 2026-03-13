@@ -14,29 +14,21 @@ class TeacherBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = UserSession.currentUser;
+    if (user == null) return const SizedBox();
+
     return BottomNavigationBar(
       currentIndex: currentIndex,
       selectedItemColor: green,
       onTap: (index) {
         if (index == currentIndex) return;
 
-        final user = UserSession.currentUser;
-        if (user == null) return; // prevent crash
-
         if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TeacherHome(
-                teacherId: user.user_id,
-                teacherName: user.name,
-                department: user.departments.first,
-                departments: user.departments,
-              ),
-            ),
-          );
-        } else if (index == 1) {
-          Navigator.pushReplacement(
+          Navigator.pop(context);
+        }
+
+        if (index == 1) {
+          Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => SettingsScreen(

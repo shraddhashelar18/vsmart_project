@@ -1,72 +1,74 @@
-import '../mock/mock_student_data.dart';
-import '../mock/mock_parent_data.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
+import '../core/session_manager.dart';
 
 class TeacherNotificationService {
-  void sendNotification({
+  static const String base = ApiConfig.baseUrl;
+
+  Future<bool> sendNotification({
     required String className,
     required String subject,
     required String message,
     required String notifyType,
     required List<String> selectedRecipients,
-  }) {
-    List<String> recipients = [];
+  }) async {
+    final response = await http.post(
+      Uri.parse("$base/teacher/send_notification.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({
+        "class": className,
+        "subject": subject,
+        "message": message,
+        "send_to": notifyType,
+        "students": selectedRecipients
+      }),
+    );
 
-    if (notifyType == "wholeStudents") {
-      recipients = mockStudents.entries
-          .where((e) => e.value["class"] == className)
-          .map((e) => e.key)
-          .toList();
-    } else if (notifyType == "wholeParents") {
-      recipients = getParentsByClass(className)
-          .map((e) => e["parentPhone"] as String)
-          .toList();
-    } else if (notifyType == "selectedStudents" ||
-        notifyType == "selectedParents") {
-      recipients = selectedRecipients;
-    }
+    print(response.body);
 
-    for (var id in recipients) {
-      if (notifyType == "wholeParents" || notifyType == "selectedParents") {
-        mockParentNotifications[id] ??= [];
-        mockParentNotifications[id]!.add({
-          "title": "Message from $subject",
-          "message": message,
-          "date": DateTime.now().toString(),
-        });
-      } else {
-        mockStudentNotifications[id] ??= [];
-        mockStudentNotifications[id]!.add({
-          "title": "Message from $subject",
-          "message": message,
-          "date": DateTime.now().toString(),
-        });
-      }
-    }
+    final data = jsonDecode(response.body);
+
+    return data["status"] ?? false;
   }
 
-  List<Map<String, dynamic>> getStudentsByClass(String className) {
-    return mockStudents.entries
-        .where((e) => e.value["class"] == className)
-        .map((e) => {
-              "enrollment": e.key,
-              ...e.value,
-            })
-        .toList();
+  /// GET STUDENTS (GET API)
+  Future<List<Map<String, dynamic>>> getStudentsByClass(
+      String className) async {
+    final response = await http.get(
+      Uri.parse("$base/teacher/get_students.php?class=$className"),
+      headers: {"Authorization": "Bearer ${SessionManager.token}"},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == true) {
+      return List<Map<String, dynamic>>.from(data["students"]);
+    }
+
+    return [];
   }
 
-  List<Map<String, dynamic>> getParentsByClass(String className) {
-    final studentIds = mockStudents.entries
-        .where((e) => e.value["class"] == className)
-        .map((e) => e.key)
-        .toList();
+  /// GET PARENTS (POST API)
+  Future<List<Map<String, dynamic>>> getParentsByClass(String className) async {
+    final response = await http.post(
+      Uri.parse("$base/teacher/get_parents.php"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({"class": className}),
+    );
 
-    return mockParents.entries
-        .where((parent) => (parent.value["children"] as List)
-            .any((childId) => studentIds.contains(childId)))
-        .map((e) => {
-              "parentPhone": e.key,
-              ...e.value,
-            })
-        .toList();
+    final data = jsonDecode(response.body);
+
+    if (data["status"] == true) {
+      return List<Map<String, dynamic>>.from(data["parents"]);
+    }
+
+    return [];
   }
 }

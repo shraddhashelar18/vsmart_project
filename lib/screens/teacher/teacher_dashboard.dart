@@ -13,6 +13,9 @@ class TeacherDashboard extends StatefulWidget {
   final int teacherId;
   final String teacherName;
   final List<String> departments;
+  final String selectedClass;
+  final String selectedSubject;
+  final Function(String, String) onSelectionChanged;
 
   const TeacherDashboard({
     Key? key,
@@ -20,6 +23,9 @@ class TeacherDashboard extends StatefulWidget {
     required this.teacherId,
     required this.departments,
     required this.teacherName,
+    required this.selectedClass,
+    required this.selectedSubject,
+    required this.onSelectionChanged,
   }) : super(key: key);
 
   @override
@@ -29,19 +35,26 @@ class TeacherDashboard extends StatefulWidget {
 class _TeacherDashboardState extends State<TeacherDashboard> {
   static const green = Color(0xFF009846);
 
-  String selectedClass = "";
-  String selectedSubject = "";
+  late String selectedClass;
+  late String selectedSubject;
 
   List<String> allocatedClasses = [];
   List<String> subjectList = [];
   final TeacherDashboardService _service = TeacherDashboardService();
+
   @override
   void initState() {
     super.initState();
+    print("TeacherDashboard INIT");
+    selectedClass = widget.selectedClass;
+    selectedSubject = widget.selectedSubject;
+
     _loadClasses();
   }
 
   Future<void> _loadClasses() async {
+    if (allocatedClasses.isNotEmpty) return;
+    print("Teacher ID passed: ${widget.teacherId}");
     print("Department: ${widget.activeDepartment}");
     final allClasses = await _service.getAllocatedClasses(widget.teacherId);
     print("Classes: $allClasses");
@@ -50,9 +63,13 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
     allocatedClasses = allClasses
         .where((cls) => cls.startsWith(widget.activeDepartment))
         .toList();
+    print("Classes after department filter: $allocatedClasses");
 
     if (allocatedClasses.isNotEmpty) {
-      selectedClass = allocatedClasses.first;
+      if (selectedClass.isEmpty || !allocatedClasses.contains(selectedClass)) {
+        selectedClass = allocatedClasses.first;
+      }
+
       await loadSubjects();
     } else {
       selectedClass = "";
@@ -73,12 +90,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
 
     if (subjectList.isEmpty) {
       selectedSubject = "";
-    } else if (subjectList.length == 1) {
+    } else if (!subjectList.contains(selectedSubject)) {
       selectedSubject = subjectList.first;
-    } else {
-      if (!subjectList.contains(selectedSubject)) {
-        selectedSubject = subjectList.first;
-      }
     }
 
     setState(() {});
@@ -194,7 +207,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
               style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),
           DropdownButtonFormField(
-            value: selectedClass.isEmpty ? null : selectedClass,
+            value:
+                allocatedClasses.contains(selectedClass) ? selectedClass : null,
             items: allocatedClasses
                 .map((cls) => DropdownMenuItem(value: cls, child: Text(cls)))
                 .toList(),
@@ -204,7 +218,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
 
               setState(() {
                 selectedClass = v;
-                selectedSubject = ""; // reset subject immediately
+                selectedSubject = "";
+                widget.onSelectionChanged(selectedClass, selectedSubject);
               });
 
               await loadSubjects();
@@ -231,7 +246,10 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                 .toList(),
             decoration: _dropdownDeco(),
             onChanged: (v) {
-              setState(() => selectedSubject = v!);
+              setState(() {
+                selectedSubject = v!;
+                widget.onSelectionChanged(selectedClass, selectedSubject);
+              });
             },
           ),
         ],

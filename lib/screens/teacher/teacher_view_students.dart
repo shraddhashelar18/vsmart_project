@@ -65,13 +65,16 @@ class _TeacherViewStudentsState extends State<TeacherViewStudents> {
                   ),
                   child: InkWell(
                     onTap: () {
-                      final studentId = s['enrollment'].toString();
+                      final studentId = s['user_id'].toString();
 
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              StudentReportDetails(studentId: studentId),
+                          builder: (_) => StudentReportDetails(
+                            studentId: studentId,
+                            name: s["full_name"],
+                            roll: s["roll_no"],
+                          ),
                         ),
                       );
                     },
@@ -86,7 +89,7 @@ class _TeacherViewStudentsState extends State<TeacherViewStudents> {
                           ),
                           alignment: Alignment.center,
                           child: Text(
-                            s['name'].toString().substring(0, 1),
+                            s['full_name'].toString().substring(0, 1),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -100,7 +103,7 @@ class _TeacherViewStudentsState extends State<TeacherViewStudents> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                s['name'],
+                                s['full_name'],
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
@@ -108,7 +111,7 @@ class _TeacherViewStudentsState extends State<TeacherViewStudents> {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                "Roll No: ${s['roll']}",
+                                "Roll No: ${s['roll_no']}",
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey.shade600,

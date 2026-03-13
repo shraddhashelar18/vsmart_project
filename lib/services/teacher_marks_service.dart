@@ -52,6 +52,7 @@ class TeacherMarksService {
         "marks": marks
       }),
     );
+    print("MARKS API RESPONSE: ${response.body}");
 
     final data = jsonDecode(response.body);
 

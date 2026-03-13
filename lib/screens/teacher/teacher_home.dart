@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'teacher_bottomm_nav.dart';
+import 'teacher_bottom_nav.dart';
 import 'teacher_dashboard.dart';
 
 class TeacherHome extends StatefulWidget {
@@ -20,6 +20,9 @@ class TeacherHome extends StatefulWidget {
 }
 
 class _TeacherHomeState extends State<TeacherHome> {
+  String selectedClass = "";
+  String selectedSubject = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,6 +31,14 @@ class _TeacherHomeState extends State<TeacherHome> {
         activeDepartment: widget.department,
         departments: widget.departments,
         teacherName: widget.teacherName,
+        selectedClass: selectedClass,
+        selectedSubject: selectedSubject,
+        onSelectionChanged: (cls, sub) {
+          setState(() {
+            selectedClass = cls;
+            selectedSubject = sub;
+          });
+        },
       ),
       bottomNavigationBar: const TeacherBottomNav(currentIndex: 0),
     );

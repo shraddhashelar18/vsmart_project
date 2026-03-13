@@ -26,17 +26,53 @@ class TeacherSendNotifications extends StatefulWidget {
 }
 
 class _TeacherSendNotificationsState extends State<TeacherSendNotifications> {
+  List<Map<String, dynamic>> students = [];
+  List<Map<String, dynamic>> parents = [];
+  bool isLoading = true;
   final msgCtrl = TextEditingController();
   final TeacherNotificationService _service = TeacherNotificationService();
   NotifyType notifyType = NotifyType.wholeStudents;
   List<String> selectedRecipients = [];
 
   @override
-  Widget build(BuildContext context) {
-    /// 🔥 FIXED STUDENT FETCH
-    final students = _service.getStudentsByClass(widget.className);
-    final parents = _service.getParentsByClass(widget.className);
+  void initState() {
+    super.initState();
+    loadData();
+  }
 
+  @override
+  void dispose() {
+    msgCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> loadData() async {
+    try {
+      print("Loading students...");
+      students = await _service.getStudentsByClass(widget.className);
+
+      print("Students loaded: ${students.length}");
+
+      print("Loading parents...");
+      parents = await _service.getParentsByClass(widget.className);
+
+      print("Parents loaded: ${parents.length}");
+    } catch (e) {
+      print("Error: $e");
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: TeacherSendNotifications.green,
@@ -106,16 +142,24 @@ class _TeacherSendNotificationsState extends State<TeacherSendNotifications> {
                         ? students
                         : parents;
 
-                    final id = notifyType == NotifyType.selectedStudents
-                        ? list[i]['enrollment']
-                        : list[i]['parentPhone'];
+                    final id = list[i]['user_id'].toString();
 
                     return CheckboxListTile(
                       value: selectedRecipients.contains(id),
-                      title: Text(list[i]['name']),
+                      title: Text(
+                        notifyType == NotifyType.selectedParents
+                            ? list[i]['student_name']
+                            : list[i]['full_name'],
+                      ),
                       subtitle: notifyType == NotifyType.selectedStudents
-                          ? Text("Roll No: ${list[i]['roll']}")
-                          : Text("Phone: ${list[i]['parentPhone']}"),
+                          ? Text("Roll No: ${list[i]['roll_no']}")
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Parent: ${list[i]['parent_name']}"),
+                                Text("Roll No: ${list[i]['roll_no']}"),
+                              ],
+                            ),
                       onChanged: (v) {
                         setState(() {
                           if (v == true) {
@@ -136,7 +180,7 @@ class _TeacherSendNotificationsState extends State<TeacherSendNotifications> {
                 backgroundColor: TeacherSendNotifications.green,
                 minimumSize: const Size(double.infinity, 50),
               ),
-              onPressed: () {
+              onPressed: () async {
                 if (msgCtrl.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Message cannot be empty")));
@@ -151,7 +195,7 @@ class _TeacherSendNotificationsState extends State<TeacherSendNotifications> {
                   return;
                 }
 
-                _service.sendNotification(
+                bool success = await _service.sendNotification(
                   className: widget.className,
                   subject: widget.subject,
                   message: msgCtrl.text.trim(),
@@ -159,11 +203,21 @@ class _TeacherSendNotificationsState extends State<TeacherSendNotifications> {
                   selectedRecipients: selectedRecipients,
                 );
 
-                msgCtrl.clear();
-                selectedRecipients.clear();
+                if (success) {
+                  setState(() {
+                    msgCtrl.clear();
+                    selectedRecipients.clear();
+                  });
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Notification Sent!")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Notification Sent!")),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Failed to send notification")),
+                  );
+                }
               },
               child: const Text("Send", style: TextStyle(color: Colors.white)),
             ),
