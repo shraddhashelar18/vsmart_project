@@ -117,11 +117,14 @@ class _LoginScreenState extends State<LoginScreen> {
       semester: user["semester"],
     );
 
-    UserSession.setUser(loggedUser);
+    final String token = result["token"].toString();
+
+    UserSession.setUser(loggedUser, token);
+
     print("ROLE FROM LOGIN: ${loggedUser.role}");
+
     _navigateUser(loggedUser);
   }
-
   void _navigateUser(UserAuth user) {
     if (user.role == "admin") {
       Navigator.pushReplacement(

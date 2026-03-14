@@ -25,10 +25,8 @@ class _StudentDashboardState extends State<StudentDashboard> {
   }
 
   Future<void> loadDashboard() async {
-    final email = UserSession.currentUser!.email;
-
-    final data = await _service.getDashboard(email);
-
+   final email = UserSession.currentUser!.email;
+   final data = await _service.getDashboard();
     setState(() {
       dashboard = data;
       studentName = data.studentName;
@@ -43,7 +41,9 @@ class _StudentDashboardState extends State<StudentDashboard> {
       subjects = data.subjects
           .map((s) => {
                 "name": s.name,
-                "marks": s.percent,
+                "obtained": s.obtained,
+                "total": s.total,
+                "percent": s.percent,
               })
           .toList();
 
@@ -73,8 +73,8 @@ class _StudentDashboardState extends State<StudentDashboard> {
     }
 
     final totalDays = presentDays + absentDays;
-    final attendancePercent = presentDays / totalDays;
-
+   final double attendancePercent =
+        totalDays == 0 ? 0.0 : presentDays / totalDays;
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: SafeArea(
@@ -234,7 +234,18 @@ class _StudentDashboardState extends State<StudentDashboard> {
       ],
     );
   }
+List<String> getSemesterMonths() {
+    final now = DateTime.now();
+    final month = now.month;
 
+    // EVEN cycle (Dec–May)
+    if (month == 12 || month <= 5) {
+      return ["Dec", "Jan", "Feb", "Mar", "Apr", "May"];
+    }
+
+    // ODD cycle (Jun–Nov)
+    return ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov"];
+  }
   // ---------------- TREND ----------------
   Widget _trendCard() {
     return Container(
@@ -267,14 +278,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
                         showTitles: true,
                         interval: 1,
                         getTitlesWidget: (value, meta) {
-                          const months = [
-                            "Jan",
-                            "Feb",
-                            "Mar",
-                            "Apr",
-                            "May",
-                            "Jun"
-                          ];
+                          final months = getSemesterMonths();
                           if (value.toInt() >= 0 &&
                               value.toInt() < months.length) {
                             return Text(months[value.toInt()]);
@@ -322,7 +326,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
                           end: Alignment.bottomCenter,
                         ),
                       ),
-                      spots: trend.asMap().entries.map((e) {
+                     spots : trend.asMap().entries.map((e) {
                         return FlSpot(e.key.toDouble(), e.value);
                       }).toList(),
                     ),
@@ -336,17 +340,22 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
   // ---------------- SUBJECTS ----------------
   Widget _subjectSection() {
+    if (subjects.isEmpty) {
+      return const SizedBox(); // hide section
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Subject-wise Performance",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          "Subject-wise Performance",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         ...subjects.map((s) => _subjectCard(s)).toList(),
       ],
     );
   }
-
   Widget _subjectCard(Map<String, dynamic> s) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -358,24 +367,20 @@ class _StudentDashboardState extends State<StudentDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(s["name"],
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
+          Text(s["name"], style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
-          Text("Marks Obtained ${s["marks"]}/100"),
+          Text("Marks Obtained ${s["obtained"]}/${s["total"]}"),
           const SizedBox(height: 6),
           LinearProgressIndicator(
-            value: s["marks"] / 100,
+            value: s["percent"] / 100,
             color: green,
             backgroundColor: Colors.grey.shade300,
           ),
           const SizedBox(height: 4),
           Align(
-              alignment: Alignment.centerRight, child: Text("${s["marks"]}%")),
+            alignment: Alignment.centerRight,
+            child: Text("${s["percent"]}%"),
+          ),
         ],
       ),
     );

@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import '../../../../services/results_service.dart';
 
 class FinalExamCard extends StatelessWidget {
   final bool declared;
@@ -9,6 +12,31 @@ class FinalExamCard extends StatelessWidget {
     required this.declared,
     required this.allowUpload,
   });
+
+  Future<void> _uploadMarksheet(BuildContext context) async {
+    try {
+      // open file picker
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+
+      if (result == null) return;
+
+      File file = File(result.files.single.path!);
+
+      // upload to backend
+ await ResultsService.uploadMarksheet(file.path);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Marksheet uploaded successfully")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Upload failed: $e")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +50,7 @@ class FinalExamCard extends StatelessWidget {
       child: Column(
         children: [
           const Icon(Icons.description, size: 42, color: Colors.grey),
-
           const SizedBox(height: 14),
-
           const Text(
             "Final Exam",
             style: TextStyle(
@@ -32,21 +58,10 @@ class FinalExamCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 6),
-
-          const Text(
-            "Scheduled for June 2026",
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 13,
-            ),
-          ),
-
-          const SizedBox(height: 20), // 👈 KEY FIX
-
+          
           ElevatedButton(
-            onPressed: allowUpload ? () {} : null,
+            onPressed: allowUpload ? () => _uploadMarksheet(context) : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF009846),
               minimumSize: const Size(double.infinity, 48),

@@ -33,9 +33,7 @@ int? activeSemester;
     final currentStudentSemester =
         await StudentSessionService.getCurrentStudentSemester();
 
-    final semesterNumber =
-        await settingsService.getActiveSemesterNumber(currentStudentSemester);
-
+    final semesterNumber = currentStudentSemester;
     final data = await ResultsService.getResultForDisplay(semesterNumber);
 
     setState(() {
@@ -68,14 +66,17 @@ if (loading || result == null) {
               ),
             ),
             if (result!.ct1Declared)
-              const CTResultCard(
+              CTResultCard(
                 title: "Class Test 1 (CT1)",
-              
+                marks: result!.marks,
+                examType: "CT1",
               ),
+
             if (result!.ct2Declared)
-              const CTResultCard(
+              CTResultCard(
                 title: "Class Test 2 (CT2)",
-                
+                marks: result!.marks,
+                examType: "CT2",
               ),
             FinalExamCard(
   declared: result!.finalDeclared,
@@ -128,7 +129,25 @@ if (loading || result == null) {
     );
   }
 
-  Widget _performanceBarCard(List<double> data) {
+ Widget _performanceBarCard(List<double> data) {
+    List<BarChartGroupData> bars = [];
+    List<String> labels = [];
+
+    if (data[0] > 0) {
+      bars.add(_bar(0, data[0]));
+      labels.add("CT1");
+    }
+
+    if (data[1] > 0) {
+      bars.add(_bar(1, data[1]));
+      labels.add("CT2");
+    }
+
+    if (data[2] > 0) {
+      bars.add(_bar(2, data[2]));
+      labels.add("Final");
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
@@ -154,23 +173,18 @@ if (loading || result == null) {
             style: TextStyle(color: Colors.grey, fontSize: 12),
           ),
           const SizedBox(height: 16),
-
           SizedBox(
             height: 200,
             child: BarChart(
               BarChartData(
                 maxY: 100,
                 alignment: BarChartAlignment.spaceEvenly,
-
-                // GRID EXACT LIKE UI
                 gridData: FlGridData(
                   show: true,
                   horizontalInterval: 25,
                   drawVerticalLine: false,
                 ),
-
                 borderData: FlBorderData(show: false),
-
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
@@ -195,7 +209,6 @@ if (loading || result == null) {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
-                        const labels = ["CT1", "CT2", "Final"];
                         if (value.toInt() < labels.length) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 6),
@@ -207,23 +220,15 @@ if (loading || result == null) {
                     ),
                   ),
                 ),
-
-                barGroups: [
-                  _bar(0, data[0]),
-                  _bar(1, data[1]),
-                  _bar(2, data[2]),
-                ],
+                barGroups: bars,
               ),
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // LEGEND
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: const [
-              _LegendDot(color: Colors.green, label: "Good (75%)"),
+              _LegendDot(color: Colors.green, label: "Good (≥75%)"),
               _LegendDot(color: Colors.orange, label: "Average (60-74%)"),
               _LegendDot(color: Colors.red, label: "Low (<60%)"),
             ],

@@ -1,13 +1,24 @@
 class SubjectModel {
   final String name;
   final double percent;
-  final String grade;
+  final int obtained;
+  final int total;
 
   SubjectModel({
     required this.name,
     required this.percent,
-    required this.grade,
+    required this.obtained,
+    required this.total,
   });
+
+ factory SubjectModel.fromJson(Map<String, dynamic> json) {
+    return SubjectModel(
+      name: json['name'] ?? "",
+      percent: (json['percent'] as num).toDouble(),
+      obtained: int.parse(json['obtained'].toString()),
+      total: int.parse(json['total'].toString()),
+    );
+  }
 }
 
 class DashboardModel {
@@ -44,4 +55,24 @@ final String department;
      
     
   });
+  factory DashboardModel.fromJson(Map<String, dynamic> json) {
+    return DashboardModel(
+      studentName: json["studentName"],
+      rollNo: json["rollNo"],
+      className: json["className"],
+      semester: json["semester"],
+      department: json["department"],
+      enrollment: "",
+      attendancePercent: 0,
+      presentDays: json["presentDays"],
+      absentDays: json["absentDays"],
+      ct1Declared: true,
+      ct2Declared: true,
+      performanceTrend:
+          List<double>.from(json["performanceTrend"].map((x) => x.toDouble())),
+      subjects: (json["subjects"] as List)
+          .map((s) => SubjectModel.fromJson(s))
+          .toList(),
+    );
+  }
 }

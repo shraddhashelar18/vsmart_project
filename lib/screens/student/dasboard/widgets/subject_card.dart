@@ -3,6 +3,7 @@ import '../../models/dashboard_model.dart';
 
 class SubjectCard extends StatelessWidget {
   final SubjectModel subject;
+
   const SubjectCard({super.key, required this.subject});
 
   @override
@@ -11,7 +12,9 @@ class SubjectCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(16)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -21,9 +24,11 @@ class SubjectCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text("${subject.percent}%"),
-              Text(subject.grade,
-                  style: const TextStyle(
-                      color: Color(0xFF009846), fontWeight: FontWeight.bold)),
+              Text(
+                "${subject.obtained}/${subject.total}",
+                style: const TextStyle(
+                    color: Color(0xFF009846), fontWeight: FontWeight.bold),
+              ),
             ],
           )
         ],

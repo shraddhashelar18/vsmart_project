@@ -1,34 +1,30 @@
-import '../mock/mock_student_data.dart';
-import '../mock/mock_student_dashboard.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
+import '../models/user_session.dart';
 import '../screens/student/models/dashboard_model.dart';
 
 class StudentDashboardService {
-  Future<DashboardModel> getDashboard(String email) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+  Future<DashboardModel> getDashboard() async {
+    final token = UserSession.token;
 
-    // 🔥 Find student by email
-    final studentEntry = mockStudents.entries.firstWhere(
-      (e) => e.value["email"] == email,
-      orElse: () => throw Exception("Student not found"),
+    final response = await http.get(
+      Uri.parse("${ApiConfig.baseUrl}/student/get_student_dashboard.php"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
     );
 
-    final enrollment = studentEntry.key;
-    final student = studentEntry.value;
+    print("DASHBOARD STATUS: ${response.statusCode}");
+    print("DASHBOARD BODY: ${response.body}");
 
-    return DashboardModel(
-      studentName: student["name"],
-      rollNo: student["roll"],
-      enrollment: enrollment,
-      className: student["class"],
-      semester: 6,
-      department: "IF",
-      attendancePercent: (student["attendance"] as double) * 100,
-      presentDays: 156,
-      absentDays: 24,
-      ct1Declared: true,
-      ct2Declared: true,
-      performanceTrend: mockDashboard.performanceTrend,
-      subjects: mockDashboard.subjects,
-    );
+    final data = jsonDecode(response.body);
+
+    if (data["status"] != true) {
+      throw Exception(data["message"] ?? "Dashboard error");
+    }
+
+    return DashboardModel.fromJson(data);
   }
 }
