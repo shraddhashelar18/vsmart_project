@@ -1,26 +1,26 @@
-import '../mock/mock_previous_sem_data.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+import '../core/api_config.dart';
+import '../core/session_manager.dart';
+
 class StudentResultsService {
-  // map user_id → enrollment
-  final Map<int, String> userIdToEnrollment = {
-    1: "22001",
-    6: "22002",
-  };
-
   Future<Map<String, dynamic>> getSemesterDetails(
-      int studentId, int semester) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    int studentId,
+    int semester,
+  ) async {
+    final response = await http.get(
+      Uri.parse(
+          "${ApiConfig.baseUrl}/student/get_semester_details.php?user_id=$studentId&semester=$semester"),
+      headers: {"Authorization": "Bearer ${SessionManager.token}"},
+    );
 
-    final enrollment = userIdToEnrollment[studentId];
+    print("SEMESTER DETAIL RESPONSE: ${response.body}");
 
-    if (enrollment == null) return {};
+    final data = jsonDecode(response.body);
 
-    final semesterKey = "Sem $semester";
-
-    if (mockPreviousSemReports.containsKey(enrollment) &&
-        mockPreviousSemReports[enrollment]!.containsKey(semesterKey)) {
-      return Map<String, dynamic>.from(
-        mockPreviousSemReports[enrollment]![semesterKey],
-      );
+    if (data["status"] == true) {
+      return Map<String, dynamic>.from(data["data"]);
     }
 
     return {};

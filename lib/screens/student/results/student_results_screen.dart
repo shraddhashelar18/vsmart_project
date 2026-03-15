@@ -41,6 +41,14 @@ int? activeSemester;
       result = data;
       loading = false;
     });
+    setState(() {
+      activeSemester = semesterNumber;
+      result = data;
+      loading = false;
+    });
+
+    print("UPLOAD ALLOWED RAW: ${data.finalUploadAllowed}");
+    print("FINAL DECLARED: ${data.finalDeclared}");
   }
   @override
   Widget build(BuildContext context) {

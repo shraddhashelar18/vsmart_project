@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../../services/results_service.dart';
+import '../student_results_screen.dart';
 
 class FinalExamCard extends StatelessWidget {
   final bool declared;
@@ -15,7 +16,6 @@ class FinalExamCard extends StatelessWidget {
 
   Future<void> _uploadMarksheet(BuildContext context) async {
     try {
-      // open file picker
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
@@ -25,11 +25,18 @@ class FinalExamCard extends StatelessWidget {
 
       File file = File(result.files.single.path!);
 
-      // upload to backend
- await ResultsService.uploadMarksheet(file.path);
+      final response = await ResultsService.uploadMarksheet(file.path);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Marksheet uploaded successfully")),
+      );
+
+      // refresh screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const StudentResultsScreen(),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -61,9 +68,12 @@ class FinalExamCard extends StatelessWidget {
           const SizedBox(height: 6),
           
           ElevatedButton(
-            onPressed: allowUpload ? () => _uploadMarksheet(context) : null,
+            onPressed: (allowUpload && declared)
+    ? () => _uploadMarksheet(context)
+    : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF009846),
+              backgroundColor:
+                  allowUpload ? const Color(0xFF009846) : Colors.grey,
               minimumSize: const Size(double.infinity, 48),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

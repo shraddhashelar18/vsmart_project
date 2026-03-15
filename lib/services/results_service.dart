@@ -33,7 +33,7 @@ class ResultsService {
       ct1Declared: data["ct1_published"] == "1",
       ct2Declared: data["ct2_published"] == "1",
       finalDeclared: data["final_published"] == "1",
-      finalUploadAllowed: data["allow_marksheet_upload"] == "1",
+      finalUploadAllowed: data["allow_marksheet_upload"].toString() == "1",
       finalPdfUploaded: false,
       reuploadAllowed: data["allow_reupload"] == "1",
       marks: Map<String, dynamic>.from(data["marks"] ?? {}),
@@ -86,7 +86,7 @@ class ResultsService {
       Uri.parse("${ApiConfig.baseUrl}/student/upload_marksheet.php"),
     );
 
-    request.headers["Authorization"] = "Bearer ${SessionManager.token}";
+    request.headers.addAll({"Authorization": "Bearer ${SessionManager.token}"});
 
     request.files.add(
       await http.MultipartFile.fromPath(
@@ -101,8 +101,11 @@ class ResultsService {
 
     print("UPLOAD RESPONSE: $responseBody");
 
-    if (response.statusCode != 200) {
-      throw Exception("Upload failed");
+    final data = jsonDecode(responseBody);
+
+    if (data["status"] != true) {
+      throw Exception(data["message"] ?? "Upload failed");
     }
   }
+  
 }

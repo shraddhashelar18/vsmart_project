@@ -23,15 +23,19 @@ class ResultModel {
     required this.marks,
   });
 
-  factory ResultModel.fromJson(Map<String, dynamic> json) {
+ factory ResultModel.fromJson(Map<String, dynamic> json) {
+    bool parseBool(value) {
+      return value == 1 || value == "1" || value == true;
+    }
+
     return ResultModel(
       semester: int.tryParse(json['active_semester'].toString()) ?? 0,
-      ct1Declared: json['ct1_published'] == "1",
-      ct2Declared: json['ct2_published'] == "1",
-      finalDeclared: json['final_published'] == "1",
-      finalUploadAllowed: json['allow_marksheet_upload'] == "1",
+      ct1Declared: parseBool(json['ct1_published']),
+      ct2Declared: parseBool(json['ct2_published']),
+      finalDeclared: parseBool(json['final_published']),
+      finalUploadAllowed: parseBool(json['allow_marksheet_upload']),
       finalPdfUploaded: false,
-      reuploadAllowed: json['allow_reupload'] == "1",
+      reuploadAllowed: parseBool(json['allow_reupload']),
       marks: Map<String, dynamic>.from(json['marks'] ?? {}),
       currentSemData: [],
       allSemData: [],

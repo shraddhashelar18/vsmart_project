@@ -48,13 +48,20 @@ class _StudentSemesterDetailScreenState
   }
 
   Widget _buildContent() {
-    final int attendance = semesterData?["attendance"] ?? 0;
-    final int percentage = semesterData?["percentage"] ?? 0;
+   final int attendance =
+        int.tryParse(semesterData?["attendance"].toString() ?? "0") ?? 0;
+
+    final int percentage =
+        double.tryParse(semesterData?["percentage"].toString() ?? "0")
+                ?.round() ??
+            0;
     final String status = semesterData?["status"] ?? "N/A";
     final Map<String, dynamic> marks =
     Map<String, dynamic>.from(semesterData?["marks"] ?? {});
-        final Map<String, dynamic> trend =
-        Map<String, dynamic>.from(semesterData?["attendanceTrend"] ?? {});
+       final trendRaw = semesterData?["attendanceTrend"];
+
+    final Map<String, dynamic> trend =
+        trendRaw is Map ? Map<String, dynamic>.from(trendRaw) : {};
         List<String> months;
 
     if (widget.semesterNumber % 2 == 1) {

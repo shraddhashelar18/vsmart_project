@@ -21,15 +21,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   void loadNotifications() async {
-    final email = UserSession.currentUser!.email;
-    final data = await NotificationService.fetchNotificationsByEmail(email);
+    final data = await NotificationService.fetchNotifications();
 
     setState(() {
       notifications = data;
       loading = false;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
