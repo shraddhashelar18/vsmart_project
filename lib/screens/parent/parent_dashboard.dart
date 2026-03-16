@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../services/parent_dashboard_service.dart';
 import '../../services/parent_notification_service.dart';
-import '../../services/parent_service.dart';
-import '../../services/report_service.dart';
-import '../../services/student_new_service.dart';
-import '../../models/user_session.dart';
 import 'notifications_screen.dart';
 import 'subjects_screen.dart';
 import 'grades_screen.dart';
@@ -20,9 +17,7 @@ class ParentDashboard extends StatefulWidget {
 }
 
 class _ParentDashboardState extends State<ParentDashboard> {
-  final ParentService _parentService = ParentService();
-  final StudentNewService _studentService = StudentNewService();
-  final ReportService _reportService = ReportService();
+  final ParentDashboardService _dashboardService = ParentDashboardService();
 
   List<Map<String, dynamic>> children = [];
   List<Map<String, dynamic>> notifications = [];
@@ -36,12 +31,23 @@ class _ParentDashboardState extends State<ParentDashboard> {
   }
 
   Future<void> _loadData() async {
-    setState(() {
-      parentData = {"name": "Parent"};
-      children = [];
-      notifications = [];
-      isLoading = false;
-    });
+    final dashboard = await _dashboardService.fetchDashboard();
+    final notif = await ParentNotificationService.fetchNotifications();
+
+    if (dashboard != null) {
+      setState(() {
+        parentData = {"name": dashboard["parent_name"]};
+        children = List<Map<String, dynamic>>.from(dashboard["children"]);
+        print(children);
+        notifications = notif;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        notifications = notif;
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -149,10 +155,10 @@ class _ParentDashboardState extends State<ParentDashboard> {
     final className = c["class"] ?? "";
     final roll = c["roll"] ?? "";
     final enrollment = c["enrollment"] ?? "";
-    double attendance = c["attendance"] ?? 0.0;
+    double attendance = (c["attendance"] ?? 0).toDouble();
     bool good = attendance >= 0.9;
 
-    final weakSubjects = _reportService.calculateWeakSubjects(enrollment);
+    List<String> weakSubjects = List<String>.from(c["weakSubjects"] ?? []);
 
     final initials =
         name.isNotEmpty ? name.split(" ").map((e) => e[0]).take(2).join() : "";
@@ -265,7 +271,10 @@ class _ParentDashboardState extends State<ParentDashboard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SubjectsScreen(className: className),
+                        builder: (_) => SubjectsScreen(
+                          className: className,
+                          semester: (c["semester"] ?? "").toString(),
+                        ),
                       ),
                     );
                   },

@@ -4,11 +4,8 @@ import '../../core/session_manager.dart';
 import '../../services/app_settings_service.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
- 
-
   const ChangePasswordScreen({
     Key? key,
-   
   }) : super(key: key);
 
   @override
@@ -46,7 +43,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   backgroundColor: primaryGreen,
                 ),
                 onPressed: _updatePassword,
-                child: const Text("Update Password"),
+                child: const Text("Update Password",
+                    style: TextStyle(
+                      color: Colors.white,
+                    )),
               )
             ],
           ),
@@ -83,6 +83,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       );
     }
   }
+
   Widget _passwordField(String label, Function(String) onChanged) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),

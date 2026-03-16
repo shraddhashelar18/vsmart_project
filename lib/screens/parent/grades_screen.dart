@@ -24,8 +24,8 @@ class _GradesScreenState extends State<GradesScreen> {
     _loadData();
   }
 
-  void _loadData() {
-    final data = _reportService.getReportByEnrollment(widget.enrollment);
+  Future<void> _loadData() async {
+    final data = await _reportService.getReportByEnrollment(widget.enrollment);
 
     setState(() {
       report = data;

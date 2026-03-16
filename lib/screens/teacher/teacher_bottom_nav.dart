@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../models/user_session.dart';
 import '../settings/settings_screen.dart';
-import 'teacher_home.dart';
 
 class TeacherBottomNav extends StatelessWidget {
   final int currentIndex;

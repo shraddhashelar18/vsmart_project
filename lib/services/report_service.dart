@@ -1,36 +1,32 @@
-import '../mock/mock_student_reports.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../core/api_config.dart';
+import '../core/session_manager.dart';
 
 class ReportService {
-  Map<String, dynamic>? getReportByEnrollment(String enrollment) {
-    return mockStudentReports[enrollment];
-  }
+  static const String base = "${ApiConfig.baseUrl}/parent";
 
-  List<String> calculateWeakSubjects(String enrollment) {
-    final report = mockStudentReports[enrollment];
-    if (report == null) return [];
+  Map<String, String> get headers => {
+        "Content-Type": "application/json",
+        "x-api-key": "VSMART_API_2026",
+        "Authorization": "Bearer ${SessionManager.token}"
+      };
 
-    final ct1 = report["ct1Marks"] ?? {};
-    final ct2 = report["ct2Marks"] ?? {};
+  Future<Map<String, dynamic>?> getReportByEnrollment(String enrollment) async {
+    final response = await http.post(
+      Uri.parse("$base/get_grades.php"),
+      headers: headers,
+      body: jsonEncode({"enrollment": enrollment}),
+    );
 
-    List<String> weakSubjects = [];
+    if (response.statusCode != 200) return null;
 
-    for (var subject in ct1.keys) {
-      final ct1Mark = ct1[subject];
-      final ct2Mark = ct2[subject];
+    final data = jsonDecode(response.body);
 
-      double finalValue;
-
-      if (ct2Mark == null) {
-        finalValue = ct1Mark.toDouble();
-      } else {
-        finalValue = (ct1Mark + ct2Mark) / 2;
-      }
-
-      if (finalValue < 15) {
-        weakSubjects.add(subject);
-      }
+    if (data["status"] == true) {
+      return data;
     }
 
-    return weakSubjects;
+    return null;
   }
 }
