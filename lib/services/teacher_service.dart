@@ -7,13 +7,13 @@ import '../core/session_manager.dart';
 class TeacherService {
   static const String base = ApiConfig.baseUrl;
   Future<List<Teacher>> getTeachersByDepartment(String department) async {
-    final url = Uri.parse("$base/hod/get_teachers.php");
+    final url =
+        Uri.parse("$base/hod/get_teachers.php?token=${SessionManager.token}");
 
     final response = await http.post(
       url,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"department": department}),
     );

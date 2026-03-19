@@ -75,11 +75,15 @@ class _HodStudentClassesState extends State<HodStudentClasses> {
                       final s = students[index];
 
                       return InkWell(
-                        onTap: () {
+                        onTap: () async {
+                          final detailedStudent =
+                              await StudentService().getStudentDetails(s.id);
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => StudentDetailScreen(student: s),
+                              builder: (_) =>
+                                  StudentDetailScreen(student: detailedStudent),
                             ),
                           );
                         },

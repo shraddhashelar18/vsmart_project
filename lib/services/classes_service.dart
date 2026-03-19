@@ -8,10 +8,9 @@ class ClassesService {
 
   Future<List<String>> getPromotedClasses(String department) async {
     final response = await http.post(
-      Uri.parse("$base/get_promoted_classes.php"),
+      Uri.parse("$base/get_promoted_classes.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"department": department}),
     );
@@ -27,10 +26,9 @@ class ClassesService {
 
   Future<List<String>> getDetainedClasses(String department) async {
     final response = await http.post(
-      Uri.parse("$base/get_detained_classes.php"),
+      Uri.parse("$base/get_detained_classes.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"department": department}),
     );
@@ -46,10 +44,9 @@ class ClassesService {
 
   Future<List<String>> getClasses(String department) async {
     final response = await http.post(
-      Uri.parse("$base/get_classes.php"),
+      Uri.parse("$base/get_classes.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"department": department}),
     );

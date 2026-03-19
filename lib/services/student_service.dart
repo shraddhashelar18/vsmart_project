@@ -7,13 +7,13 @@ import '../core/session_manager.dart';
 class StudentService {
   static const String base = "${ApiConfig.baseUrl}/hod";
   Future<List<Student>> getStudentsByClass(String className) async {
-    final url = Uri.parse("$base/get_students_by_class.php");
+    final url = Uri.parse(
+        "$base/get_students_by_class.php?token=${SessionManager.token}");
 
     final response = await http.post(
       url,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"class": className}),
     );
@@ -60,13 +60,13 @@ class StudentService {
   }
 
   Future<List<Student>> getPromotedStudents(String className) async {
-    final url = Uri.parse("$base/get_promoted_students.php");
+    final url = Uri.parse(
+        "$base/get_promoted_students.php?token=${SessionManager.token}");
 
     final response = await http.post(
       url,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"class": className}),
     );
@@ -109,13 +109,13 @@ class StudentService {
   }
 
   Future<List<Student>> getAtktStudents(String className) async {
-    final url = Uri.parse("$base/get_atkt_students.php");
+    final url =
+        Uri.parse("$base/get_atkt_students.php?token=${SessionManager.token}");
 
     final response = await http.post(
       url,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"class": className}),
     );
@@ -154,13 +154,13 @@ class StudentService {
   }
 
   Future<List<Student>> getDetainedStudents(String className) async {
-    final url = Uri.parse("$base/get_detained_students.php");
+    final url = Uri.parse(
+        "$base/get_detained_students.php?token=${SessionManager.token}");
 
     final response = await http.post(
       url,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"class": className}),
     );
@@ -196,5 +196,43 @@ class StudentService {
     }
 
     return students;
+  }
+
+  Future<Student> getStudentDetails(String studentId) async {
+    final url = Uri.parse(
+        "$base/get_student_details.php?token=${SessionManager.token}");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"student_id": studentId}),
+    );
+
+    print("STUDENT DETAILS RESPONSE: ${response.body}"); // ✅ IMPORTANT
+
+    final data = jsonDecode(response.body);
+
+    return Student(
+      id: data["id"],
+      name: data["name"],
+      rollNo: data["rollNo"],
+      enrollmentNo: data["enrollmentNo"],
+      email: data["email"],
+      phone: data["phone"],
+      parentMobile: data["parentMobile"],
+      backlogCount: data["backlogCount"],
+      promotionStatus: data["promotionStatus"],
+      ct1Marks: Map<String, String>.from(data["ct1Marks"] ?? {}),
+      ct2Marks: Map<String, String>.from(data["ct2Marks"] ?? {}),
+      finalResults: Map<String, String>.from(data["finalResults"] ?? {}),
+      ktSubjects: data["ktSubjects"] != null
+          ? List<String>.from(data["ktSubjects"])
+          : [],
+      percentage: data["percentage"] != null
+          ? double.tryParse(data["percentage"].toString())
+          : null, //
+    );
   }
 }
