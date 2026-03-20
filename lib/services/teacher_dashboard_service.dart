@@ -7,10 +7,9 @@ class TeacherDashboardService {
   static const String base = "${ApiConfig.baseUrl}/teacher";
   Future<List<String>> getAllocatedClasses(int teacherId) async {
     final response = await http.get(
-      Uri.parse("$base/get_classes.php"),
+     Uri.parse("$base/get_classes.php?token=${SessionManager.token}"),
       headers: {
-        "Authorization": "Bearer ${SessionManager.token}",
-        "Content-Type": "application/json"
+              "Content-Type": "application/json",
       },
     );
 
@@ -28,10 +27,9 @@ class TeacherDashboardService {
 
   Future<List<String>> getSubjects(int teacherId, String className) async {
     final response = await http.get(
-      Uri.parse("$base/get_subjects.php?class=$className"),
+      Uri.parse("$base/get_subjects.php?class=$className&token=${SessionManager.token}"),
       headers: {
-        "Authorization": "Bearer ${SessionManager.token}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
     );
 

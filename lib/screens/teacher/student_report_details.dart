@@ -53,7 +53,8 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
     final Map<String, dynamic> marks =
         marksData is Map ? Map<String, dynamic>.from(marksData) : {};
 
-    final subjects = marks.keys.toList();
+    final subjects =
+        marks.keys.map((e) => e.toString().trim()).toSet().toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -136,7 +137,16 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
               )
             else
               ...subjects.map((subject) {
-                final exams = Map<String, dynamic>.from(marks[subject]);
+                final matchingKeys = marks.keys
+                    .where((k) => k.toString().trim() == subject)
+                    .toList();
+
+                Map<String, dynamic> exams = {};
+
+                for (var key in matchingKeys) {
+                  exams.addAll(Map<String, dynamic>.from(marks[key]));
+                }
+                final orderedExams = ["CT1", "CT2", "FINAL"];
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,9 +157,10 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
                           fontSize: 16, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 12),
-                    ...exams.entries.map((examEntry) {
-                      final examName = examEntry.key;
-                      final data = examEntry.value;
+                    ...orderedExams.map((examName) {
+                      if (!exams.containsKey(examName)) return const SizedBox();
+
+                      final data = exams[examName];
 
                       if (data["status"] == "draft") return const SizedBox();
 
