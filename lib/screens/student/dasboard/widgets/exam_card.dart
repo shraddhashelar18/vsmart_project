@@ -46,9 +46,13 @@ class ExamCard extends StatelessWidget {
 
           // -------- Status chip --------
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Status"),
+              const Expanded(
+                child: Text(
+                  "Status",
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               Chip(
                 label: Text(isDeclared ? "Declared" : "Pending"),
                 backgroundColor:

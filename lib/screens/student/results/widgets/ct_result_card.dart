@@ -32,18 +32,26 @@ class CTResultCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  subject,
-                  style: TextStyle(color: textColor),
-                ),
-                Text(
-                  "$mark/30",
-                  style: TextStyle(color: textColor),
-                ),
-              ],
-            ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      subject,
+                      style: TextStyle(color: textColor),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      "$mark/30",
+                      textAlign: TextAlign.right,
+                      style: TextStyle(color: textColor),
+                    ),
+                  ),
+                ],
+              )
           ),
         );
       }
@@ -68,10 +76,15 @@ class CTResultCard extends StatelessWidget {
           ...rows,
           const Divider(),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Percentage ${percentage.toStringAsFixed(1)}%"),
-              Text("Total Marks $total/${subjects * 30}")
+              Expanded(
+                child: Text(
+                  "Percentage ${percentage.toStringAsFixed(1)}%",
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text("Total $total/${subjects * 30}"),
             ],
           )
         ],

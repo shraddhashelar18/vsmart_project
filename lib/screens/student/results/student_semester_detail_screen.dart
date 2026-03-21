@@ -290,44 +290,31 @@ const Text(
       });
     }
   }
-  Future<void> _openPdf(String path) async {
+  Future<void> _openPdf(String url) async {
     try {
-      // If it's an asset (mock mode)
-      if (path.startsWith("assets/")) {
-        final byteData = await rootBundle.load(path);
+      final directory = await getTemporaryDirectory();
 
-        final file = File(
-          '${(await getTemporaryDirectory()).path}/Semester_${widget.semesterNumber}_Marksheet.pdf',
-        );
-
-        await file.writeAsBytes(byteData.buffer.asUint8List());
-
-        await OpenFilex.open(file.path);
-      }
-
-      // If it's a backend URL
-      else if (path.startsWith("http")) {
-        final directory = await getTemporaryDirectory();
-        final file = File(
-          '${directory.path}/Semester_${widget.semesterNumber}_Marksheet.pdf',
-        );
-
-        // Download file from URL
-        final response = await HttpClient().getUrl(Uri.parse(path));
-        final httpResponse = await response.close();
-
-        final bytes = await consolidateHttpClientResponseBytes(httpResponse);
-        await file.writeAsBytes(bytes);
-
-        await OpenFilex.open(file.path);
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Marksheet downloaded successfully")),
+      final file = File(
+        '${directory.path}/Semester_${widget.semesterNumber}_Marksheet.pdf',
       );
+
+      final request = await HttpClient().getUrl(Uri.parse(url));
+      final response = await request.close();
+
+      if (response.statusCode != 200) {
+        throw Exception("Failed to download PDF");
+      }
+
+      final bytes = await consolidateHttpClientResponseBytes(response);
+
+      await file.writeAsBytes(bytes, flush: true);
+
+      await OpenFilex.open(file.path);
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to download marksheet")),
+        const SnackBar(content: Text("Failed to open marksheet")),
       );
     }
   }

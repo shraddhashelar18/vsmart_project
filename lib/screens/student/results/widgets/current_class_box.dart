@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CurrentClassBox extends StatelessWidget {
-  const CurrentClassBox({super.key});
+  final String className;
+
+  const CurrentClassBox({super.key, required this.className});
 
   @override
   Widget build(BuildContext context) {
@@ -14,22 +16,25 @@ class CurrentClassBox extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(18),
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Current Class", style: TextStyle(color: Colors.white70)),
-              SizedBox(height: 4),
-              Text("IF6KA",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold)),
+              const Text("Current Class",
+                  style: TextStyle(color: Colors.white70)),
+              const SizedBox(height: 4),
+              Text(
+                className,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
             ],
           ),
-          Icon(Icons.school, color: Colors.white),
+          const Icon(Icons.school, color: Colors.white),
         ],
       ),
     );

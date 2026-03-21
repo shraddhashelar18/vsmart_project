@@ -6,6 +6,8 @@ class ResultModel {
   final bool finalUploadAllowed;
   final bool finalPdfUploaded;
   final bool reuploadAllowed;
+  final int activeSemester;
+  final String currentClass;
   final List<double> currentSemData;
   final List<double> allSemData;
   final Map<String, dynamic> marks;
@@ -18,6 +20,8 @@ class ResultModel {
     required this.finalUploadAllowed,
     required this.finalPdfUploaded,
     required this.reuploadAllowed,
+     required this.activeSemester,
+       required this.currentClass,
     required this.currentSemData,
     required this.allSemData,
     required this.marks,
@@ -35,7 +39,9 @@ class ResultModel {
       finalDeclared: parseBool(json['final_published']),
       finalUploadAllowed: parseBool(json['allow_marksheet_upload']),
       finalPdfUploaded: false,
+      activeSemester: json['active_semester'],
       reuploadAllowed: parseBool(json['allow_reupload']),
+      currentClass: json['current_class'] ?? "",
       marks: Map<String, dynamic>.from(json['marks'] ?? {}),
       currentSemData: [],
       allSemData: [],

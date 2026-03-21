@@ -238,16 +238,35 @@ List<String> getSemesterMonths() {
     final now = DateTime.now();
     final month = now.month;
 
-    // EVEN cycle (Dec–May)
+    List<String> months;
+
     if (month == 12 || month <= 5) {
-      return ["Dec", "Jan", "Feb", "Mar", "Apr", "May"];
+      months = ["Dec", "Jan", "Feb", "Mar", "Apr", "May"];
+    } else {
+      months = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov"];
     }
 
-    // ODD cycle (Jun–Nov)
-    return ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov"];
+    return months.take(trend.length).toList();
   }
   // ---------------- TREND ----------------
-  Widget _trendCard() {
+ Widget _trendCard() {
+    if (trend.isEmpty || trend.every((v) => v == 0)) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(
+          child: Text(
+            "Attendance graph will appear after first month",
+            style: TextStyle(fontSize: 14),
+          ),
+        ),
+      );
+    }
+
+ 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

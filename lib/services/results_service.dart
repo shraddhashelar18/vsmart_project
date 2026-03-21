@@ -9,7 +9,7 @@ import '../screens/student/models/result_model.dart';
 class ResultsService {
   /* ================= FETCH RESULT ================= */
 
-  static Future<ResultModel> getResultForDisplay(int semester) async {
+ static Future<ResultModel> getResultForDisplay() async  {
     final response = await http.post(
       Uri.parse("${ApiConfig.baseUrl}/student/get_student_result.php"),
       headers: {
@@ -36,6 +36,8 @@ class ResultsService {
       finalUploadAllowed: data["allow_marksheet_upload"].toString() == "1",
       finalPdfUploaded: false,
       reuploadAllowed: data["allow_reupload"] == "1",
+     activeSemester: int.parse(data["active_semester"].toString()),
+     currentClass: data['current_class'] ?? "",
       marks: Map<String, dynamic>.from(data["marks"] ?? {}),
       currentSemData: _buildCurrentGraph(data),
       allSemData: _buildAllSemGraph(data),

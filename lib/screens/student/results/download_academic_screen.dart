@@ -4,11 +4,17 @@ import '../../../models/user_session.dart';
 import '../results/student_semester_detail_screen.dart';
 
 class DownloadAcademicReportScreen extends StatelessWidget {
-  const DownloadAcademicReportScreen({super.key});
+
+  final int activeSemester;
+
+  const DownloadAcademicReportScreen({
+    super.key,
+    required this.activeSemester,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final currentSemester = UserSession.currentUser?.semester ?? 1;
+ final currentSemester = activeSemester;
 
     return Scaffold(
       appBar: AppBar(
@@ -16,7 +22,7 @@ class DownloadAcademicReportScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF009846),
       ),
       backgroundColor: Colors.grey.shade100,
-      body: currentSemester <= 0
+    body: currentSemester <= 1
           ? const Center(
               child: Text(
                 "No semester data available",
@@ -25,7 +31,7 @@ class DownloadAcademicReportScreen extends StatelessWidget {
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: currentSemester,
+              itemCount: currentSemester - 1,
               itemBuilder: (context, index) {
                 final semester = index + 1;
 
