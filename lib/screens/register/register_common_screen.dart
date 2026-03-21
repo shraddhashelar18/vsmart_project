@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/auth_service.dart';
@@ -400,19 +399,18 @@ class _RegisterCommonScreenState extends State<RegisterCommonScreen> {
 
   Widget _header() {
     return Column(
-      children: const [
-        CircleAvatar(
-          radius: 32,
-          backgroundColor: Color(0xFF009846),
-          child: Icon(Icons.school, color: Colors.white, size: 28),
+      children: [
+        Image.asset(
+          "assets/icon1.png",
+          height: 80,
         ),
-        SizedBox(height: 10),
+        SizedBox(height: 3),
         Text(
-          "Vsmart",
+          "VSmart",
           style: TextStyle(
             color: Color(0xFF009846),
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
         ),
         SizedBox(height: 4),

@@ -125,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     _navigateUser(loggedUser);
   }
+
   void _navigateUser(UserAuth user) {
     if (user.role == "admin") {
       Navigator.pushReplacement(
@@ -196,19 +197,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _appHeader() {
     return Column(
-      children: const [
-        CircleAvatar(
-          radius: 32,
-          backgroundColor: Color(0xFF009846),
-          child: Icon(Icons.school, color: Colors.white),
+      children: [
+        Image.asset(
+          "assets/icon1.png",
+          height: 80,
         ),
-        SizedBox(height: 10),
+        SizedBox(height: 3),
         Text(
-          "Vsmart",
+          "VSmart",
           style: TextStyle(
-              color: Color(0xFF009846),
-              fontSize: 22,
-              fontWeight: FontWeight.w600),
+            color: Color(0xFF009846),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
