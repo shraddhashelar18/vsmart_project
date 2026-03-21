@@ -24,7 +24,6 @@ final Map<String, Map<String, dynamic>> mockPreviousSemReports = {
       },
       "percentage": 78,
       "status": "PASS",
-      "marksheetPdf": "assets/sample_marksheet.pdf",
     },
     "Sem 2": {
       "marks": {

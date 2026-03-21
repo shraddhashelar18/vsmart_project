@@ -8,15 +8,22 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool showText = false;
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 10), () {
-        Navigator.pushReplacementNamed(context, '/register');
+    // Show text after logo animation
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      setState(() {
+        showText = true;
       });
+    });
+
+    // Navigate to next screen
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.pushReplacementNamed(context, '/register');
     });
   }
 
@@ -28,36 +35,53 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              height: 70,
-              width: 70,
-              decoration: const BoxDecoration(
-                color: Color(0xFF009846),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.school,
-                color: Colors.white,
-                size: 35,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "Vsmart",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF009846),
+            /// 🔥 LOGO ANIMATION
+            TweenAnimationBuilder(
+              tween: Tween(begin: 0.3, end: 1.0),
+              duration: const Duration(milliseconds: 1000),
+              curve: Curves.easeOut,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.scale(
+                    scale: value,
+                    child: child,
+                  ),
+                );
+              },
+              child: Image.asset(
+                "assets/icon1.png",
+                height: MediaQuery.of(context).size.height * 0.20,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "A Smart Academic Management Platform",
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
+
+            const SizedBox(height: 5),
+
+            /// 🔥 TEXT FADE IN
+            AnimatedOpacity(
+              opacity: showText ? 1 : 0,
+              duration: const Duration(milliseconds: 800),
+              child: Column(
+                children: const [
+                  Text(
+                    "VSmart",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF009846),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Smart Academic Management Platform",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
