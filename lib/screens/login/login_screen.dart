@@ -115,6 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
       departments: List<String>.from(user["departments"] ?? []),
       className: user["className"],
       semester: user["semester"],
+      enrollmentNo: user["enrollmentNo"],
     );
 
     final String token = result["token"].toString();
