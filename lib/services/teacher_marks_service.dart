@@ -14,9 +14,8 @@ class TeacherMarksService {
   }) async {
     final response = await http.get(
       Uri.parse(
-        "$base/get_class_students_marks.php?class=$className&subject=$subject&exam_type=$examType",
+       "$base/get_class_students_marks.php?class=$className&subject=$subject&exam_type=$examType&token=${SessionManager.token}",
       ),
-      headers: {"Authorization": "Bearer ${SessionManager.token}"},
     );
 
     final data = jsonDecode(response.body);
@@ -38,10 +37,9 @@ class TeacherMarksService {
     required List<Map<String, dynamic>> marks,
   }) async {
     final response = await http.post(
-      Uri.parse("$base/enter_marks.php"),
+      Uri.parse("$base/enter_marks.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({
         "class": className,
@@ -66,8 +64,7 @@ class TeacherMarksService {
   }) async {
     final response = await http.get(
       Uri.parse(
-          "$base/get_marks_stats.php?class=$className&subject=$subject&exam_type=$examType"),
-      headers: {"Authorization": "Bearer ${SessionManager.token}"},
+          "$base/get_marks_stats.php?class=$className&subject=$subject&exam_type=$examType&token=${SessionManager.token}"),
     );
 
     final data = jsonDecode(response.body);

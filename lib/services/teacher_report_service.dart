@@ -8,10 +8,9 @@ class TeacherReportService {
   Future<List<Map<String, dynamic>>> getStudentsByClass(
       String className) async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/teacher/get_students.php"),
+     Uri.parse("${ApiConfig.baseUrl}/teacher/get_students.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"class": className}),
     );
@@ -28,10 +27,9 @@ class TeacherReportService {
   /// GET STUDENT REPORT (marks)
   Future<Map<String, dynamic>?> getStudentReport(String studentId) async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/teacher/get_reports.php"),
+      Uri.parse("${ApiConfig.baseUrl}/teacher/get_reports.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"user_id": studentId}),
     );
@@ -54,8 +52,7 @@ class TeacherReportService {
   Future<Map<String, dynamic>?> getPreviousSemesters(String studentId) async {
     final response = await http.get(
       Uri.parse(
-          "${ApiConfig.baseUrl}/teacher/get_previous_semesters.php?user_id=$studentId"),
-      headers: {"Authorization": "Bearer ${SessionManager.token}"},
+          "${ApiConfig.baseUrl}/teacher/get_previous_semesters.php?user_id=$studentId&token=${SessionManager.token}"),
     );
 
     print("PREVIOUS SEM RESPONSE: ${response.body}");

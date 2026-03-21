@@ -10,10 +10,9 @@ class TeacherAttendanceService {
   Future<List<Map<String, dynamic>>> getStudentsByClass(
       String className) async {
     final response = await http.post(
-      Uri.parse("$base/get_students.php"),
+      Uri.parse("$base/get_students.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"class": className}),
     );
@@ -47,10 +46,9 @@ class TeacherAttendanceService {
         .toList();
 
     final response = await http.post(
-      Uri.parse("$base/mark_attendance.php"),
+      Uri.parse("$base/mark_attendance.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({
         "class": className,

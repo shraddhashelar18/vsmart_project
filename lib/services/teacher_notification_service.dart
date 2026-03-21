@@ -14,10 +14,9 @@ class TeacherNotificationService {
     required List<String> selectedRecipients,
   }) async {
     final response = await http.post(
-      Uri.parse("$base/teacher/send_notification.php"),
+      Uri.parse("$base/teacher/send_notification.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({
         "class": className,
@@ -39,8 +38,7 @@ class TeacherNotificationService {
   Future<List<Map<String, dynamic>>> getStudentsByClass(
       String className) async {
     final response = await http.get(
-      Uri.parse("$base/teacher/get_students.php?class=$className"),
-      headers: {"Authorization": "Bearer ${SessionManager.token}"},
+      Uri.parse("$base/teacher/get_students.php?class=$className&token=${SessionManager.token}"),
     );
 
     final data = jsonDecode(response.body);
@@ -55,10 +53,9 @@ class TeacherNotificationService {
   /// GET PARENTS (POST API)
   Future<List<Map<String, dynamic>>> getParentsByClass(String className) async {
     final response = await http.post(
-      Uri.parse("$base/teacher/get_parents.php"),
+      Uri.parse("$base/teacher/get_parents.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
       body: jsonEncode({"class": className}),
     );
