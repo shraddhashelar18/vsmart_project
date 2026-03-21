@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/student_new_service.dart';
+import '../../services/parent_profile_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String enrollment;
@@ -11,7 +11,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final StudentNewService _studentService = StudentNewService();
+  final ParentProfileService _profileService = ParentProfileService();
 
   Map<String, dynamic>? student;
   bool isLoading = true;
@@ -25,8 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadStudent() async {
-    final data =
-        await _studentService.getStudentByEnrollment(widget.enrollment);
+    final data = await _profileService.getStudentProfile(widget.enrollment);
 
     setState(() {
       student = data;

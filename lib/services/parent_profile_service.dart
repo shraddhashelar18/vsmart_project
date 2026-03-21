@@ -2,23 +2,22 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/api_config.dart';
 import '../core/session_manager.dart';
-import '../models/user_session.dart';
 
-class ParentDashboardService {
+class ParentProfileService {
   static const String base = "${ApiConfig.baseUrl}/parent";
 
-  Future<Map<String, dynamic>?> fetchDashboard() async {
-    final userId = UserSession.currentUser!.user_id;
-
+  Future<Map<String, dynamic>?> getStudentProfile(String enrollment) async {
     final response = await http.post(
-      Uri.parse("$base/get_parent_dashboard.php?token=${SessionManager.token}"),
+      Uri.parse("$base/get_student_profile.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
       },
-      body: jsonEncode({"user_id": userId}),
+      body: jsonEncode({
+        "enrollment": enrollment,
+      }),
     );
 
-    print("PARENT DASHBOARD RESPONSE: ${response.body}");
+    print("PARENT PROFILE RESPONSE: ${response.body}");
 
     if (response.statusCode != 200 || response.body.isEmpty) {
       return null;

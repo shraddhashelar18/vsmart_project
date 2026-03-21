@@ -6,16 +6,12 @@ import '../core/session_manager.dart';
 class SubjectsService {
   static const String base = "${ApiConfig.baseUrl}/parent";
 
-  Map<String, String> get headers => {
-        "Content-Type": "application/json",
-        "x-api-key": "VSMART_API_2026",
-        "Authorization": "Bearer ${SessionManager.token}"
-      };
-
   Future<List<String>> getSubjects(String className, String semester) async {
     final response = await http.post(
-      Uri.parse("$base/get_subjects.php"),
-      headers: headers,
+      Uri.parse("$base/get_subjects.php?token=${SessionManager.token}"),
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: jsonEncode({"class": className, "semester": semester}),
     );
 

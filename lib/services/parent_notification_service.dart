@@ -6,11 +6,10 @@ import '../core/session_manager.dart';
 class ParentNotificationService {
   static Future<List<Map<String, dynamic>>> fetchNotifications() async {
     final response = await http.get(
-      Uri.parse("${ApiConfig.baseUrl}/parent/get_notifications.php"),
+      Uri.parse(
+          "${ApiConfig.baseUrl}/parent/get_notifications.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "VSMART_API_2026",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
     );
 
