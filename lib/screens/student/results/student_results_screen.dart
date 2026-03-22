@@ -144,26 +144,9 @@ Future<void> loadResult() async {
   }
 
  Widget _performanceBarCard(List<double> data) {
-    // ⭐ ADD THIS BLOCK
-    if (data.isEmpty || data.every((e) => e == 0)) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: const Center(
-          child: Text(
-            "Performance graph will appear after first month completion",
-            style: TextStyle(color: Colors.grey),
-          ),
-        ),
-      );
-    }
 
 
-
+  
     List<BarChartGroupData> bars = [];
     List<String> labels = [];
 

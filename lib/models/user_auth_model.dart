@@ -9,10 +9,11 @@ class UserAuth {
   // ✅ ADD THESE
   final String? className;
   final int? semester;
-
+final String? enrollmentNo;
   UserAuth({
     required this.user_id,
     required this.name,
+    this.enrollmentNo,
     required this.email,
     required this.role,
     required this.status,
@@ -25,6 +26,7 @@ class UserAuth {
     String? status,
     List<String>? departments,
     String? className,
+    String? enrollmentNo,
     int? semester,
   }) {
     return UserAuth(
@@ -32,6 +34,7 @@ class UserAuth {
       name: name,
       email: email,
       role: role,
+       enrollmentNo: enrollmentNo ?? this.enrollmentNo,
       status: status ?? this.status,
       departments: departments ?? this.departments,
       className: className ?? this.className,
@@ -45,6 +48,7 @@ class UserAuth {
       name: json['name'],
       email: json['email'],
       role: json['role'],
+      enrollmentNo: json['enrollmentNo'],
       status: json['status'],
       departments: json['departments'] != null
           ? List<String>.from(json['departments'])
@@ -60,6 +64,7 @@ class UserAuth {
       "name": name,
       "email": email,
       "role": role,
+      "enrollmentNo": enrollmentNo, 
       "status": status,
       "departments": departments,
       "className": className,

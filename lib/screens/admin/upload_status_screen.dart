@@ -39,7 +39,7 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
 
   Future loadStudents() async {
     students = await ResultService.getUploadStatus(selectedClass!);
-
+    print("STUDENTS: $students");
     setState(() {});
   }
 
@@ -65,7 +65,9 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
                 );
               }).toList(),
               onChanged: (v) async {
-                selectedDept = v;
+                setState(() {
+                  selectedDept = v;
+                });
 
                 await loadClasses();
               },
@@ -84,7 +86,9 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
                 );
               }).toList(),
               onChanged: (v) async {
-                selectedClass = v;
+                setState(() {
+                  selectedClass = v;
+                });
 
                 await loadStudents();
               },
@@ -93,11 +97,9 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
             const SizedBox(height: 20),
 
             /// Student List
-            Expanded(
-              child: students.isEmpty
-                  ? const Center(
-                      child: Text("No data"),
-                    )
+           Expanded(
+              child: students == null || students.isEmpty
+                  ? const Center(child: Text("No data"))
                   : ListView.builder(
                       itemCount: students.length,
                       itemBuilder: (context, index) {
@@ -106,8 +108,8 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
                         return Card(
                           child: ListTile(
                             leading: const Icon(Icons.person),
-                            title: Text(s["name"]),
-                            trailing: s["uploaded"] == 1
+                            title: Text(s["full_name"] ?? "No Name"),
+                           trailing: (s["marks_uploaded"].toString() == "1")
                                 ? const Text(
                                     "Uploaded",
                                     style: TextStyle(

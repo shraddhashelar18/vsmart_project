@@ -14,7 +14,7 @@ class DownloadAcademicReportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
- final currentSemester = activeSemester;
+final currentSemester = activeSemester;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,7 +31,7 @@ class DownloadAcademicReportScreen extends StatelessWidget {
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: currentSemester - 1,
+              itemCount: currentSemester > 1 ? currentSemester - 1 : 0,
               itemBuilder: (context, index) {
                 final semester = index + 1;
 

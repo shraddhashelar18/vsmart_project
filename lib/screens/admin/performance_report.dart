@@ -27,6 +27,12 @@ Future<void> _loadPerformance() async {
     if (selectedClass == null) return;
 
     try {
+      // 👉 CHECK EXAM STATUS FIRST
+      isCT1Conducted = await _service.isExamEnabled(selectedClass!, "CT1");
+
+      isCT2Conducted = await _service.isExamEnabled(selectedClass!, "CT2");
+
+      // 👉 LOAD DATA
       students = await _service.getPerformanceReport(
         className: selectedClass!,
         exam: selectedExam,
@@ -180,7 +186,7 @@ Future<void> _loadPerformance() async {
     if (marks == null) {
       displayText = "Not Conducted";
       color = Colors.grey;
-    } else if (marks == "ABSENT") {
+    } else if (marks == "Absent") {
       displayText = "Absent";
       color = Colors.red;
     } else {

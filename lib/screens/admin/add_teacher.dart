@@ -37,7 +37,7 @@ final _employeeCtrl = TextEditingController();
 
   /// 🔥 Subjects stored locally (NO MOCK ACCESS)
   Map<String, List<String>> selectedSubjectsPerClass = {};
-Map<String, List<String>> subjectCache = {};
+Map<String, List<Map<String, dynamic>>> subjectCache = {};
   bool get isEdit => widget.teacherId != null;
 
   /// Example Subject Mapping
@@ -120,7 +120,7 @@ _employeeCtrl.text = teacher["employee_id"] ?? "";
   String _baseClass(String cls) {
     return cls.substring(0, cls.length - 1);
   }
-Future<List<String>> _getSubjects(String className) async {
+Future<List<Map<String, dynamic>>> _getSubjects(String className) async {
     if (subjectCache.containsKey(className)) {
       return subjectCache[className]!;
     }
@@ -156,43 +156,43 @@ Future<List<String>> _getSubjects(String className) async {
 const SizedBox(height: 12),
             _label("Phone"),
             TextField(
-              controller: _phoneCtrl,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              maxLength: 10,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.phone),
-                hintText: "Enter phone number",
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+  controller: _phoneCtrl,
+  keyboardType: TextInputType.number,
+  inputFormatters: [
+    FilteringTextInputFormatter.digitsOnly,
+  ],
+  maxLength: 10,
+  decoration: InputDecoration(
+    prefixIcon: const Icon(Icons.phone),
+    hintText: "Enter phone number",
+    filled: true,
+    fillColor: Colors.grey.shade100,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide.none,
+    ),
+  ),
+),
            _label("Employee ID"),
-            TextField(
-              controller: _employeeCtrl,
-              enabled: !isEdit,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              maxLength: 10,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.badge),
-                hintText: "Enter 10 digit employee ID",
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+           TextField(
+  controller: _employeeCtrl,
+  enabled: !isEdit,
+  keyboardType: TextInputType.text,
+  inputFormatters: [
+    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+  ],
+  maxLength: 6,
+  decoration: InputDecoration(
+    prefixIcon: const Icon(Icons.badge),
+    hintText: "Enter employee ID (e.g. vp1009)",
+    filled: true,
+    fillColor: Colors.grey.shade100,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide.none,
+    ),
+  ),
+),
 
             const SizedBox(height: 12),
 
@@ -325,7 +325,7 @@ const SizedBox(height: 12),
                   Text(cls,
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
-                  FutureBuilder<List<String>>(
+                  FutureBuilder<List<Map<String, dynamic>>>(
                     future: _getSubjects(cls),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
@@ -341,18 +341,23 @@ const SizedBox(height: 12),
                       return Wrap(
                         spacing: 8,
                         children: subjects.map((sub) {
+                          final subjectName = sub["name"];
+                          final isAssigned = sub["assigned"] == 1;
+
                           return FilterChip(
-                            label: Text(sub),
-                            selected: selectedSubs.contains(sub),
-                            onSelected: (val) {
-                              setState(() {
-                                if (val) {
-                                  selectedSubs.add(sub);
-                                } else {
-                                  selectedSubs.remove(sub);
-                                }
-                              });
-                            },
+                            label: Text(subjectName),
+                            selected: selectedSubs.contains(subjectName),
+                            onSelected: isAssigned
+                                ? null // 🔒 disable if already assigned
+                                : (val) {
+                                    setState(() {
+                                      if (val) {
+                                        selectedSubs.add(subjectName);
+                                      } else {
+                                        selectedSubs.remove(subjectName);
+                                      }
+                                    });
+                                  },
                           );
                         }).toList(),
                       );
@@ -404,10 +409,11 @@ const SizedBox(height: 12),
                   );
                   return;
                 }
-                if (_employeeCtrl.text.length != 10) {
+                if (!RegExp(r'^[a-zA-Z]{2}\d{4}$')
+                    .hasMatch(_employeeCtrl.text)) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content: Text("Employee ID must be 10 digits")),
+                        content: Text("Employee ID must be like vp1009")),
                   );
                   return;
                 }
@@ -472,10 +478,14 @@ const SizedBox(height: 12),
     Map<String, Map<String, List<String>>> result = {};
 
     selectedSubjectsPerClass.forEach((className, subjects) {
-      String dept = className.substring(0, 2); // IF, CO, EJ
+      if (subjects.isEmpty) {
+        print("EMPTY SUBJECT BLOCKED FOR $className");
+      }
 
-      result.putIfAbsent(dept, () => {});
-      result[dept]![className] = subjects;
+      String department = className.substring(0, 2); // EJ, IF, CO
+
+      result.putIfAbsent(department, () => {});
+      result[department]![className] = subjects;
     });
 
     return result;

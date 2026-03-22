@@ -8,7 +8,6 @@ class TeacherNewService {
   Map<String, String> get headers => {
         "Content-Type": "application/json",
         "x-api-key": "VSMART_API_2026",
-        "Authorization": "Bearer ${SessionManager.token}",
       };
 
   /// ===============================
@@ -17,7 +16,8 @@ class TeacherNewService {
 
   Future<List<Map<String, dynamic>>> getTeachers(String department) async {
     final response = await http.post(
-      Uri.parse("$base/teachers/get_teachers.php"),
+     Uri.parse(
+          "$base/teachers/get_teachers.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"department": department}),
     );
@@ -45,7 +45,8 @@ class TeacherNewService {
 
 Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
     final response = await http.post(
-      Uri.parse("$base/teachers/get_teacher_detail.php"),
+      Uri.parse(
+          "$base/teachers/get_teacher_detail.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"id": id}),
     );
@@ -69,7 +70,8 @@ Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
 
   Future<List<String>> getClasses(String department) async {
     final response = await http.post(
-      Uri.parse("$base/classes/get_classes_by_department.php"),
+   Uri.parse(
+          "$base/classes/get_classes_by_department.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"department": department}),
     );
@@ -85,9 +87,10 @@ Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
     return [];
   }
 
-  Future<List<String>> getSubjects(String className) async {
+ Future<List<Map<String, dynamic>>> getSubjects(String className) async {
     final response = await http.post(
-      Uri.parse("$base/subject/get_subjects_by_class.php"),
+      Uri.parse(
+          "$base/subject/get_subjects_by_class.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"class_name": className}),
     );
@@ -95,12 +98,12 @@ Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
     final data = jsonDecode(response.body);
 
     if (data["status"]) {
-      return List<String>.from(data["subjects"]);
+      final List subjects = data["subjects"];
+      return subjects.map((e) => Map<String, dynamic>.from(e)).toList();
     }
 
     return [];
   }
-
   /// ===============================
   /// ADD TEACHER
   /// ===============================
@@ -114,7 +117,7 @@ Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
     required Map<String, Map<String, List<String>>> subjects,
   }) async {
     final response = await http.post(
-      Uri.parse("$base/teachers/add_teacher.php"),
+     Uri.parse("$base/teachers/add_teacher.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({
         "employee_id": employeeId,
@@ -141,7 +144,8 @@ Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
     required Map<String, Map<String, List<String>>> subjects,
   }) async {
     final response = await http.post(
-      Uri.parse("$base/teachers/update_teacher.php"),
+    Uri.parse(
+          "$base/teachers/update_teacher.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({
         "user_id": userId,
@@ -161,7 +165,8 @@ Future<Map<String, dynamic>?> getTeacherDetail(int id) async {
 
   Future<bool> deleteTeacher(int id) async {
     final response = await http.post(
-      Uri.parse("$base/teachers/delete_teacher.php"),
+   Uri.parse(
+          "$base/teachers/delete_teacher.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"id": id}),
     );

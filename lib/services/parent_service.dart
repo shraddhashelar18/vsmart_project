@@ -21,7 +21,7 @@ class ParentService {
 
   Future<List<Map<String, dynamic>>> getParentsByClass(String className) async {
     final response = await http.post(
-      Uri.parse("$base/get_parents_by_class.php"),
+    Uri.parse("$base/get_parents_by_class.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"className": className}),
     );
@@ -50,7 +50,7 @@ class ParentService {
     required List<String> children,
   }) async {
     final response = await http.post(
-      Uri.parse("$base/add_parent.php"),
+  Uri.parse("$base/add_parent.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode(
           {"name": name, "email": email, "phone": phone, "children": children}),
@@ -72,7 +72,7 @@ class ParentService {
       required String oldPhone,
   }) async {
     final response = await http.post(
-      Uri.parse("$base/update_parent.php"),
+    Uri.parse("$base/update_parent.php?token=${SessionManager.token}"),
       headers: headers,
      body: jsonEncode({"name": name, "phone": phone, "oldPhone": oldPhone}),
     );
@@ -91,7 +91,7 @@ class ParentService {
 
   Future<bool> deleteParent(String phone) async {
     final response = await http.post(
-      Uri.parse("$base/delete_parent.php"),
+     Uri.parse("$base/delete_parent.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"phone": phone}),
     );
@@ -130,7 +130,7 @@ class ParentService {
 
   Future<Map<String, dynamic>?> getParent(String phone) async {
     final response = await http.post(
-      Uri.parse("$base/get_parent_detail.php"),
+    Uri.parse("$base/get_parent_detail.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"phone": phone}),
     );

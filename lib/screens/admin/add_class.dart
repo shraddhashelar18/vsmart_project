@@ -129,7 +129,11 @@ children: [
           _loadingTeachers
               ? const Center(child: CircularProgressIndicator())
               : DropdownButtonFormField<int>(
-                  value: int.tryParse(_selectedTeacher ?? ""),
+                isExpanded: true,
+                 value:
+                          (_selectedTeacher == null || _selectedTeacher == "0")
+                              ? null
+                              : int.tryParse(_selectedTeacher!),
                   decoration: InputDecoration(
                     hintText: "Select class teacher",
                     filled: true,
@@ -242,7 +246,7 @@ Future<void> _saveClass() async {
     final name = _classNameCtrl.text.trim();
 
     if (isEdit) {
-      await _classService.updateClass(
+      await _classService.updateClassTeacher(
         className: name,
         teacherId: int.parse(_selectedTeacher!),
       );

@@ -10,7 +10,8 @@ class ResultService {
 
   static Future<Map<String, dynamic>> getSettings() async {
     final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/admin/result_control.php"),
+       Uri.parse(
+            "${ApiConfig.baseUrl}/admin/reports/result_control.php?token=${SessionManager.token}"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer ${SessionManager.token}"
@@ -25,7 +26,9 @@ class ResultService {
   =============================== */
 
   static Future updateSettings(bool upload, bool publish) async {
-    await http.post(Uri.parse("${ApiConfig.baseUrl}/admin/result_control.php"),
+    await http.post(
+        Uri.parse(
+            "${ApiConfig.baseUrl}/admin/reports/result_control.php?token=${SessionManager.token}"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer ${SessionManager.token}"
@@ -43,7 +46,8 @@ class ResultService {
 
   static Future enableUpload() async {
     await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/admin/open_marksheet_upload.php"),
+        Uri.parse(
+            "${ApiConfig.baseUrl}/admin/open_marksheet_upload.php?token=${SessionManager.token}"),
         headers: {"Authorization": "Bearer ${SessionManager.token}"});
   }
 
@@ -52,7 +56,9 @@ class ResultService {
   =============================== */
 
   static Future publishFinalResult() async {
-    await http.post(Uri.parse("${ApiConfig.baseUrl}/admin/publish_final_results.php"),
+    await http.post(
+        Uri.parse(
+            "${ApiConfig.baseUrl}/admin/publish_final_results.php?token=${SessionManager.token}"),
         headers: {"Authorization": "Bearer ${SessionManager.token}"});
   }
 
@@ -62,7 +68,8 @@ class ResultService {
 
   static Future<List<dynamic>> getUploadProgress() async {
     final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/admin/result_control.php"),
+       Uri.parse(
+            "${ApiConfig.baseUrl}/admin/reports/result_control.php?token=${SessionManager.token}"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer ${SessionManager.token}"
@@ -75,23 +82,27 @@ class ResultService {
   }
 
   static Future<List<String>> getClasses(String dept) async {
-    final res = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/result_control.php"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer ${SessionManager.token}"
-      },
-      body: jsonEncode({"action": "classes", "department": dept}),
+    final res = await http.get(
+      Uri.parse(
+          "${ApiConfig.baseUrl}/admin/classes/get_classes_filtered.php?token=${SessionManager.token}"),
     );
+
+    if (res.body.isEmpty) return [];
 
     final data = jsonDecode(res.body);
 
-    return List<String>.from(data["classes"]);
+    List all = data["classes"] ?? [];
+
+    return all
+        .where((c) => c.toString().startsWith(dept))
+        .map<String>((e) => e.toString())
+        .toList();
   }
 
   static Future<List<dynamic>> getUploadStatus(String className) async {
     final res = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/result_control.php"),
+      Uri.parse(
+          "${ApiConfig.baseUrl}/admin/reports/result_control.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer ${SessionManager.token}"
@@ -99,27 +110,36 @@ class ResultService {
       body: jsonEncode({"action": "student_upload_status", "class": className}),
     );
 
+    // 🔥 VERY IMPORTANT SAFETY
+    if (res.body.isEmpty) return [];
+
     final data = jsonDecode(res.body);
 
-    return data["students"];
+    // 🔥 FIX: ALWAYS RETURN LIST
+    return data["students"] ?? [];
   }
-  static Future<List<String>> getDepartments() async {
+ static Future<List<String>> getDepartments() async {
     final res = await http.get(
-      Uri.parse("${ApiConfig.baseUrl}/admin/classes/get_classes.php"),
+      Uri.parse(
+          "${ApiConfig.baseUrl}/admin/classes/get_classes_filtered.php?token=${SessionManager.token}"),
     );
 
     final data = jsonDecode(res.body);
 
+    if (data["status"] != true || data["classes"] == null) {
+      return [];
+    }
+
     List classes = data["classes"];
 
-    // extract departments from class codes
     Set<String> depts = {};
 
     for (var c in classes) {
-      depts.add(c.substring(0, 2));
+      if (c.length >= 2) {
+        depts.add(c.substring(0, 2));
+      }
     }
 
     return depts.toList();
   }
-  
 }

@@ -146,7 +146,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _infoTile(Icons.person, "Name",
                           UserSession.currentUser?.name ?? ""),
                       _infoTile(Icons.badge, "Enrollment",
-                          "${UserSession.currentUser?.user_id ?? ""}"),
+                          "${UserSession.currentUser?.enrollmentNo ?? ""}"),
                       _infoTile(Icons.school, "Class",
                           UserSession.currentUser?.className ?? ""),
                       _infoTile(Icons.calendar_today, "Semester",

@@ -12,14 +12,19 @@ class ClassService {
         "Authorization": "Bearer ${SessionManager.token}",
       };
 
+  /// ===============================
   /// GET CLASSES BY DEPARTMENT
+  /// ===============================
   Future<List<Map<String, dynamic>>> getClassesByDepartment(
       String department) async {
     final response = await http.post(
-      Uri.parse("$base/get_classes_by_department.php"),
+      Uri.parse(
+          "$base/get_classes_by_department.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"department": department}),
     );
+
+    print("CLASS RESPONSE: ${response.body}");
 
     if (response.statusCode != 200 || response.body.isEmpty) {
       return [];
@@ -34,14 +39,16 @@ class ClassService {
     return [];
   }
 
+  /// ===============================
   /// ADD CLASS
+  /// ===============================
   Future<bool> addClass({
     required String className,
     required String department,
     required int teacherId,
   }) async {
     final response = await http.post(
-      Uri.parse("$base/add_class.php"),
+      Uri.parse("$base/add_class.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({
         "class_name": className,
@@ -50,35 +57,34 @@ class ClassService {
       }),
     );
 
-    final data = jsonDecode(response.body);
+    print("ADD CLASS RESPONSE: ${response.body}");
 
+    if (response.statusCode != 200 || response.body.isEmpty) {
+      return false;
+    }
+
+    final data = jsonDecode(response.body);
     return data["status"] ?? false;
   }
 
+  /// ===============================
   /// UPDATE CLASS TEACHER
- 
-Future<bool> updateClassTeacher({
+  /// ===============================
+  Future<bool> updateClassTeacher({
     required String className,
     required int teacherId,
   }) async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/classes/update_class_teacher.php"),
+      Uri.parse("$base/update_class.php?token=${SessionManager.token}"),
       headers: headers,
       body: jsonEncode({"class_name": className, "class_teacher": teacherId}),
     );
 
-    final data = jsonDecode(response.body);
-    return data["status"] ?? false;
-  }
-  Future<bool> updateClass({
-    required String className,
-    required int teacherId,
-  }) async {
-    final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/classes/update_class.php"),
-      headers: headers,
-      body: jsonEncode({"class_name": className, "class_teacher": teacherId}),
-    );
+    print("UPDATE CLASS RESPONSE: ${response.body}");
+
+    if (response.statusCode != 200 || response.body.isEmpty) {
+      return false;
+    }
 
     final data = jsonDecode(response.body);
     return data["status"] ?? false;

@@ -8,12 +8,10 @@ class AdminDashboardService {
 
   Future<Map<String, dynamic>> getDashboardStats() async {
     print("TOKEN BEING SENT: ${SessionManager.token}");
-
-    final response = await http.get(
-      Uri.parse("$base/admin/dashboard.php"),
+final response = await http.get(
+      Uri.parse("$base/admin/dashboard.php?token=${SessionManager.token}"),
       headers: {
         "x-api-key": "VSMART_API_2026",
-        "Authorization": "Bearer ${SessionManager.token}"
       },
     );
 

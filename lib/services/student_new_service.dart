@@ -21,7 +21,7 @@ Future<List<Map<String, dynamic>>> getStudentsByClass(String className) async {
 
 
 final response = await http.post(
-  Uri.parse("$base/get_students.php"),
+ Uri.parse("$base/get_students.php?token=${SessionManager.token}"),
   headers: headers,
   body: jsonEncode({
     "class": className
@@ -52,7 +52,7 @@ GET STUDENT DETAIL
 Future<Map<String, dynamic>?> getStudentByEnrollment(String enrollment) async {
 
 final response = await http.post(
-  Uri.parse("$base/get_student_detail.php"),
+Uri.parse("$base/get_student_detail.php?token=${SessionManager.token}"),
   headers: headers,
   body: jsonEncode({
     "enrollment": enrollment
@@ -92,7 +92,7 @@ required String className,
 }) async {
 
 final response = await http.post(
-  Uri.parse("$base/add_students.php"),
+ Uri.parse("$base/add_students.php?token=${SessionManager.token}"),
   headers: headers,
   body: jsonEncode({
     "enrollment": enrollment,
@@ -132,7 +132,7 @@ required String enrollment,
 
 
 final response = await http.post(
-  Uri.parse("$base/update_student.php"),
+Uri.parse("$base/update_student.php?token=${SessionManager.token}"),
   headers: headers,
   body: jsonEncode({
     "user_id": userId,
@@ -163,7 +163,7 @@ Future<bool> deleteStudent(int userId) async {
 
 
 final response = await http.post(
-  Uri.parse("$base/delete_student.php"),
+ Uri.parse("$base/delete_student.php?token=${SessionManager.token}"),
   headers: headers,
   body: jsonEncode({
     "user_id": userId
@@ -190,7 +190,7 @@ Future<List<Map<String, dynamic>>> getStudentsByParentPhone(String parentPhone) 
 
 
 final response = await http.post(
-  Uri.parse("$base/get_students_by_parent.php"),
+ Uri.parse("$base/get_students_by_parent.php?token=${SessionManager.token}"),
   headers: headers,
   body: jsonEncode({
     "parentPhone": parentPhone

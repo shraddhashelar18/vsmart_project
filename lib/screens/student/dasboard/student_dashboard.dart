@@ -62,7 +62,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
   late String department;
   late int presentDays;
   late int absentDays;
-  late List<double> trend;
+late List<Map<String, dynamic>> trend;
   late List<Map<String, dynamic>> subjects;
   @override
   Widget build(BuildContext context) {
@@ -235,22 +235,11 @@ class _StudentDashboardState extends State<StudentDashboard> {
     );
   }
 List<String> getSemesterMonths() {
-    final now = DateTime.now();
-    final month = now.month;
-
-    List<String> months;
-
-    if (month == 12 || month <= 5) {
-      months = ["Dec", "Jan", "Feb", "Mar", "Apr", "May"];
-    } else {
-      months = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov"];
-    }
-
-    return months.take(trend.length).toList();
+    return trend.map((e) => e["month"].toString()).toList();
   }
   // ---------------- TREND ----------------
  Widget _trendCard() {
-    if (trend.isEmpty || trend.every((v) => v == 0)) {
+ if (trend.isEmpty || trend.every((v) => (v["percent"] ?? 0) == 0)) {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -345,8 +334,9 @@ List<String> getSemesterMonths() {
                           end: Alignment.bottomCenter,
                         ),
                       ),
-                     spots : trend.asMap().entries.map((e) {
-                        return FlSpot(e.key.toDouble(), e.value);
+                    spots: trend.asMap().entries.map((e) {
+                        return FlSpot(e.key.toDouble(),
+                            (e.value["percent"] as num).toDouble());
                       }).toList(),
                     ),
                   ],

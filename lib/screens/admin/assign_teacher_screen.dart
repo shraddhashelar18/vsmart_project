@@ -162,7 +162,7 @@ if (selectedDept != null)
                     bool isAllocated = allocatedSubjects.contains(subject);
 
                     return CheckboxListTile(
-                      value: selectedSubjects.contains(subject),
+                      value: isAllocated || selectedSubjects.contains(subject),
                       onChanged: isAllocated
                           ? null
                           : (value) {
@@ -196,14 +196,28 @@ if (selectedDept != null)
                     : () async {
                         // Later you will save dept/class/subjects here
 
-                       await _service.assignTeacher(
+                       final success = await _service.assignTeacher(
                           widget.request.requestId,
                           selectedDept!,
                           selectedClass!,
                           selectedSubjects,
                         );
 
-                        Navigator.popUntil(context, (route) => route.isFirst);
+                        print("ASSIGN RESULT: $success");
+
+                        if (success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Teacher Assigned Successfully")),
+                          );
+
+                          Navigator.popUntil(context, (route) => route.isFirst);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Assignment Failed ❌")),
+                          );
+                        }
                       },
                 child: const Text(
                   "Assign & Approve",

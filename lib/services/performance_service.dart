@@ -24,7 +24,8 @@ class PerformanceService {
     required String exam,
   }) async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/reports/get_performance_report.php"),
+   Uri.parse(
+          "${ApiConfig.baseUrl}/admin/reports/get_performance_report.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer ${SessionManager.token}"
@@ -45,6 +46,23 @@ class PerformanceService {
 
     
   }
+Future<bool> isExamEnabled(String className, String exam) async {
+    final response = await http.post(
+      Uri.parse(
+          "${ApiConfig.baseUrl}/admin/reports/get_performance_report.php?token=${SessionManager.token}"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}"
+      },
+      body: jsonEncode({
+        "action": "check_exam",
+        "class": className,
+        "exam": exam,
+      }),
+    );
 
+    final data = jsonDecode(response.body);
+    return data["enabled"] ?? false;
+  }
   
 }

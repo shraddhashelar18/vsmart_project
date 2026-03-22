@@ -7,6 +7,8 @@ import 'package:open_filex/open_filex.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
 
 class StudentSemesterDetailScreen extends StatefulWidget {
   final int semesterNumber;
@@ -290,32 +292,49 @@ const Text(
       });
     }
   }
+  
   Future<void> _openPdf(String url) async {
+    print("PDF URL RECEIVED: $url");
     try {
-      final directory = await getTemporaryDirectory();
+    final directory = await getApplicationDocumentsDirectory();
 
       final file = File(
         '${directory.path}/Semester_${widget.semesterNumber}_Marksheet.pdf',
       );
 
-      final request = await HttpClient().getUrl(Uri.parse(url));
-      final response = await request.close();
+      // ✅ USE HTTP PACKAGE (NOT HttpClient)
+      final response = await http.get(Uri.parse(url));
 
+print("STATUS: ${response.statusCode}");
+      print("HEADERS: ${response.headers}");
+      print("BODY SAMPLE: ${response.body.substring(0, 100)}");
       if (response.statusCode != 200) {
         throw Exception("Failed to download PDF");
       }
 
-      final bytes = await consolidateHttpClientResponseBytes(response);
+     await file.writeAsBytes(response.bodyBytes, flush: true);
 
-      await file.writeAsBytes(bytes, flush: true);
+      if (await file.exists()) {
+        await Future.delayed(const Duration(milliseconds: 300));
+      await OpenFilex.open(
+          file.path,
+          type: "application/pdf",
+        );
+      } else {
+        throw Exception("File not saved");
+      }
 
-      await OpenFilex.open(file.path);
+      
     } catch (e) {
+      print("PDF ERROR: $e");
+
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to open marksheet")),
       );
+      
     }
   }
+  
 }

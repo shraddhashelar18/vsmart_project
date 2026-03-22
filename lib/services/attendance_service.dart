@@ -18,7 +18,8 @@ class AttendanceService {
 
   Future<List<String>> getDepartments() async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+    Uri.parse(
+          "${ApiConfig.baseUrl}/admin/reports/attendance_report.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer ${SessionManager.token}"
@@ -41,7 +42,8 @@ class AttendanceService {
 
   Future<List<String>> getClasses(String department) async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+    Uri.parse(
+          "${ApiConfig.baseUrl}/admin/reports/attendance_report.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer ${SessionManager.token}"
@@ -64,7 +66,8 @@ class AttendanceService {
 
   Future<List<String>> getMonths() async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+     Uri.parse(
+          "${ApiConfig.baseUrl}/admin/reports/attendance_report.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer ${SessionManager.token}"
@@ -90,7 +93,8 @@ class AttendanceService {
     required int month,
   }) async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+    Uri.parse(
+          "${ApiConfig.baseUrl}/admin/reports/attendance_report.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer ${SessionManager.token}"
@@ -112,7 +116,8 @@ class AttendanceService {
   }
   Future<bool> isMonthEnabled(int monthNumber) async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/reports/attendance_report.php"),
+   Uri.parse(
+          "${ApiConfig.baseUrl}/admin/reports/attendance_report.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer ${SessionManager.token}"

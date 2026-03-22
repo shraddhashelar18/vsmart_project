@@ -35,7 +35,7 @@ final String department;
   final bool ct1Declared;
   final bool ct2Declared;
 
-  final List<double> performanceTrend;
+final List<Map<String, dynamic>> performanceTrend;
   final List<SubjectModel> subjects;
 
   DashboardModel({
@@ -68,8 +68,7 @@ final String department;
       absentDays: json["absentDays"],
       ct1Declared: true,
       ct2Declared: true,
-      performanceTrend:
-          List<double>.from(json["performanceTrend"].map((x) => x.toDouble())),
+      performanceTrend: List<Map<String, dynamic>>.from(json["performanceTrend"]),
       subjects: (json["subjects"] as List)
           .map((s) => SubjectModel.fromJson(s))
           .toList(),

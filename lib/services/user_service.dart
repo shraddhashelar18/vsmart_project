@@ -15,6 +15,7 @@ class UserService {
       headers: {
         "x-api-key": "VSMART_API_2026",
         "Authorization": "Bearer ${SessionManager.token}"
+        
       },
     );
 
@@ -111,7 +112,8 @@ class UserService {
   }
   Future<List<String>> getSubjectsByClass(String className) async {
     final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/admin/subject/get_subjects_by_class.php"),
+      Uri.parse(
+          "${ApiConfig.baseUrl}/admin/subject/get_subjects_by_class.php?token=${SessionManager.token}"),
       headers: {
         "Content-Type": "application/json",
         "x-api-key": "VSMART_API_2026",
@@ -123,7 +125,7 @@ class UserService {
     final data = jsonDecode(response.body);
 
     if (data["status"] == true) {
-      return List<String>.from(data["subjects"]);
+     return List<String>.from(data["subjects"].map((s) => s["name"]));
     }
 
     return [];

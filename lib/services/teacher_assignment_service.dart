@@ -35,43 +35,57 @@ class TeacherAssignmentService {
   ------------------------- */
 
   Future<List<String>> getSubjects(String className) async {
-    final res = await http.get(
+    final res = await http.post(
       Uri.parse(
-        "${ApiConfig.baseUrl}/admin/reports/teacher_assign.php?action=get_subjects&class=$className",
-      ),
-      headers: headers,
+          "${ApiConfig.baseUrl}/admin/subject/get_subjects_by_class.php?token=${SessionManager.token}"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}",
+        "x-api-key": "VSMART_API_2026"
+      },
+      body: jsonEncode({"class_name": className}),
     );
+
+    print("SUBJECT RESPONSE: ${res.body}");
+
+    if (res.body.isEmpty) return [];
 
     final data = jsonDecode(res.body);
 
     if (data["status"] == true) {
-      return List<String>.from(data["subjects"]);
+      return List<String>.from(data["subjects"].map((s) => s["name"]));
     }
 
     return [];
   }
-
   /* -------------------------
   GET ALLOCATED SUBJECTS
   ------------------------- */
 
-  Future<List<String>> getAllocated(String className) async {
-    final res = await http.get(
+ Future<List<String>> getAllocated(String className) async {
+    final res = await http.post(
       Uri.parse(
-        "${ApiConfig.baseUrl}/admin/reports/teacher_assign.php?action=get_allocated&class=$className",
+        "${ApiConfig.baseUrl}/admin/reports/teacher_assign.php",
       ),
-      headers: headers,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${SessionManager.token}",
+        "x-api-key": "VSMART_API_2026"
+      },
+      body: jsonEncode({"action": "get_allocated", "class": className}),
     );
+
+    print("ALLOCATED STATUS: ${res.statusCode}");
+    print("ALLOCATED RAW: ${res.body}");
 
     final data = jsonDecode(res.body);
 
     if (data["status"] == true) {
-      return List<String>.from(data["allocated_subjects"]);
+      return List<String>.from(data["allocated_subjects"] ?? []);
     }
 
     return [];
   }
-
   /* -------------------------
   ASSIGN TEACHER
   ------------------------- */
@@ -84,8 +98,8 @@ class TeacherAssignmentService {
   ) async {
     final res = await http.post(
       Uri.parse(
-        "${ApiConfig.baseUrl}/admin/reports/teacher_assign.php?action=assign_teacher",
-      ),
+  "${ApiConfig.baseUrl}/admin/reports/teacher_assign.php",
+),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer ${SessionManager.token}",
@@ -94,13 +108,16 @@ class TeacherAssignmentService {
       body: jsonEncode({
         "user_id": userId,
         "department": department,
+         "action": "assign_teacher", // 🔥 MOVE HERE
         "class": className,
         "subjects": subjects
       }),
     );
-
+print("ASSIGN RAW: ${res.body}");
     final data = jsonDecode(res.body);
 
     return data["status"] == true;
+
+    
   }
 }
