@@ -13,6 +13,8 @@ class ManageStudents extends StatefulWidget {
 
 class _ManageStudentsState extends State<ManageStudents> {
   static const green = Color(0xFF009846);
+  List<Map<String, dynamic>> filteredStudents = [];
+  TextEditingController searchCtrl = TextEditingController();
 
   final StudentNewService _studentService = StudentNewService();
 
@@ -26,7 +28,23 @@ class _ManageStudentsState extends State<ManageStudents> {
 
   Future<void> _loadStudents() async {
     students = await _studentService.getStudentsByClass(widget.className);
-    setState(() {});
+
+    setState(() {
+      filteredStudents = students; // 🔥 important
+    });
+  }
+
+void _filterStudents(String query) {
+    final lower = query.toLowerCase();
+
+    setState(() {
+      filteredStudents = students.where((s) {
+        return (s["name"] ?? "").toLowerCase().contains(lower) ||
+            (s["email"] ?? "").toLowerCase().contains(lower) ||
+            (s["phone"] ?? "").toLowerCase().contains(lower) ||
+            (s["enrollment"] ?? "").toLowerCase().contains(lower);
+      }).toList();
+    });
   }
 
   @override
@@ -54,10 +72,19 @@ class _ManageStudentsState extends State<ManageStudents> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
+           TextField(
+              controller: searchCtrl,
+              onChanged: _filterStudents,
               decoration: InputDecoration(
                 hintText: "Search by name, email, phone or ID...",
                 prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    searchCtrl.clear();
+                    _filterStudents("");
+                  },
+                ),
                 filled: true,
                 fillColor: Colors.grey.shade100,
                 border: OutlineInputBorder(
@@ -70,14 +97,14 @@ class _ManageStudentsState extends State<ManageStudents> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "${students.length} students found",
+                "${filteredStudents.length} students found",
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
             const SizedBox(height: 12),
             Expanded(
               child: ListView(
-                children: students.map((s) {
+               children: filteredStudents.map((s) {
                   return _StudentCard(
                     enrollment: s["enrollment"],
                     name: s["name"] ?? "",

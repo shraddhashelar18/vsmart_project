@@ -341,14 +341,17 @@ const SizedBox(height: 12),
                       return Wrap(
                         spacing: 8,
                         children: subjects.map((sub) {
-                          final subjectName = sub["name"];
+                         final subjectName = sub["name"];
                           final isAssigned = sub["assigned"] == 1;
+
+// 🔥 THIS IS KEY LINE
+                          final isOwn = selectedSubs.contains(subjectName);
 
                           return FilterChip(
                             label: Text(subjectName),
                             selected: selectedSubs.contains(subjectName),
-                            onSelected: isAssigned
-                                ? null // 🔒 disable if already assigned
+                            onSelected: (isAssigned && !isOwn)
+                                ? null // 🔒 assigned to OTHER teacher
                                 : (val) {
                                     setState(() {
                                       if (val) {
@@ -417,6 +420,47 @@ const SizedBox(height: 12),
                   );
                   return;
                 }
+// 🔥 CHECK: at least one class selected
+                if (selectedClasses.isEmpty) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text("Warning"),
+                      content: const Text(
+                        "Please assign at least one class and subject.\nOtherwise teacher will not appear.",
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("OK"),
+                        ),
+                      ],
+                    ),
+                  );
+                  return;
+                }
+                // 🔥 VALIDATE SUBJECTS FIRST
+                bool hasEmpty =
+                    selectedSubjectsPerClass.values.any((subs) => subs.isEmpty);
+
+                if (hasEmpty) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text("Warning"),
+                      content: const Text(
+                        "Each selected class must have at least one subject.\nOtherwise teacher will not appear.",
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("OK"),
+                        ),
+                      ],
+                    ),
+                  );
+                  return; // 🔥 STOP SAVE HERE
+                }
                 int teacherId;
 
                 if (isEdit) {
@@ -478,11 +522,7 @@ const SizedBox(height: 12),
     Map<String, Map<String, List<String>>> result = {};
 
     selectedSubjectsPerClass.forEach((className, subjects) {
-      if (subjects.isEmpty) {
-        print("EMPTY SUBJECT BLOCKED FOR $className");
-      }
-
-      String department = className.substring(0, 2); // EJ, IF, CO
+      String department = className.substring(0, 2);
 
       result.putIfAbsent(department, () => {});
       result[department]![className] = subjects;

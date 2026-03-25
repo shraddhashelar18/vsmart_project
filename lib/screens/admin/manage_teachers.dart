@@ -16,6 +16,8 @@ class _ManageTeachersState extends State<ManageTeachers> {
   final TeacherNewService _teacherService = TeacherNewService();
   List<Map<String, dynamic>> teachers = [];
 
+List<Map<String, dynamic>> filteredTeachers = [];
+  TextEditingController searchCtrl = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -27,9 +29,21 @@ class _ManageTeachersState extends State<ManageTeachers> {
 
     setState(() {
       teachers = allTeachers;
+      filteredTeachers = allTeachers; // 🔥 important
     });
   }
 
+  void _filterTeachers(String query) {
+    final lower = query.toLowerCase();
+
+    setState(() {
+      filteredTeachers = teachers.where((t) {
+        return t["name"].toLowerCase().contains(lower) ||
+            t["email"].toLowerCase().contains(lower) ||
+            t["phone"].toLowerCase().contains(lower);
+      }).toList();
+    });
+  }
   void _deleteTeacher(int id, String name) async {
     bool? confirm = await showDialog(
       context: context,
@@ -89,26 +103,47 @@ class _ManageTeachersState extends State<ManageTeachers> {
           _loadTeachers();
         },
       ),
-      body: Padding(
+     body: Padding(
         padding: const EdgeInsets.all(16),
-        child: teachers.isEmpty
-            ? const Center(child: Text("No teachers found"))
-            : ListView.builder(
-                itemCount: teachers.length,
-                itemBuilder: (context, index) {
-                  final teacher = teachers[index];
-
-                  return TeacherCard(
-                    teacherId: teacher["id"],
-                    name: teacher["name"],
-                    email: teacher["email"],
-                    phone: teacher["phone"],
-                    department: widget.department,
-                    onDelete: () =>
-                        _deleteTeacher(teacher["id"], teacher["name"]),
-                  );
-                },
+        child: Column(
+          children: [
+            TextField(
+              controller: searchCtrl,
+              onChanged: _filterTeachers,
+              decoration: InputDecoration(
+                hintText: "Search teacher...",
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.grey.shade200,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
               ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: filteredTeachers.isEmpty
+                  ? const Center(child: Text("No teachers found"))
+                  : ListView.builder(
+                      itemCount: filteredTeachers.length,
+                      itemBuilder: (context, index) {
+                        final teacher = filteredTeachers[index];
+
+                        return TeacherCard(
+                          teacherId: teacher["id"],
+                          name: teacher["name"],
+                          email: teacher["email"],
+                          phone: teacher["phone"],
+                          department: widget.department,
+                          onDelete: () =>
+                              _deleteTeacher(teacher["id"], teacher["name"]),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

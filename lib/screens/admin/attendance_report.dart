@@ -151,22 +151,18 @@ class _AttendanceReportState extends State<AttendanceReport> {
   value: selectedMonth,
   decoration: _decoration("Month"),
   items: months.map((m) {
-                final monthNumber = _monthToNumber(m);
-
                 return DropdownMenuItem<String>(
                   value: m,
                   child: FutureBuilder<bool>(
-                    future: _attendanceService.isMonthEnabled(monthNumber),
+                    future:
+                        _attendanceService.isMonthEnabled(_monthToNumber(m)),
                     builder: (context, snapshot) {
                       final enabled = snapshot.data ?? false;
 
-                      return IgnorePointer(
-                        ignoring: !enabled,
-                        child: Text(
-                          m,
-                          style: TextStyle(
-                            color: enabled ? Colors.black : Colors.grey,
-                          ),
+                      return Text(
+                        m,
+                        style: TextStyle(
+                          color: enabled ? Colors.black : Colors.grey,
                         ),
                       );
                     },
@@ -175,19 +171,24 @@ class _AttendanceReportState extends State<AttendanceReport> {
               }).toList(),
 
   onChanged: (v) async {
+  if (v == null) return;
 
-    if (v == null) return;
+  final monthNumber = _monthToNumber(v);
 
-    final monthNumber = _monthToNumber(v);
+  final enabled = await _attendanceService.isMonthEnabled(monthNumber);
 
-    final enabled = await _attendanceService.isMonthEnabled(monthNumber);
+  if (!enabled) {
+    // 🔥 ADD THIS (UX)
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("This month is not available yet")),
+    );
+    return;
+  }
 
-    if (!enabled) return;
+  setState(() => selectedMonth = v);
 
-    setState(() => selectedMonth = v);
-
-    await _loadAttendance();
-  },
+  await _loadAttendance();
+},
 ),
             const SizedBox(height: 20),
             const Align(
