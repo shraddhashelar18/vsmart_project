@@ -54,9 +54,11 @@ class _GradesScreenState extends State<GradesScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildTestCard("Class Test 1 (CT1)", ct1),
-          const SizedBox(height: 20),
-          _buildTestCard("Class Test 2 (CT2)", ct2),
+          if (ct1.isNotEmpty) ...[
+            _buildTestCard("Class Test 1 (CT1)", ct1),
+            const SizedBox(height: 20),
+          ],
+          if (ct2.isNotEmpty) _buildTestCard("Class Test 2 (CT2)", ct2),
         ],
       ),
     );

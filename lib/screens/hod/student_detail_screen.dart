@@ -172,9 +172,17 @@ class StudentDetailScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(subject),
+          Expanded(
+            // ✅ FIX
+            child: Text(
+              subject,
+              softWrap: true,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+          const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 12,

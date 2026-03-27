@@ -212,6 +212,8 @@ class StudentService {
 
     print("STUDENT DETAILS RESPONSE: ${response.body}"); // ✅ IMPORTANT
 
+    print("RAW RESPONSE: ${response.body}");
+
     final data = jsonDecode(response.body);
 
     return Student(
@@ -235,7 +237,7 @@ class StudentService {
       finalResults: data["finalResults"] is Map
           ? Map<String, String>.from(data["finalResults"])
           : {},
-      ktSubjects: data["ktSubjects"] != null
+      ktSubjects: data["ktSubjects"] is List
           ? List<String>.from(data["ktSubjects"])
           : [],
       percentage: data["percentage"] != null
