@@ -49,7 +49,6 @@ class _GradesScreenState extends State<GradesScreen> {
         backgroundColor: green,
         title: const Text(
           "Grades",
-          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(

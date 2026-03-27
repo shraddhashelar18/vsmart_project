@@ -146,7 +146,12 @@ class _StudentReportDetailsState extends State<StudentReportDetails> {
                 for (var key in matchingKeys) {
                   exams.addAll(Map<String, dynamic>.from(marks[key]));
                 }
-                final orderedExams = ["CT1", "CT2", "FINAL"];
+                final hasMarks =
+                    exams.containsKey("CT1") || exams.containsKey("CT2");
+
+                if (!hasMarks) return const SizedBox();
+
+                final orderedExams = ["CT1", "CT2"];
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

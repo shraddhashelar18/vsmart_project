@@ -18,6 +18,7 @@ class HodStudentClasses extends StatefulWidget {
 class _HodStudentClassesState extends State<HodStudentClasses> {
   final StudentService _service = StudentService();
   late Future<List<Student>> _studentsFuture;
+  String searchQuery = "";
 
   static const green = Color(0xFF009846);
 
@@ -39,6 +40,11 @@ class _HodStudentClassesState extends State<HodStudentClasses> {
         child: Column(
           children: [
             TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
               decoration: InputDecoration(
                 hintText: "Search student...",
                 prefixIcon: const Icon(Icons.search),
@@ -65,14 +71,24 @@ class _HodStudentClassesState extends State<HodStudentClasses> {
 
                   final students = snapshot.data ?? [];
 
+                  final filteredStudents = students.where((s) {
+                    final name = s.name.toLowerCase();
+                    final roll = s.rollNo.toString().toLowerCase();
+                    final status = (s.promotionStatus ?? "").toLowerCase();
+
+                    return name.contains(searchQuery) ||
+                        roll.contains(searchQuery) ||
+                        status.contains(searchQuery);
+                  }).toList();
+
                   if (students.isEmpty) {
                     return const Center(child: Text("No students found"));
                   }
 
                   return ListView.builder(
-                    itemCount: students.length,
+                    itemCount: filteredStudents.length,
                     itemBuilder: (context, index) {
-                      final s = students[index];
+                      final s = filteredStudents[index];
 
                       return InkWell(
                         onTap: () async {

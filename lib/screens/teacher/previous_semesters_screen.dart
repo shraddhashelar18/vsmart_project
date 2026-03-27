@@ -316,6 +316,7 @@ class _PreviousSemestersScreenState extends State<PreviousSemestersScreen> {
               ...marks.entries.map<Widget>((subjectEntry) {
                 final subject = subjectEntry.key;
                 final exams = subjectEntry.value;
+                final orderedExams = ["CT1", "CT2", "FINAL"];
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
@@ -338,15 +339,20 @@ class _PreviousSemestersScreenState extends State<PreviousSemestersScreen> {
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w700)),
                       const SizedBox(height: 12),
-                      ...exams.entries.map<Widget>((examEntry) {
+                      ...orderedExams.map<Widget>((examName) {
+                        if (!exams.containsKey(examName))
+                          return const SizedBox();
+
+                        final value = exams[examName];
+
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 6),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(examEntry.key),
+                              Text(examName),
                               Text(
-                                "${examEntry.value}",
+                                "$value",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: PreviousSemestersScreen.green,

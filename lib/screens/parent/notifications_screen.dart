@@ -18,7 +18,6 @@ class NotificationsScreen extends StatelessWidget {
         backgroundColor: green,
         title: const Text(
           "Notifications",
-          style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: notifications.isEmpty
@@ -52,9 +51,9 @@ class NotificationsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
       ),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: green.withOpacity(0.15),
-          child: const Icon(Icons.notifications, color: green),
+        leading: const CircleAvatar(
+          backgroundColor: Color(0xFF009846),
+          child: Icon(Icons.notifications, color: Colors.white),
         ),
         title: Text(
           title,

@@ -60,88 +60,116 @@ class _ParentDashboardState extends State<ParentDashboard> {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(95),
-        child: AppBar(
-          backgroundColor: ParentDashboard.green,
-          elevation: 0,
-          flexibleSpace: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 42, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Text("Parent Dashboard",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text("Welcome back, ${parentData?["name"] ?? ""}",
-                    style: const TextStyle(color: Colors.white70))
-              ],
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.notifications, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => NotificationsScreen(
-                      notifications: notifications,
-                    ),
-                  ),
-                );
-              },
-            )
-          ],
-        ),
-      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Your Child",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            ...children.map((c) => _childCard(c)),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Notifications",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            NotificationsScreen(notifications: notifications),
+            // 🔹 CURVED HEADER WITH ICON
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
+              decoration: const BoxDecoration(
+                color: Color(0xFF009846),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(25),
+                  bottomRight: Radius.circular(25),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // TITLE + ICON
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Parent Dashboard",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    );
-                  },
-                  child: const Text(
-                    "View All",
-                    style: TextStyle(
-                      color: ParentDashboard.green,
-                      fontWeight: FontWeight.w600,
+                      IconButton(
+                        icon: const Icon(Icons.notifications,
+                            color: Colors.white),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => NotificationsScreen(
+                                notifications: notifications,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    "Welcome back, ${parentData?["name"] ?? ""}",
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            ...notifications.take(2).map((n) => Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.notifications),
-                    title: Text(n["title"] ?? ""),
-                    subtitle: Text(n["message"] ?? ""),
+
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Your Child",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  ...children.map((c) => _childCard(c)),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Notifications",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => NotificationsScreen(
+                                  notifications: notifications),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "View All",
+                          style: TextStyle(
+                            color: ParentDashboard.green,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                )),
+                  const SizedBox(height: 12),
+                  ...notifications.take(2).map((n) => Card(
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.notifications,
+                            color: ParentDashboard.green,
+                          ),
+                          title: Text(n["title"] ?? ""),
+                          subtitle: Text(n["message"] ?? ""),
+                        ),
+                      )),
+                ],
+              ),
+            ),
           ],
         ),
       ),

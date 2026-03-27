@@ -41,7 +41,14 @@ class _PrincipalDepartmentViewState extends State<PrincipalDepartmentView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: green,
-        title: Text("${widget.department} Department"),
+        title: Text(
+          "${widget.department} Department",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       bottomNavigationBar: PrincipalBottomNav(
         currentIndex: 0,

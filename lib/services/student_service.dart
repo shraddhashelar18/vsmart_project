@@ -224,9 +224,17 @@ class StudentService {
       parentMobile: data["parentMobile"],
       backlogCount: data["backlogCount"],
       promotionStatus: data["promotionStatus"],
-      ct1Marks: Map<String, String>.from(data["ct1Marks"] ?? {}),
-      ct2Marks: Map<String, String>.from(data["ct2Marks"] ?? {}),
-      finalResults: Map<String, String>.from(data["finalResults"] ?? {}),
+      ct1Marks: data["ct1Marks"] is Map
+          ? Map<String, String>.from(data["ct1Marks"])
+          : {},
+
+      ct2Marks: data["ct2Marks"] is Map
+          ? Map<String, String>.from(data["ct2Marks"])
+          : {},
+
+      finalResults: data["finalResults"] is Map
+          ? Map<String, String>.from(data["finalResults"])
+          : {},
       ktSubjects: data["ktSubjects"] != null
           ? List<String>.from(data["ktSubjects"])
           : [],

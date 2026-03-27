@@ -45,7 +45,6 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
         elevation: 0,
         title: Text(
           "Subjects - ${widget.className}",
-          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: isLoading

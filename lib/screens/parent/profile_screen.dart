@@ -56,8 +56,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: green,
         elevation: 0,
-        title: const Text("Student Profile",
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Student Profile",
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

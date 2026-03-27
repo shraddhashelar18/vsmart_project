@@ -152,7 +152,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
           const Text("Teacher Dashboard",
               style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold)),
           const SizedBox(height: 18),
           Text(

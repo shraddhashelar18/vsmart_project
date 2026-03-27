@@ -28,14 +28,11 @@ class AboutScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // ✅ SAME LOGO AS LOGIN SCREEN
                   Image.asset(
-                    "assets/icon1.png",
+                    "assets/icon2.png",
                     height: 80,
                   ),
-
-                  const SizedBox(height: 20),
-
+                  const SizedBox(height: 5),
                   const Text(
                     "VSmart",
                     style: TextStyle(
@@ -43,26 +40,20 @@ class AboutScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   const Text(
                     "Smart Academic Management System",
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey),
                   ),
-
                   const SizedBox(height: 20),
                   const Divider(),
                   const SizedBox(height: 10),
-
                   const Text(
                     "Version 1.0.0",
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
-
                   const SizedBox(height: 8),
-
                   const Text(
                     "© 2026 All Rights Reserved",
                     style: TextStyle(color: Colors.grey),
