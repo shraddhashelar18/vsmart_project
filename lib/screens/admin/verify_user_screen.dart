@@ -21,7 +21,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
 
   Map<String, dynamic> details = {};
   bool loading = true;
-
+String selectedClass = "";
   @override
   void initState() {
     super.initState();
@@ -32,11 +32,10 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
     final data = await _service.getUserDetails(widget.request.requestId);
 
     setState(() {
-      details = data;
+     details = data ?? {};
       loading = false;
     });
   }
-
   Widget infoTile(String title, String value) {
     return ListTile(
       title: Text(title),
@@ -152,7 +151,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                           ),
                         );
                       } else {
-                        await _service.approveRequest(request);
+                        await _service.approveRequest(request, selectedClass);
                         Navigator.pop(context);
                       }
                     },

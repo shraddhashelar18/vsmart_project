@@ -297,9 +297,8 @@ const Text(
     print("PDF URL RECEIVED: $url");
     try {
     final directory = await getApplicationDocumentsDirectory();
-
-      final file = File(
-        '${directory.path}/Semester_${widget.semesterNumber}_Marksheet.pdf',
+final file = File(
+        '${directory.path}/Marksheet_${DateTime.now().millisecondsSinceEpoch}.pdf',
       );
 
       // ✅ USE HTTP PACKAGE (NOT HttpClient)

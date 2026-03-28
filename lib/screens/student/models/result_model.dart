@@ -37,7 +37,8 @@ class ResultModel {
       ct1Declared: parseBool(json['ct1_published']),
       ct2Declared: parseBool(json['ct2_published']),
       finalDeclared: parseBool(json['final_published']),
-      finalUploadAllowed: parseBool(json['allow_marksheet_upload']),
+      finalUploadAllowed: (json['allow_marksheet_upload'] == 1) &&
+          (json['marks_uploaded'] == 0),
       finalPdfUploaded: false,
       activeSemester: json['active_semester'],
       reuploadAllowed: parseBool(json['allow_reupload']),

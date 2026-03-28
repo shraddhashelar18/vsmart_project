@@ -247,13 +247,14 @@ if (allowMarksheetUpload) ...[
     loadSettings();
   }
 
-  Future loadSettings() async {
-    final data = await ResultService.getSettings();
+ Future loadSettings() async {
+    final res = await ResultService.getSettings();
+
+    final settings = res["data"]; // 🔥 FIX
 
     setState(() {
-      allowMarksheetUpload = data["allow_marksheet_upload"] == 1;
-
-      publishFinalResult = data["final_published"] == 1;
+      allowMarksheetUpload = settings["allow_marksheet_upload"] == 1;
+      publishFinalResult = settings["final_published"] == 1;
     });
   }
 } 

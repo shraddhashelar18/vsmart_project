@@ -44,7 +44,8 @@ class UserService {
         APPROVE USER
   ====================== */
 
-  Future<void> approveRequest(RegistrationRequest request) async {
+  Future<void> approveRequest(
+      RegistrationRequest request, String className) async {
     await http.post(
       Uri.parse("${ApiConfig.baseUrl}/admin/reports/approve_user.php"),
       headers: {
@@ -52,10 +53,12 @@ class UserService {
         "x-api-key": "VSMART_API_2026",
         "Authorization": "Bearer ${SessionManager.token}"
       },
-      body: jsonEncode({"user_id": request.requestId}),
+      body: jsonEncode({
+        "user_id": request.requestId,
+        "class": className // 🔥 ADD THIS
+      }),
     );
   }
-
   /* ======================
         REJECT USER
   ====================== */
@@ -76,7 +79,7 @@ class UserService {
         GET USER DETAILS
   ====================== */
 
-  Future<Map<String, dynamic>> getUserDetails(int userId) async {
+ Future<Map<String, dynamic>?> getUserDetails(int userId) async {
     final response = await http.get(
       Uri.parse(
           "${ApiConfig.baseUrl}/admin/reports/verify_registration.php?user_id=$userId"),
@@ -86,11 +89,29 @@ class UserService {
       },
     );
 
+    print("USER DETAIL STATUS: ${response.statusCode}");
+    print("USER DETAIL BODY: ${response.body}");
+
+    if (response.statusCode != 200 || response.body.isEmpty) {
+      return null;
+    }
+
     final data = jsonDecode(response.body);
 
-    return Map<String, dynamic>.from(data["details"]);
-  }
+    if (data["status"] == true) {
+      // 🔥 HANDLE NULL DETAILS
+      if (data["details"] != null) {
+        return Map<String, dynamic>.from(data["details"]);
+      }
 
+      // 🔥 FALLBACK → USE USER DATA
+      if (data["user"] != null) {
+        return Map<String, dynamic>.from(data["user"]);
+      }
+    }
+
+    return null;
+  }
   Future<List<String>> getClassesByDepartment(String dept) async {
     final response = await http.post(
       Uri.parse("${ApiConfig.baseUrl}/admin/classes/get_classes_by_department.php"),
